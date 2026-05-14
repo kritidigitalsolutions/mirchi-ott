@@ -74,7 +74,7 @@ class _AutoSliderState extends State<AutoSlider> {
     if (widget.content.isEmpty) {
       return const SizedBox(
         height: 200,
-        child: Center(child: CircularProgressIndicator(color: Colors.pink)),
+        child: Center(child: CircularProgressIndicator(color: AppColors.primary)),
       );
     }
 

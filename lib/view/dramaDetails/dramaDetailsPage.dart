@@ -16,6 +16,7 @@ import '../popUp/age_popup.dart';
 import '../videoPlayer/video_player.dart';
 import 'cast_crewPage.dart';
 import '../premium/goPremium.dart';
+import '../../utils/share_service.dart';
 import '../../view_model/drama_detail_controller/drama_details_controller.dart';
 import '../../utils/custom_snackbar.dart';
 
@@ -274,7 +275,10 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
                     icon: Icons.share,
                     label: "Share",
                     onTap: () {
-                      Share.share("Check out ${widget.content.title} on Mirchi OTT App 🎬🔥");
+                      ShareService.shareContent(
+                        title: widget.content.title,
+                        imageUrl: widget.content.poster,
+                      );
                     },
                   ),
                 ],

@@ -60,7 +60,7 @@ class SettingsPage extends StatelessWidget {
       child: Text(
         title,
         style: const TextStyle(
-          color: Colors.pinkAccent,
+          color: AppColors.primary,
           fontSize: 14,
           fontWeight: FontWeight.bold,
         ),
@@ -75,7 +75,7 @@ class SettingsPage extends StatelessWidget {
       trailing: Switch(
         value: value,
         onChanged: onChanged,
-        activeColor: Colors.pinkAccent,
+        activeColor: AppColors.primary,
       ),
     );
   }

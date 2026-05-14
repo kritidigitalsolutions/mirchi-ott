@@ -152,7 +152,7 @@ class _SignInPageState extends State<SignInPage> {
                         child: const Text(
                           "Enter Code",
                           style: TextStyle(
-                            color: Colors.pinkAccent,
+                            color: AppColors.primary,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -189,7 +189,7 @@ class _SignInPageState extends State<SignInPage> {
                     children: [
                       Obx(() => Checkbox(
                         value: isAgeConfirmed.value,
-                        activeColor: Colors.pinkAccent,
+                        activeColor: AppColors.primary,
                         onChanged: (value) {
                           if (!isAgeConfirmed.value) {
                             Get.dialog(

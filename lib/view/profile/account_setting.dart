@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../app/theme/app_colors.dart';
 import '../../view_model/auth_controller/auth_controller.dart';
 import '../../view_model/primium_controller/premium_controller.dart';
 
@@ -87,7 +88,7 @@ class AccountSettingsPage extends StatelessWidget {
   Widget _buildInfoRow(IconData icon, String label, String value, {Color color = Colors.white}) {
     return Row(
       children: [
-        Icon(icon, color: Colors.pinkAccent, size: 18),
+        Icon(icon, color: AppColors.primary, size: 18),
         const SizedBox(width: 10),
         Text("$label: ", style: const TextStyle(color: Colors.white70, fontSize: 14)),
         Expanded(
@@ -106,13 +107,13 @@ class AccountSettingsPage extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.pinkAccent.withOpacity(0.2),
+        color: AppColors.primary.withOpacity(0.2),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.pinkAccent),
+        border: Border.all(color: AppColors.primary),
       ),
       child: Text(
         planName,
-        style: const TextStyle(color: Colors.pinkAccent, fontWeight: FontWeight.bold, fontSize: 12),
+        style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 12),
       ),
     );
   }
@@ -129,7 +130,7 @@ class AccountSettingsPage extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.grey[900],
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: isExpanded ? Colors.pinkAccent.withOpacity(0.5) : Colors.transparent),
+        border: Border.all(color: isExpanded ? AppColors.primary.withOpacity(0.5) : Colors.transparent),
       ),
       child: Column(
         children: [

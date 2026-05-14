@@ -12,7 +12,6 @@ class WatchlistPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Controller initialize करें (अगर पहले से नहीं है)
     final WatchlistController controller = Get.put(WatchlistController());
     final AuthController authController = Get.find<AuthController>();
 
@@ -29,7 +28,7 @@ class WatchlistPage extends StatelessWidget {
       body: Obx(() {
         /// 🔄 LOADING
         if (controller.isLoading.value) {
-          return const Center(child: CircularProgressIndicator(color: Colors.pink));
+          return const Center(child: CircularProgressIndicator(color: AppColors.primary));
         }
 
         /// ❌ EMPTY STATE

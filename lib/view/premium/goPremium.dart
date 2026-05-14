@@ -21,7 +21,7 @@ class GoPremiumPage extends StatelessWidget {
       body: SafeArea(
         child: Obx(() {
           if (controller.isLoading.value) {
-            return const Center(child: CircularProgressIndicator(color: Colors.pink));
+            return const Center(child: CircularProgressIndicator(color: AppColors.primary));
           }
 
           return Column(

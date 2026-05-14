@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../app/theme/app_colors.dart';
 import '../../view_model/profile/privacy_controller.dart';
 
 class TermsAndConditionsPage extends StatelessWidget {
@@ -31,7 +32,7 @@ class TermsAndConditionsPage extends StatelessWidget {
       body: Obx(() {
         if (controller.isLoadingTerms.value) {
           return const Center(
-            child: CircularProgressIndicator(color: Colors.pink),
+            child: CircularProgressIndicator(color: AppColors.primary),
           );
         }
         return SingleChildScrollView(

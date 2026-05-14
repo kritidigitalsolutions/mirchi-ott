@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:mirchi_ott/app/theme/app_colors.dart';
 import 'package:mirchi_ott/view_model/download_controller/download_controller.dart';
 import '../../view_model/auth_controller/auth_controller.dart';
 import '../../view_model/home_controller/home_controller.dart';
@@ -148,7 +149,7 @@ class DownloadsPage extends StatelessWidget {
                           textConfirm: "Delete",
                           textCancel: "Cancel",
                           confirmTextColor: Colors.white,
-                          buttonColor: Colors.red,
+                          buttonColor: AppColors.primary,
                           onConfirm: () {
                             downloadController.removeDownload(item.id);
                             Get.back();
@@ -202,7 +203,7 @@ class DownloadsPage extends StatelessWidget {
             const SizedBox(height: 25),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.pinkAccent,
+                backgroundColor: AppColors.buttonColor,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 40,
                   vertical: 12,

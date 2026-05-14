@@ -66,7 +66,7 @@ class PaymentBottomSheet extends StatelessWidget {
                     ),
                     if (controller.isSubscribing.value)
                       const Center(
-                        child: CircularProgressIndicator(color: Colors.pinkAccent),
+                        child: CircularProgressIndicator(color: AppColors.primary),
                       ),
                   ],
                 )),

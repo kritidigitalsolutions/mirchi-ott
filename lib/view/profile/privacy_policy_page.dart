@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../app/theme/app_colors.dart';
 import '../../view_model/profile/privacy_controller.dart';
 
 class PrivacyPolicyPage extends StatelessWidget {
@@ -28,7 +29,7 @@ class PrivacyPolicyPage extends StatelessWidget {
       ),
       body: Obx(() {
         if (controller.isLoadingPrivacy.value) {
-          return const Center(child: CircularProgressIndicator(color: Colors.pink));
+          return const Center(child: CircularProgressIndicator(color: AppColors.primary));
         }
         return SingleChildScrollView(
           padding: const EdgeInsets.all(16),
