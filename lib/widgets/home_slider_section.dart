@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../utils/app_images.dart';
 import '../data/models/response_model/content_response_model/content_model.dart';
 import '../view/dramaDetails/dramaDetailsPage.dart';
 import 'catagory_widget.dart';
@@ -81,7 +82,7 @@ class HomeSliderSection extends StatelessWidget {
                       item.poster,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) => Image.asset(
-                        "assets/images/farzi.jpg",
+                        AppImages.farzi,
                         fit: BoxFit.cover,
                       ),
                     ),

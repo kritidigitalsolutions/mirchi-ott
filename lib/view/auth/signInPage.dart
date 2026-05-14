@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:mirchi_ott/utils/app_images.dart';
 import '../../app/theme/app_colors.dart';
 import '../../view_model/auth_controller/auth_controller.dart';
 import 'otpPage.dart';
@@ -77,7 +78,7 @@ class _SignInPageState extends State<SignInPage> {
 
                   /// LOGO
                   Image.asset(
-                    "assets/images/mirchi_logo.png",
+                    AppImages.logo,
                     height: 100,
                   ),
 

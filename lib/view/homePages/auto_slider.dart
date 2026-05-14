@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:mirchi_ott/utils/app_images.dart';
 import 'package:mirchi_ott/view_model/primium_controller/premium_controller.dart';
 import '../../data/models/response_model/content_response_model/content_model.dart';
 import '../auth/signInPage.dart';
@@ -107,9 +108,9 @@ class _AutoSliderState extends State<AutoSlider> {
                           Image.network(
                             item.banner,
                             fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) => Container(
-                              color: Colors.grey[900],
-                              child: const Icon(Icons.broken_image, color: Colors.white54, size: 50),
+                            errorBuilder: (context, error, stackTrace) => Image.asset(
+                              AppImages.farzi,
+                              fit: BoxFit.cover,
                             ),
                           ),
                           Container(color: AppColors.black.withOpacity(0.3)),

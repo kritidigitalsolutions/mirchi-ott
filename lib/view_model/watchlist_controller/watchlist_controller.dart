@@ -14,7 +14,7 @@ class WatchlistController extends GetxController {
   void onInit() {
     super.onInit();
     
-    // Auth status check करें
+    // Auth status check
     final authController = Get.find<AuthController>();
     
     // Initial fetch if logged in
@@ -22,7 +22,7 @@ class WatchlistController extends GetxController {
       getWatchlist();
     }
 
-    // Login status change को listen करें
+    // Listen to login status changes
     ever(authController.isLoggedIn, (bool loggedIn) {
       if (loggedIn) {
         getWatchlist();
@@ -39,7 +39,6 @@ class WatchlistController extends GetxController {
       final response = await repo.getWatchlist();
       
       if (response != null) {
-        // Checking for success true or just presence of data
         final List<dynamic> data = response['data'] ?? [];
         watchlist.assignAll(data.map((e) => e as Map<String, dynamic>).toList());
         print("✅ WATCHLIST FETCHED: ${watchlist.length} items");
@@ -54,12 +53,11 @@ class WatchlistController extends GetxController {
   /// ✅ CHECK if a content ID is in the watchlist
   bool isInWatchlist(String contentId) {
     return watchlist.any((item) {
-      final movie = item['movie'];
-      if (movie != null && movie is Map) {
-        return movie['_id'] == contentId;
+      final contentItem = item['item'];
+      if (contentItem != null && contentItem is Map) {
+        return contentItem['_id'] == contentId;
       }
-      // In some cases movie might be just ID if not populated, but your API seems to return full object
-      return movie == contentId;
+      return contentItem == contentId;
     });
   }
 
@@ -69,11 +67,10 @@ class WatchlistController extends GetxController {
       isLoading.value = true;
       final response = await repo.addToWatchlist(contentId);
       
-      // Fixed: Checking response existence as 201 response might not have "success: true" key
       if (response != null) {
         CustomSnackbar.show(
           title: "Success",
-          message: response['message'] ?? "Added to watchlist",
+          message: response['message'] ?? "Added to watchlist ❤️",
           isSuccess: true,
         );
         // 🔄 Refresh list immediately
@@ -121,11 +118,11 @@ class WatchlistController extends GetxController {
     if (isInWatchlist(contentId)) {
       try {
         final watchlistItem = watchlist.firstWhere((item) {
-          final movie = item['movie'];
-          if (movie != null && movie is Map) {
-            return movie['_id'] == contentId;
+          final contentItem = item['item'];
+          if (contentItem != null && contentItem is Map) {
+            return contentItem['_id'] == contentId;
           }
-          return movie == contentId;
+          return contentItem == contentId;
         });
         
         final String? watchlistId = watchlistItem['_id'];

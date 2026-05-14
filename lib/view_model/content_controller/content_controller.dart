@@ -11,6 +11,8 @@ class ContentController extends GetxController {
   var isLoading = true.obs;
   var allContent = <ContentModel>[].obs;
   var trendingContent = <ContentModel>[].obs;
+  var seriesEpisodes = <ContentModel>[].obs;
+  var isEpisodesLoading = false.obs;
   
   // Cache for likes: ContentID -> LikeCount
   var contentLikes = <String, int>{}.obs;
@@ -37,6 +39,19 @@ class ContentController extends GetxController {
       print("Error in ContentController: $e");
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  Future<void> fetchEpisodes(String seriesId) async {
+    try {
+      isEpisodesLoading.value = true;
+      seriesEpisodes.clear();
+      final episodes = await _repository.getEpisodes(seriesId);
+      seriesEpisodes.assignAll(episodes);
+    } catch (e) {
+      print("Error fetching episodes: $e");
+    } finally {
+      isEpisodesLoading.value = false;
     }
   }
 

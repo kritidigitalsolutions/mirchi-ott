@@ -25,7 +25,7 @@ class WatchlistRepo {
       final response = await apiProvider.postApi(
         AppConstants.addWatchlist,
         {
-          "movieId": contentId,
+          "itemId": contentId,
         },
       );
       return response;

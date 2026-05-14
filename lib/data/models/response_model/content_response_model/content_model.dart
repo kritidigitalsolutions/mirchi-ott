@@ -1,3 +1,5 @@
+import '../../../../utils/constants.dart';
+
 class ContentModel {
   final String id;
   final String title;
@@ -15,9 +17,17 @@ class ContentModel {
   final List<Cast>? cast;
   final List<String> category;
   final String slug;
-  final String contentType;
+  final String contentType; // 'movie', 'series', 'episode'
   final bool isComingSoon;
+  final bool isTrending;
   final String? releaseDate;
+  
+  // Series/Episode specific fields
+  final int? totalSeasons;
+  final int? totalEpisodes;
+  final String? seriesId;
+  final int? seasonNumber;
+  final int? episodeNumber;
 
   ContentModel({
     required this.id,
@@ -38,10 +48,33 @@ class ContentModel {
     required this.slug,
     required this.contentType,
     this.isComingSoon = false,
+    this.isTrending = false,
     this.releaseDate,
+    this.totalSeasons,
+    this.totalEpisodes,
+    this.seriesId,
+    this.seasonNumber,
+    this.episodeNumber,
   });
 
   factory ContentModel.fromJson(Map<String, dynamic> json) {
+    String baseUrl = AppConstants.serverUrl;
+
+    String formatUrl(String? url) {
+      if (url == null || url.isEmpty) return '';
+      if (url.startsWith('http')) return url;
+      return '$baseUrl$url';
+    }
+
+    // Determine content type from various possible keys
+    String type = json['type'] ?? json['contentType'] ?? '';
+    if (type.isEmpty && json['itemModel'] != null) {
+      type = json['itemModel'].toString().toLowerCase();
+    }
+    if (type.isEmpty && json['seriesId'] != null) {
+      type = 'episode';
+    }
+
     return ContentModel(
       id: json['_id'] ?? '',
       title: json['title'] ?? '',
@@ -50,10 +83,10 @@ class ContentModel {
       releaseYear: json['releaseYear'] ?? 0,
       duration: json['duration'],
       language: json['language'] ?? '',
-      poster: json['poster'] ?? '',
-      banner: json['banner'] ?? '',
-      videoUrl: json['videoUrl'],
-      trailerUrl: json['trailerUrl'],
+      poster: formatUrl(json['poster'] ?? json['thumbnail']),
+      banner: formatUrl(json['banner'] ?? json['poster'] ?? json['thumbnail']),
+      videoUrl: formatUrl(json['videoUrl']),
+      trailerUrl: formatUrl(json['trailerUrl']),
       isPremium: json['isPremium'] ?? false,
       rating: (json['rating'] ?? 0).toDouble(),
       cast: json['cast'] != null
@@ -61,9 +94,15 @@ class ContentModel {
           : null,
       category: List<String>.from(json['category'] ?? []),
       slug: json['slug'] ?? '',
-      contentType: json['contentType'] ?? '',
+      contentType: type,
       isComingSoon: json['isComingSoon'] ?? false,
+      isTrending: json['isTrending'] ?? false,
       releaseDate: json['releaseDate'],
+      totalSeasons: json['totalSeasons'],
+      totalEpisodes: json['totalEpisodes'],
+      seriesId: json['seriesId'],
+      seasonNumber: json['seasonNumber'],
+      episodeNumber: json['episodeNumber'],
     );
   }
 
@@ -85,9 +124,15 @@ class ContentModel {
       'cast': cast?.map((e) => e.toJson()).toList(),
       'category': category,
       'slug': slug,
-      'contentType': contentType,
+      'type': contentType,
       'isComingSoon': isComingSoon,
+      'isTrending': isTrending,
       'releaseDate': releaseDate,
+      'totalSeasons': totalSeasons,
+      'totalEpisodes': totalEpisodes,
+      'seriesId': seriesId,
+      'seasonNumber': seasonNumber,
+      'episodeNumber': episodeNumber,
     };
   }
 }
@@ -104,9 +149,16 @@ class Cast {
   });
 
   factory Cast.fromJson(Map<String, dynamic> json) {
+    String baseUrl = AppConstants.serverUrl;
+    String formatUrl(String? url) {
+      if (url == null || url.isEmpty) return '';
+      if (url.startsWith('http')) return url;
+      return '$baseUrl$url';
+    }
+
     return Cast(
       name: json['name'] ?? '',
-      image: json['image'] ?? '',
+      image: formatUrl(json['image']),
       id: json['_id'] ?? '',
     );
   }

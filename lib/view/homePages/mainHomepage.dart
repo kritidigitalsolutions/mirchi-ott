@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../app/theme/app_colors.dart';
+import '../../utils/app_images.dart';
 import '../../view_model/content_controller/content_controller.dart';
 import '../navbar/bottomNavbar.dart';
 import '../dramaDetails/dramaDetailsPage.dart';
@@ -122,7 +123,8 @@ class MainHomePage extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Image.asset('assets/images/mirchi_logo.png', height: 40),
+              Image.asset(AppImages.logo,
+                  height: 80),
               Row(
                 children: [
                   Obx(() {
@@ -229,56 +231,54 @@ class MainHomePage extends StatelessWidget {
                 const SizedBox(height: 15),
 
                 Obx(
-                  () => SizedBox(
-                    height: 170,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: contentController.allContent
-                          .where(
-                            (c) =>
-                                c.contentType == 'series' &&
-                                c.isComingSoon == false,
-                          )
-                          .length,
-                      itemBuilder: (context, index) {
-                        final item = contentController.allContent
-                            .where(
-                              (c) =>
-                                  c.contentType == 'series' &&
-                                  c.isComingSoon == false,
-                            )
-                            .toList()[index];
+                  () {
+                    final seriesContent = contentController.allContent
+                        .where(
+                          (c) =>
+                              c.contentType == 'series' &&
+                              c.isComingSoon == false,
+                        )
+                        .toList();
 
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 10),
-                          child: GestureDetector(
-                            onTap: () {
-                              Get.to(
-                                () => DramaDetailsPage(
-                                  isSignedIn: authController.isLoggedIn.value,
-                                  content: item,
+                    return SizedBox(
+                      height: 170,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: seriesContent.length,
+                        itemBuilder: (context, index) {
+                          final item = seriesContent[index];
+
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                            child: GestureDetector(
+                              onTap: () {
+                                Get.to(
+                                  () => DramaDetailsPage(
+                                    isSignedIn: authController.isLoggedIn.value,
+                                    content: item,
+                                  ),
+                                );
+                              },
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(15),
+                                child: Image.network(
+                                  item.poster,
+                                  width: 130,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      Image.asset(
+                                    AppImages.farzi,
+                                    width: 130,
+                                    fit: BoxFit.cover,
+                                  ),
                                 ),
-                              );
-                            },
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(15),
-                              child: Image.network(
-                                item.poster,
-                                width: 130,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) =>
-                                    Image.asset(
-                                      "assets/images/farzi.jpg",
-                                      width: 130,
-                                      fit: BoxFit.cover,
-                                    ),
                               ),
                             ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
+                          );
+                        },
+                      ),
+                    );
+                  },
                 ),
 
                 const SizedBox(height: 10),

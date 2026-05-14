@@ -44,7 +44,7 @@ class WatchlistPage extends StatelessWidget {
           itemBuilder: (context, index) {
             final item = controller.watchlist[index];
             final watchlistId = item['_id'] ?? '';
-            final movieData = item['movie'];
+            final contentData = item['item'];
 
             // UI variables
             String title = "Unknown Title";
@@ -52,8 +52,14 @@ class WatchlistPage extends StatelessWidget {
             String year = "";
             ContentModel? contentItem;
 
-            if (movieData != null && movieData is Map<String, dynamic>) {
-              contentItem = ContentModel.fromJson(movieData);
+            if (contentData != null && contentData is Map<String, dynamic>) {
+              // Copy data and inject itemModel as 'type' if missing
+              final Map<String, dynamic> fullData = Map<String, dynamic>.from(contentData);
+              if (fullData['type'] == null && item['itemModel'] != null) {
+                fullData['type'] = item['itemModel'].toString().toLowerCase();
+              }
+              
+              contentItem = ContentModel.fromJson(fullData);
               title = contentItem.title;
               poster = contentItem.poster;
               year = contentItem.releaseYear.toString();

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:mirchi_ott/utils/app_images.dart';
 import '../../app/theme/app_colors.dart';
 import '../../view_model/primium_controller/premium_controller.dart';
 
@@ -48,7 +49,7 @@ class _RedeemVoucherPageState extends State<RedeemVoucherPage> {
 
                 /// 🔹 Logo
                 Image.asset(
-                  "assets/images/mirchi_logo.png",
+                  AppImages.logo,
                   height: 80,
                   width: 80,
                   fit: BoxFit.contain,

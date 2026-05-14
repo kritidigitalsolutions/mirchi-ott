@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:mirchi_ott/utils/app_images.dart';
 import 'package:mirchi_ott/view_model/auth_controller/auth_controller.dart';
 import 'package:mirchi_ott/view_model/download_controller/download_controller.dart';
 import 'package:mirchi_ott/view_model/primium_controller/premium_controller.dart';
@@ -18,27 +19,40 @@ import '../premium/goPremium.dart';
 import '../../view_model/drama_detail_controller/drama_details_controller.dart';
 import '../../utils/custom_snackbar.dart';
 
-class DramaDetailsPage extends StatelessWidget {
+class DramaDetailsPage extends StatefulWidget {
   final bool isSignedIn;
   final ContentModel content;
 
   const DramaDetailsPage({super.key, required this.isSignedIn, required this.content});
 
   @override
-  Widget build(BuildContext context) {
-    final DramaDetailsController controller = Get.put(DramaDetailsController());
-    final AuthController authController = Get.find<AuthController>();
-    final WatchlistController watchlistController = Get.put(WatchlistController());
-    final ContentController contentController = Get.find<ContentController>();
-    final PremiumController premiumController = Get.put(PremiumController());
-    final InteractionController interactionController = Get.put(InteractionController());
-    final DownloadController downloadController = Get.put(DownloadController());
+  State<DramaDetailsPage> createState() => _DramaDetailsPageState();
+}
 
+class _DramaDetailsPageState extends State<DramaDetailsPage> {
+  final DramaDetailsController controller = Get.put(DramaDetailsController());
+  final AuthController authController = Get.find<AuthController>();
+  final WatchlistController watchlistController = Get.put(WatchlistController());
+  final ContentController contentController = Get.find<ContentController>();
+  final PremiumController premiumController = Get.put(PremiumController());
+  final InteractionController interactionController = Get.put(InteractionController());
+  final DownloadController downloadController = Get.put(DownloadController());
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.content.contentType == 'series') {
+      contentController.fetchEpisodes(widget.content.id);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     // Filter "You May Also Like"
     final List<ContentModel> relatedContent = contentController.allContent.where((item) {
-      return item.id != content.id && 
-             item.contentType == content.contentType && 
-             item.category.any((cat) => content.category.contains(cat));
+      return item.id != widget.content.id && 
+             item.contentType == widget.content.contentType && 
+             item.category.any((cat) => widget.content.category.contains(cat));
     }).toList();
 
     return Scaffold(
@@ -51,12 +65,12 @@ class DramaDetailsPage extends StatelessWidget {
             Stack(
               children: [
                 Image.network(
-                  content.banner,
+                  widget.content.banner,
                   height: 300,
                   width: double.infinity,
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) => Image.asset(
-                    "assets/images/farzi.jpg",
+                    AppImages.farzi,
                     height: 300,
                     width: double.infinity,
                     fit: BoxFit.cover,
@@ -70,7 +84,7 @@ class DramaDetailsPage extends StatelessWidget {
                     onPressed: () => Get.back(),
                   ),
                 ),
-                if (content.trailerUrl != null && content.trailerUrl!.isNotEmpty)
+                if (widget.content.trailerUrl != null && widget.content.trailerUrl!.isNotEmpty)
                 Positioned(
                   bottom: 20,
                   right: 20,
@@ -83,8 +97,8 @@ class DramaDetailsPage extends StatelessWidget {
                       final bool? isOver18 = await Get.dialog<bool>(const AgeRestrictionPopup());
                       if (isOver18 == true) {
                         Get.to(() => AdvancedVideoPlayer(
-                          url: content.trailerUrl!, 
-                          title: '${content.title} - Trailer'
+                          url: widget.content.trailerUrl!, 
+                          title: '${widget.content.title} - Trailer'
                         ));
                       }
                     },
@@ -98,17 +112,18 @@ class DramaDetailsPage extends StatelessWidget {
             const SizedBox(height: 15),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Text(content.title, style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
+              child: Text(widget.content.title, style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
             ),
             const SizedBox(height: 6),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Text("${content.releaseYear} • ${content.language} ${content.duration != null ? '• ${content.duration}' : ''}", style: const TextStyle(color: AppColors.white, fontSize: 14)),
+              child: Text("${widget.content.releaseYear} • ${widget.content.language} ${widget.content.duration != null ? '• ${widget.content.duration}' : ''}", style: const TextStyle(color: AppColors.white, fontSize: 14)),
             ),
 
             const SizedBox(height: 20),
 
-            /// 🔐 DYNAMIC WATCH BUTTON
+            /// 🔐 DYNAMIC WATCH BUTTON (For Movies or General Series Play)
+            if (widget.content.contentType != 'series')
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Obx(() {
@@ -124,9 +139,9 @@ class DramaDetailsPage extends StatelessWidget {
                   onPressed: () {
                     if (!userLoggedIn) {
                       Get.to(() => const SignInPage());
-                    } else if (isPurchased || !content.isPremium) {
-                      if (content.videoUrl != null && content.videoUrl!.isNotEmpty) {
-                        Get.to(() => AdvancedVideoPlayer(url: content.videoUrl!, title: content.title));
+                    } else if (isPurchased || !widget.content.isPremium) {
+                      if (widget.content.videoUrl != null && widget.content.videoUrl!.isNotEmpty) {
+                        Get.to(() => AdvancedVideoPlayer(url: widget.content.videoUrl!, title: widget.content.title));
                       } else {
                         CustomSnackbar.show(title: "Error", message: "Video URL not found", isError: true);
                       }
@@ -137,7 +152,7 @@ class DramaDetailsPage extends StatelessWidget {
                   child: Text(
                     !userLoggedIn 
                         ? "Sign In to Watch" 
-                        : (isPurchased || !content.isPremium ? "Watch Video" : "Subscribe to Watch"),
+                        : (isPurchased || !widget.content.isPremium ? "Watch Video" : "Subscribe to Watch"),
                     style: const TextStyle(color: Colors.white),
                   ),
                 );
@@ -146,15 +161,16 @@ class DramaDetailsPage extends StatelessWidget {
 
             const SizedBox(height: 12),
             
-            /// ⬇ DYNAMIC DOWNLOAD BUTTON (Logic Fixed)
+            /// ⬇ DYNAMIC DOWNLOAD BUTTON
+            if (widget.content.contentType != 'series')
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Obx(() {
                 final sub = premiumController.subscriptionData.value;
                 final bool isPurchased = sub != null && sub['status'] == 'active';
                 final bool userLoggedIn = authController.isLoggedIn.value;
-                final bool isAlreadyDownloaded = downloadController.isDownloaded(content.id);
-                final bool downloading = downloadController.isDownloading[content.id] ?? false;
+                final bool isAlreadyDownloaded = downloadController.isDownloaded(widget.content.id);
+                final bool downloading = downloadController.isDownloading[widget.content.id] ?? false;
 
                 return OutlinedButton(
                   style: OutlinedButton.styleFrom(
@@ -165,14 +181,12 @@ class DramaDetailsPage extends StatelessWidget {
                     if (!userLoggedIn) {
                       Get.to(() => const SignInPage());
                     } else if (isPurchased) {
-                      // ✅ Direct download if plan is purchased
                       if (isAlreadyDownloaded) {
                         CustomSnackbar.show(title: "Info", message: "Already downloaded");
                       } else {
-                        downloadController.downloadVideo(content);
+                        downloadController.downloadVideo(widget.content);
                       }
                     } else {
-                      // ❌ Show popup only if plan is NOT purchased
                       _showSubscriptionDialog(context);
                     }
                   },
@@ -184,14 +198,14 @@ class DramaDetailsPage extends StatelessWidget {
                         height: 20,
                         width: 20,
                         child: CircularProgressIndicator(
-                          value: downloadController.downloadProgress[content.id] ?? 0,
+                          value: downloadController.downloadProgress[widget.content.id] ?? 0,
                           color: Colors.white,
                           strokeWidth: 2,
                         ),
                       ),
                       const SizedBox(height: 5),
                       Text(
-                        "${((downloadController.downloadProgress[content.id] ?? 0) * 100).toInt()}%",
+                        "${((downloadController.downloadProgress[widget.content.id] ?? 0) * 100).toInt()}%",
                         style: const TextStyle(color: Colors.white, fontSize: 12),
                       ),
                     ],
@@ -214,7 +228,7 @@ class DramaDetailsPage extends StatelessWidget {
             const SizedBox(height: 20),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Text(content.description, style: const TextStyle(color: Colors.white70)),
+              child: Text(widget.content.description, style: const TextStyle(color: Colors.white70)),
             ),
 
             const SizedBox(height: 20),
@@ -230,9 +244,9 @@ class DramaDetailsPage extends StatelessWidget {
                       GestureDetector(
                         onTap: watchlistController.isLoading.value
                             ? null
-                            : () => watchlistController.toggleWatchlist(content.id.toString()),
+                            : () => watchlistController.toggleWatchlist(widget.content.id.toString()),
                         child: Icon(
-                          watchlistController.isInWatchlist(content.id.toString())
+                          watchlistController.isInWatchlist(widget.content.id.toString())
                               ? Icons.bookmark
                               : Icons.bookmark_border,
                           color: Colors.white,
@@ -247,20 +261,20 @@ class DramaDetailsPage extends StatelessWidget {
                   _actionButton(
                     icon: interactionController.isLiked.value ? Icons.thumb_up : Icons.thumb_up_outlined,
                     label: "Like",
-                    onTap: () => interactionController.toggleLike(contentId: content.id, contentType: content.contentType),
+                    onTap: () => interactionController.toggleLike(contentId: widget.content.id, contentType: widget.content.contentType),
                   ),
 
                   _actionButton(
                     icon: interactionController.isDisliked.value ? Icons.thumb_down : Icons.thumb_down_outlined,
                     label: "Dislike",
-                    onTap: () => interactionController.toggleDislike(contentId: content.id, contentType: content.contentType),
+                    onTap: () => interactionController.toggleDislike(contentId: widget.content.id, contentType: widget.content.contentType),
                   ),
 
                   _actionButton(
                     icon: Icons.share,
                     label: "Share",
                     onTap: () {
-                      Share.share("Check out ${content.title} on Mirchi OTT App 🎬🔥");
+                      Share.share("Check out ${widget.content.title} on Mirchi OTT App 🎬🔥");
                     },
                   ),
                 ],
@@ -269,8 +283,114 @@ class DramaDetailsPage extends StatelessWidget {
 
             const SizedBox(height: 25),
 
+            /// 📺 EPISODES SECTION FOR SERIES
+            if (widget.content.contentType == 'series') ...[
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  children: [
+                    const Text(
+                      "Seasons",
+                      style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(width: 15),
+                    Expanded(
+                      child: SizedBox(
+                        height: 40,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: widget.content.totalSeasons ?? 1,
+                          itemBuilder: (context, index) {
+                            final seasonNum = index + 1;
+                            return Obx(() => GestureDetector(
+                              onTap: () => controller.selectedSeason.value = seasonNum,
+                              child: Container(
+                                margin: const EdgeInsets.only(right: 10),
+                                padding: const EdgeInsets.symmetric(horizontal: 15),
+                                decoration: BoxDecoration(
+                                  color: controller.selectedSeason.value == seasonNum 
+                                      ? AppColors.buttonColor 
+                                      : Colors.grey[900],
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                alignment: Alignment.center,
+                                child: Text(
+                                  "Season $seasonNum",
+                                  style: const TextStyle(color: Colors.white, fontSize: 14),
+                                ),
+                              ),
+                            ));
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              Obx(() {
+                if (contentController.isEpisodesLoading.value) {
+                  return const Center(child: CircularProgressIndicator(color: AppColors.buttonColor));
+                }
+
+                final episodes = contentController.seriesEpisodes.where((item) => 
+                  item.seasonNumber == controller.selectedSeason.value
+                ).toList();
+
+                if (episodes.isEmpty) {
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16),
+                    child: Text("No episodes found for this season.", style: TextStyle(color: Colors.white54)),
+                  );
+                }
+
+                return ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: episodes.length,
+                  itemBuilder: (context, index) {
+                    final episode = episodes[index];
+                    return ListTile(
+                      onTap: () {
+                        final userLoggedIn = authController.isLoggedIn.value;
+                        final sub = premiumController.subscriptionData.value;
+                        final bool isPurchased = sub != null && sub['status'] == 'active';
+
+                        if (!userLoggedIn) {
+                          Get.to(() => const SignInPage());
+                        } else if (isPurchased || !episode.isPremium) {
+                          if (episode.videoUrl != null && episode.videoUrl!.isNotEmpty) {
+                            Get.to(() => AdvancedVideoPlayer(url: episode.videoUrl!, title: episode.title));
+                          } else {
+                            CustomSnackbar.show(title: "Error", message: "Video URL not found", isError: true);
+                          }
+                        } else {
+                          Get.to(() => const GoPremiumPage());
+                        }
+                      },
+                      leading: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.network(
+                          episode.poster,
+                          width: 100,
+                          height: 60,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) => Image.asset(AppImages.farzi, width: 100, height: 60, fit: BoxFit.cover),
+                        ),
+                      ),
+                      title: Text(episode.title, style: const TextStyle(color: Colors.white, fontSize: 16)),
+                      subtitle: Text(episode.duration ?? "", style: const TextStyle(color: Colors.white54, fontSize: 12)),
+                      trailing: const Icon(Icons.play_circle_outline, color: Colors.white),
+                    );
+                  },
+                );
+              }),
+            ],
+
+            const SizedBox(height: 25),
+
             /// 🎭 Cast & Crew
-            if (content.cast != null && content.cast!.isNotEmpty) ...[
+            if (widget.content.cast != null && widget.content.cast!.isNotEmpty) ...[
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16),
                 child: Text("Cast & Crew", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
@@ -280,9 +400,9 @@ class DramaDetailsPage extends StatelessWidget {
                 height: 110,
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
-                  itemCount: content.cast!.length,
+                  itemCount: widget.content.cast!.length,
                   itemBuilder: (context, index) {
-                    final actor = content.cast![index];
+                    final actor = widget.content.cast![index];
                     return GestureDetector(
                       onTap: () {
                         Get.to(() => CastDetailsPage(castName: actor.name, castImage: actor.image));
@@ -299,7 +419,7 @@ class DramaDetailsPage extends StatelessWidget {
                                 image: DecorationImage(
                                   image: (actor.image.isNotEmpty) 
                                     ? NetworkImage(actor.image) 
-                                    : const AssetImage("assets/images/farzi.jpg") as ImageProvider,
+                                    : AssetImage(AppImages.farzi) as ImageProvider,
                                   fit: BoxFit.cover,
                                 ),
                               ),
@@ -341,7 +461,7 @@ class DramaDetailsPage extends StatelessWidget {
                             item.poster,
                             width: 110,
                             fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) => Image.asset("assets/images/asur.webp", width: 110, fit: BoxFit.cover),
+                            errorBuilder: (context, error, stackTrace) => Image.asset(AppImages.asur, width: 110, fit: BoxFit.cover),
                           ),
                         ),
                       ),

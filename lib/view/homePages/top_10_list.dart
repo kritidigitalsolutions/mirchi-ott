@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../utils/app_images.dart';
 import '../../data/models/response_model/content_response_model/content_model.dart';
 import '../../app/theme/app_colors.dart';
 import '../../widgets/catagory_widget.dart';
@@ -99,7 +100,7 @@ class Top10List extends StatelessWidget {
                             height: 140,
                             fit: BoxFit.cover,
                             errorBuilder: (context, error, stackTrace) => Image.asset(
-                              "assets/images/farzi.jpg",
+                              AppImages.farzi,
                               width: 95,
                               height: 140,
                               fit: BoxFit.cover,
