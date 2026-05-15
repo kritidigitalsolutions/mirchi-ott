@@ -4,9 +4,12 @@ import 'package:mirchi_ott/view/profile/privacy_policy_page.dart';
 import 'package:mirchi_ott/view/profile/setting_page.dart';
 import 'package:mirchi_ott/view/profile/terms_condition_page.dart';
 import 'package:mirchi_ott/view/profile/watchlist.dart';
+import 'package:mirchi_ott/view/navbar/downloads.dart';
 import 'package:mirchi_ott/view_model/primium_controller/premium_controller.dart';
+import 'package:mirchi_ott/utils/constants.dart';
 import '../../app/theme/app_colors.dart';
 import '../../view_model/auth_controller/auth_controller.dart';
+import '../auth/signInPage.dart';
 import '../premium/goPremium.dart';
 import 'account_setting.dart';
 import 'Rate_your_app.dart';
@@ -55,16 +58,26 @@ class ProfilePage extends StatelessWidget {
                           // Profile Image from API
                           Obx(() {
                             final user = authController.userData.value;
-                            final imageUrl = user?['avatar'] ?? user?['image'] ?? user?['profileImage'];
-                            
+                            String? imageUrl = user?['avatar'] ??
+                                user?['image'] ??
+                                user?['profileImage'];
+
+                            if (imageUrl != null &&
+                                imageUrl.isNotEmpty &&
+                                !imageUrl.startsWith('http')) {
+                              imageUrl = "${AppConstants.serverUrl}/$imageUrl";
+                            }
+
                             return CircleAvatar(
                               radius: 25,
                               backgroundColor: Colors.grey[800],
-                              backgroundImage: (imageUrl != null && imageUrl.isNotEmpty)
-                                  ? NetworkImage(imageUrl)
-                                  : null,
+                              backgroundImage:
+                                  (imageUrl != null && imageUrl.isNotEmpty)
+                                      ? NetworkImage(imageUrl)
+                                      : null,
                               child: (imageUrl == null || imageUrl.isEmpty)
-                                  ? const Icon(Icons.person, color: AppColors.white, size: 30)
+                                  ? const Icon(Icons.person,
+                                      color: AppColors.white, size: 30)
                                   : null,
                             );
                           }),
@@ -144,6 +157,7 @@ class ProfilePage extends StatelessWidget {
 
             buildMenuItem(context, Icons.person_outline, "My Account", const AccountSettingsPage()),
             buildMenuItem(context, Icons.bookmark_border, "Watchlist", const WatchlistPage()),
+            buildMenuItem(context, Icons.download_for_offline_outlined, "Downloads", const DownloadsPage()),
             buildMenuItem(context, Icons.settings_outlined, "Settings", const SettingsPage()),
             buildMenuItem(context, Icons.rate_review, "Rate Our App", const ReviewPage()),
             buildMenuItem(context, Icons.info_outline, "Terms & Conditions", const TermsAndConditionsPage()),
@@ -153,15 +167,19 @@ class ProfilePage extends StatelessWidget {
 
             const SizedBox(height: 20),
             Center(
-              child: ElevatedButton(
+              child: Obx(() => ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.buttonColor,
                   padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
                 ),
-                onPressed: onLogout,
-                child: const Text("SIGN OUT", style: TextStyle(color: AppColors.white, fontWeight: FontWeight.bold)),
-              ),
+                onPressed: authController.isLoggedIn.value 
+                    ? onLogout 
+                    : () => Get.to(() => SignInPage()),
+                child: Text(
+                    authController.isLoggedIn.value ? "SIGN OUT" : "SIGN IN", 
+                    style: const TextStyle(color: AppColors.white, fontWeight: FontWeight.bold)),
+              )),
             ),
             const SizedBox(height: 30),
             const Text("App Version 1.0.0", style: TextStyle(color: Colors.grey, fontSize: 12)),

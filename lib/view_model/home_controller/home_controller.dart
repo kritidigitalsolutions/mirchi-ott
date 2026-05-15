@@ -3,7 +3,7 @@ import '../../utils/app_session.dart';
 import '../auth_controller/auth_controller.dart';
 
 class HomeController extends GetxController {
-  var selectedIndex = 0.obs;
+  var selectedIndex = 1.obs;
   var isLoggedIn = false.obs;
 
   final List<String> webSeriesImages = [
@@ -34,6 +34,6 @@ class HomeController extends GetxController {
     final authController = Get.find<AuthController>();
     await authController.logout();
     isLoggedIn.value = false;
-    selectedIndex.value = 0;
+    selectedIndex.value = 1;
   }
 }

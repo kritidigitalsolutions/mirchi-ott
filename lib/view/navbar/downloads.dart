@@ -50,7 +50,10 @@ class DownloadsPage extends StatelessWidget {
           return _baseEmptyView(
             title: "No downloads yet",
             buttonText: "Explore",
-            onTap: () => homeController.selectedIndex.value = 0,
+            onTap: () {
+              Get.back(); // Back to Profile
+              homeController.selectedIndex.value = 1; // Switch to Home Tab
+            },
           );
         }
 

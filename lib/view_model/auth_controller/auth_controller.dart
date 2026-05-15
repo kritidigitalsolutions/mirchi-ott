@@ -74,9 +74,13 @@ class AuthController extends GetxController {
     isLoading.value = true;
     try {
       final response = await repository.sendOtp(identifier);
+      String otpMessage = 'Your OTP has been sent successfully.';
+      if (response.otp != null) {
+        otpMessage = 'Your OTP is: ${response.otp}';
+      }
       CustomSnackbar.show(
         title: 'OTP Generated',
-        message: 'Your OTP is send Successfully',
+        message: otpMessage,
         isSuccess: true,
       );
       print(response);
@@ -136,9 +140,12 @@ class AuthController extends GetxController {
   }) async {
     try {
       isLoading.value = true;
-      // Note: Image upload logic should be handled here or in repository if API supports multipart.
-      // For now, continuing with existing logic while making imagePath optional.
-      final response = await repository.createProfile(phone: phone, name: name, email: email);
+      final response = await repository.createProfile(
+        phone: phone,
+        name: name,
+        email: email,
+        profileImage: imagePath,
+      );
 
       if (response != null) {
         String? token = response['token'];
@@ -148,9 +155,6 @@ class AuthController extends GetxController {
         }
 
         userData.value = response['user'] ?? {"name": name, "email": email, "phone": phone};
-        if (imagePath != null && userData.value != null) {
-           userData.value!['image'] = imagePath; // Local preview or handle upload
-        }
         await storage.write('user_data', userData.value);
         
         // ✅ User is fully registered and logged in now

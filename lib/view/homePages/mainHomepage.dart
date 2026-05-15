@@ -7,13 +7,13 @@ import '../navbar/bottomNavbar.dart';
 import '../dramaDetails/dramaDetailsPage.dart';
 import 'auto_slider.dart';
 import 'coming_soon.dart';
-import '../navbar/downloads.dart';
 import '../../widgets/home_slider_section.dart';
 import '../search_pages/searchPage.dart';
 import 'top_10_list.dart';
 import '../auth/signInPage.dart';
 import '../premium/goPremium.dart';
 import '../profile/profilePage.dart';
+import '../shorts/shorts_page.dart';
 import '../../view_model/home_controller/home_controller.dart';
 import '../../view_model/auth_controller/auth_controller.dart';
 import '../../utils/notification_service.dart';
@@ -30,12 +30,10 @@ class MainHomePage extends StatelessWidget {
     final notificationService = NotificationService.to;
 
     return PopScope(
-      canPop: false, // ❌ direct pop disable
+      canPop: false, 
       onPopInvoked: (didPop) {
-        final controller = Get.find<HomeController>();
-
-        if (controller.selectedIndex.value != 0) {
-          controller.selectedIndex.value = 0; // ✅ Home pe le jao
+        if (controller.selectedIndex.value != 1) {
+          controller.selectedIndex.value = 1; // ✅ Home pe le jao
         } else {
           Navigator.of(context).pop(); // ✅ App exit
         }
@@ -50,6 +48,7 @@ class MainHomePage extends StatelessWidget {
                 () => IndexedStack(
                   index: controller.selectedIndex.value,
                   children: [
+                    _buildShortsContent(notificationService),
                     _buildHomeContent(
                       context,
                       controller,
@@ -57,10 +56,6 @@ class MainHomePage extends StatelessWidget {
                       contentController,
                       notificationService,
                     ),
-                    const SearchPage(),
-                    const GoPremiumPage(),
-                    const DownloadsPage(),
-
                     /// ✅ ONLY PROFILE HERE
                     ProfilePage(
                       onLogout: () {
@@ -78,31 +73,113 @@ class MainHomePage extends StatelessWidget {
               int selectedIndex = controller.selectedIndex.value;
               bool isLoggedIn = authController.isLoggedIn.value;
 
-              if (selectedIndex != 2) {
-                return Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  child: CustomBottomNavbar(
-                    selectedIndex: selectedIndex,
-                    onItemTapped: (index) {
-                      /// 🔥 LOGIN GUARD
-                      if (index == 4 && !isLoggedIn) {
-                        Get.to(() => const SignInPage());
-                        return;
-                      }
-
-                      controller.onItemTapped(index);
-                    },
-                    isLoggedIn: isLoggedIn,
-                  ),
-                );
-              }
-              return const SizedBox.shrink();
+              return Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: CustomBottomNavbar(
+                  selectedIndex: selectedIndex,
+                  onItemTapped: (index) {
+                    /// 🔥 Redirect to SignIn if not logged in and clicking More
+                    if (index == 2 && !isLoggedIn) {
+                      Get.to(() => const SignInPage());
+                      return;
+                    }
+                    controller.onItemTapped(index);
+                  },
+                  isLoggedIn: isLoggedIn,
+                ),
+              );
             }),
           ],
         ),
       ),
+    );
+  }
+
+  /// 🔹 HEADER
+  Widget _buildHeader(NotificationService notificationService) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Image.asset(AppImages.logo, height: 60),
+          Row(
+            children: [
+              IconButton(
+                onPressed: () => Get.to(() => const SearchPage()),
+                icon: const Icon(Icons.search, color: Colors.white, size: 28),
+              ),
+              Obx(() {
+                int unreadCount = notificationService.notifications
+                    .where((n) => n['isRead'] == false)
+                    .length;
+                return Stack(
+                  children: [
+                    IconButton(
+                      onPressed: () => Get.to(() => const NotificationPage()),
+                      icon: const Icon(Icons.notifications_outlined,
+                          color: Colors.white, size: 28),
+                    ),
+                    if (unreadCount > 0)
+                      Positioned(
+                        right: 8,
+                        top: 8,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: const BoxDecoration(
+                            color: Colors.red,
+                            shape: BoxShape.circle,
+                          ),
+                          constraints: const BoxConstraints(
+                            minWidth: 16,
+                            minHeight: 16,
+                          ),
+                          child: Text(
+                            unreadCount > 9 ? '9+' : '$unreadCount',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                  ],
+                );
+              }),
+              const SizedBox(width: 4),
+              SizedBox(
+                width: 100,
+                height: 28,
+                child: ElevatedButton(
+                  onPressed: () => Get.to(() => const GoPremiumPage()),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.buttonColor,
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                  ),
+                  child: const Text(
+                    "Go Premium",
+                    style: TextStyle(color: Colors.white, fontSize: 10),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 🔹 SHORTS CONTENT
+  Widget _buildShortsContent(NotificationService notificationService) {
+    return Column(
+      children: [
+        _buildHeader(notificationService),
+        const Expanded(child: ShortsPage()),
+      ],
     );
   }
 
@@ -118,79 +195,7 @@ class MainHomePage extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         /// HEADER
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Image.asset(AppImages.logo,
-                  height: 80),
-              Row(
-                children: [
-                  Obx(() {
-                    int unreadCount = notificationService.notifications
-                        .where((n) => n['isRead'] == false)
-                        .length;
-                    return Stack(
-                      children: [
-                        IconButton(
-                          onPressed: () {
-                            Get.to(() => const NotificationPage());
-                          },
-                          icon: const Icon(Icons.notifications_outlined,
-                              color: Colors.white, size: 28),
-                        ),
-                        if (unreadCount > 0)
-                          Positioned(
-                            right: 8,
-                            top: 8,
-                            child: Container(
-                              padding: const EdgeInsets.all(4),
-                              decoration: const BoxDecoration(
-                                color: Colors.red,
-                                shape: BoxShape.circle,
-                              ),
-                              constraints: const BoxConstraints(
-                                minWidth: 16,
-                                minHeight: 16,
-                              ),
-                              child: Text(
-                                unreadCount > 9 ? '9+' : '$unreadCount',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ),
-                      ],
-                    );
-                  }),
-                  const SizedBox(width: 8),
-                  SizedBox(
-                    width: 110,
-                    height: 28,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Get.to(() => const GoPremiumPage());
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.buttonColor,
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                      ),
-                      child: const Text(
-                        "Go Premium",
-                        style: TextStyle(color: Colors.white, fontSize: 10),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
+        _buildHeader(notificationService),
 
         /// SCROLL
         Expanded(

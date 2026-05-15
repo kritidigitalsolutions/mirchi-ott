@@ -26,8 +26,8 @@ class CustomBottomNavbar extends StatelessWidget {
 
     return Padding(
       padding: EdgeInsets.only(
-        left: width * 0.05,
-        right: width * 0.05,
+        left: width * 0.15,
+        right: width * 0.15,
         bottom: height * 0.025,
       ),
       child: ClipRRect(
@@ -46,11 +46,15 @@ class CustomBottomNavbar extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildNavItem(Icons.home, "Home", 0, iconSize, fontSize),
-                _buildNavItem(Icons.search, "Search", 1, iconSize, fontSize),
-                _buildNavItem(Icons.workspace_premium, "Plans", 2, iconSize, fontSize),
-                _buildNavItem(Icons.download, "Downloads", 3, iconSize, fontSize),
-                _buildNavItem(Icons.menu, "More", 4, iconSize, fontSize),
+                _buildNavItem(Icons.play_circle_outline, "Shorts", 0, iconSize, fontSize),
+                _buildNavItem(Icons.home_outlined, "Home", 1, iconSize, fontSize),
+                _buildNavItem(
+                  isLoggedIn ? Icons.person_outline : Icons.menu,
+                  isLoggedIn ? "Profile" : "More",
+                  2,
+                  iconSize,
+                  fontSize,
+                ),
               ],
             ),
           ),
@@ -73,7 +77,7 @@ class CustomBottomNavbar extends StatelessWidget {
       onTap: () => onItemTapped(index),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 250),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
         decoration: BoxDecoration(
           color: isSelected
               ? AppColors.buttonColor

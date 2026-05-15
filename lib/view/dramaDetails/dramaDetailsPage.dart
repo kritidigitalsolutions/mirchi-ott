@@ -124,109 +124,124 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
             const SizedBox(height: 20),
 
             /// 🔐 DYNAMIC WATCH BUTTON (For Movies or General Series Play)
-            if (widget.content.contentType != 'series')
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Obx(() {
-                final sub = premiumController.subscriptionData.value;
-                final bool isPurchased = sub != null && sub['status'] == 'active';
-                final bool userLoggedIn = authController.isLoggedIn.value;
+            if (widget.content.contentType != 'series') ...[
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Obx(() {
+                  final sub = premiumController.subscriptionData.value;
+                  final bool isPurchased =
+                      sub != null && sub['status'] == 'active';
+                  final bool userLoggedIn = authController.isLoggedIn.value;
 
-                return ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.buttonColor,
-                    minimumSize: const Size(double.infinity, 50),
-                  ),
-                  onPressed: () {
-                    if (!userLoggedIn) {
-                      Get.to(() => const SignInPage());
-                    } else if (isPurchased || !widget.content.isPremium) {
-                      if (widget.content.videoUrl != null && widget.content.videoUrl!.isNotEmpty) {
-                        Get.to(() => AdvancedVideoPlayer(url: widget.content.videoUrl!, title: widget.content.title));
+                  return ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.buttonColor,
+                      minimumSize: const Size(double.infinity, 50),
+                    ),
+                    onPressed: () {
+                      if (!userLoggedIn) {
+                        Get.to(() => const SignInPage());
+                      } else if (isPurchased || !widget.content.isPremium) {
+                        if (widget.content.videoUrl != null &&
+                            widget.content.videoUrl!.isNotEmpty) {
+                          Get.to(() => AdvancedVideoPlayer(
+                              url: widget.content.videoUrl!,
+                              title: widget.content.title));
+                        } else {
+                          CustomSnackbar.show(
+                              title: "Error",
+                              message: "Video URL not found",
+                              isError: true);
+                        }
                       } else {
-                        CustomSnackbar.show(title: "Error", message: "Video URL not found", isError: true);
+                        Get.to(() => const GoPremiumPage());
                       }
-                    } else {
-                      Get.to(() => const GoPremiumPage());
-                    }
-                  },
-                  child: Text(
-                    !userLoggedIn 
-                        ? "Sign In to Watch" 
-                        : (isPurchased || !widget.content.isPremium ? "Watch Video" : "Subscribe to Watch"),
-                    style: const TextStyle(color: Colors.white),
-                  ),
-                );
-              }),
-            ),
+                    },
+                    child: Text(
+                      !userLoggedIn
+                          ? "Sign In to Watch"
+                          : (isPurchased || !widget.content.isPremium
+                              ? "Watch Video"
+                              : "Subscribe to Watch"),
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                  );
+                }),
+              ),
+              const SizedBox(height: 12),
 
-            const SizedBox(height: 12),
-            
-            /// ⬇ DYNAMIC DOWNLOAD BUTTON
-            if (widget.content.contentType != 'series')
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Obx(() {
-                final sub = premiumController.subscriptionData.value;
-                final bool isPurchased = sub != null && sub['status'] == 'active';
-                final bool userLoggedIn = authController.isLoggedIn.value;
-                final bool isAlreadyDownloaded = downloadController.isDownloaded(widget.content.id);
-                final bool downloading = downloadController.isDownloading[widget.content.id] ?? false;
+              /// ⬇ DYNAMIC DOWNLOAD BUTTON
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Obx(() {
+                  final sub = premiumController.subscriptionData.value;
+                  final bool isPurchased =
+                      sub != null && sub['status'] == 'active';
+                  final bool userLoggedIn = authController.isLoggedIn.value;
+                  final bool isAlreadyDownloaded =
+                      downloadController.isDownloaded(widget.content.id);
+                  final bool downloading =
+                      downloadController.isDownloading[widget.content.id] ??
+                          false;
 
-                return OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Colors.white), 
-                    minimumSize: const Size(double.infinity, 50)
-                  ),
-                  onPressed: () {
-                    if (!userLoggedIn) {
-                      Get.to(() => const SignInPage());
-                    } else if (isPurchased) {
-                      if (isAlreadyDownloaded) {
-                        CustomSnackbar.show(title: "Info", message: "Already downloaded");
+                  return OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: Colors.white),
+                        minimumSize: const Size(double.infinity, 50)),
+                    onPressed: () {
+                      if (!userLoggedIn) {
+                        Get.to(() => const SignInPage());
+                      } else if (isPurchased) {
+                        if (isAlreadyDownloaded) {
+                          CustomSnackbar.show(
+                              title: "Info", message: "Already downloaded");
+                        } else {
+                          downloadController.downloadVideo(widget.content);
+                        }
                       } else {
-                        downloadController.downloadVideo(widget.content);
+                        _showSubscriptionDialog(context);
                       }
-                    } else {
-                      _showSubscriptionDialog(context);
-                    }
-                  },
-                  child: downloading
-                      ? Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          value: downloadController.downloadProgress[widget.content.id] ?? 0,
-                          color: Colors.white,
-                          strokeWidth: 2,
-                        ),
-                      ),
-                      const SizedBox(height: 5),
-                      Text(
-                        "${((downloadController.downloadProgress[widget.content.id] ?? 0) * 100).toInt()}%",
-                        style: const TextStyle(color: Colors.white, fontSize: 12),
-                      ),
-                    ],
-                  )
-                      : isAlreadyDownloaded
-                      ? Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      Icon(Icons.check_circle, color: Colors.green),
-                      SizedBox(width: 8),
-                      Text("Downloaded", style: TextStyle(color: Colors.white)),
-                    ],
-                  )
-                      : const Text("Download", style: TextStyle(color: Colors.white)),
-
-                );
-              }),
-            ),
-
-            const SizedBox(height: 20),
+                    },
+                    child: downloading
+                        ? Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  value: downloadController
+                                          .downloadProgress[widget.content.id] ??
+                                      0,
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              ),
+                              const SizedBox(height: 5),
+                              Text(
+                                "${((downloadController.downloadProgress[widget.content.id] ?? 0) * 100).toInt()}%",
+                                style: const TextStyle(
+                                    color: Colors.white, fontSize: 12),
+                              ),
+                            ],
+                          )
+                        : isAlreadyDownloaded
+                            ? Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: const [
+                                  Icon(Icons.check_circle, color: Colors.green),
+                                  SizedBox(width: 8),
+                                  Text("Downloaded",
+                                      style: TextStyle(color: Colors.white)),
+                                ],
+                              )
+                            : const Text("Download",
+                                style: TextStyle(color: Colors.white)),
+                  );
+                }),
+              ),
+              const SizedBox(height: 20),
+            ],
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Text(widget.content.description, style: const TextStyle(color: Colors.white70)),

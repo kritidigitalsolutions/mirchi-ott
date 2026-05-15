@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../app/theme/app_colors.dart';
 import '../../data/models/response_model/content_response_model/content_model.dart';
 import '../../view_model/auth_controller/auth_controller.dart';
+import '../../view_model/home_controller/home_controller.dart';
 import '../../view_model/watchlist_controller/watchlist_controller.dart';
 import '../dramaDetails/dramaDetailsPage.dart';
 import '../homePages/mainHomepage.dart';
@@ -153,10 +154,13 @@ class WatchlistPage extends StatelessWidget {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
                 onPressed: () {
+                  final homeController = Get.find<HomeController>();
+                  homeController.selectedIndex.value = 1;
                   Get.offAll(() => const MainHomePage());
                 },
                 child: const Text(
-                  "Start Adding",
+                  ""
+                      "Start Adding",
                   style: TextStyle(color: AppColors.white, fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ),

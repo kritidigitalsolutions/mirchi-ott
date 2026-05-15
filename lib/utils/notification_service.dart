@@ -82,18 +82,27 @@ class NotificationService extends GetxController {
 
   /// 📡 Standardized method to send token to backend
   Future<void> uploadToken() async {
-    if (_currentToken == null) return;
-    
-    print("📡 Uploading FCM Token to Backend...");
     try {
+      // 🔄 If token is not yet available, try to fetch it
+      if (_currentToken == null) {
+        print("🔍 Attempting to fetch FCM Token...");
+        _currentToken = await _firebaseMessaging.getToken();
+      }
+
+      if (_currentToken == null) {
+        print("⚠️ FCM Token is still NULL. Cannot upload.");
+        return;
+      }
+
+      print("📡 Uploading FCM Token to Backend: $_currentToken");
       final BaseApiService apiService = Get.find<BaseApiService>();
       final response = await apiService.postApi(
         AppConstants.updateFcmToken,
-        {'fcmtoken': _currentToken}, // ✅ FIXED KEY NAME TO LOWERCASE 'fcmtoken'
+        {'fcmToken': _currentToken},
       );
-      print("✅ FCM Token Synced: $response");
+      print("✅ FCM Token Synced Successfully: $response");
     } catch (e) {
-      print("⚠️ FCM Token Sync Failed (Expected if not logged in): $e");
+      print("⚠️ FCM Token Sync Failed: $e");
     }
   }
 

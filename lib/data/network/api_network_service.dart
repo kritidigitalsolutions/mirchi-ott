@@ -121,6 +121,39 @@ class NetworkApiService extends BaseApiService {
     }
   }
 
+  @override
+  Future<dynamic> postMultipartApi(String url, Map<String, dynamic> data,
+      Map<String, String> files) async {
+    try {
+      debugPrint("POST MULTIPART API CALL => $url");
+      
+      Map<String, dynamic> formDataMap = Map.from(data);
+      
+      for (var entry in files.entries) {
+        if (entry.value.isNotEmpty) {
+          formDataMap[entry.key] = await MultipartFile.fromFile(
+            entry.value,
+            filename: entry.value.split('/').last,
+          );
+        }
+      }
+
+      FormData formData = FormData.fromMap(formDataMap);
+
+      final response = await _dio.post(
+        url,
+        data: formData,
+        options: Options(
+          headers: {"Content-Type": "multipart/form-data"},
+        ),
+      );
+      return returnResponse(response);
+    } on DioException catch (e) {
+      debugPrint("POST MULTIPART API ERROR => ${e.message}");
+      throw _handleDioError(e);
+    }
+  }
+
   AppException _handleDioError(DioException error) {
     debugPrint("HANDLE ERROR => ${error.response?.data}");
 

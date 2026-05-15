@@ -20,10 +20,12 @@ class NotificationPage extends StatelessWidget {
           'Notifications',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Get.back(),
-        ),
+        leading: Navigator.canPop(context)
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back, color: Colors.white),
+                onPressed: () => Get.back(),
+              )
+            : null,
         actions: [
           Obx(() => notificationService.notifications.isNotEmpty
               ? IconButton(

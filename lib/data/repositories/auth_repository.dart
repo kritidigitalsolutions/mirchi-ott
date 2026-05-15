@@ -39,14 +39,28 @@ class AuthRepository {
     required String phone,
     required String name,
     required String email,
+    String? profileImage,
   }) async {
     try {
-      final response = await apiProvider.postApi(AppConstants.createProfile, {
-        'phone': phone,
-        'name': name,
-        'email': email,
-      });
-      return response;
+      if (profileImage != null && profileImage.isNotEmpty) {
+        final response = await apiProvider.postMultipartApi(
+          AppConstants.createProfile,
+          {
+            'phone': phone,
+            'name': name,
+            'email': email,
+          },
+          {'profileImage': profileImage},
+        );
+        return response;
+      } else {
+        final response = await apiProvider.postApi(AppConstants.createProfile, {
+          'phone': phone,
+          'name': name,
+          'email': email,
+        });
+        return response;
+      }
     } catch (e) {
       rethrow;
     }
