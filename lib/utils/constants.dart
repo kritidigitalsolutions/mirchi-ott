@@ -1,6 +1,6 @@
 class AppConstants {
-  // static const String serverUrl = 'http://192.168.1.15:5000';
-  static const String serverUrl = 'https://mirchi-sigma.vercel.app';
+  static const String serverUrl = 'http://192.168.1.32:5000';
+  // static const String serverUrl = 'https://mirchi-sigma.vercel.app';
   static const String baseUrl = '$serverUrl/api';
 
   // Auth Endpoints
@@ -12,6 +12,12 @@ class AppConstants {
 
   /// fcm
   static const String updateFcmToken = '$baseUrl/notification/fcm-token';
+
+  /// support
+  static const String createTicket = '$baseUrl/support';
+  static const String getTickets = '$baseUrl/support';
+  static String replyTicket(String id) => '$baseUrl/support/reply/$id';
+  static String getConversation(String id) => '$baseUrl/support/conversation/$id';
 
   /// notifications
   static const String getNotifications = '$baseUrl/notifications';

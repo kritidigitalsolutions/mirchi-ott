@@ -19,11 +19,14 @@ class _SignInPageState extends State<SignInPage> {
 
   final isAgeConfirmed = false.obs;
   final showCodeField = false.obs;
+  final isEmailLogin = false.obs;
 
   final TextEditingController phoneController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
   final TextEditingController codeController = TextEditingController();
 
   final FocusNode phoneFocusNode = FocusNode();
+  final FocusNode emailFocusNode = FocusNode();
 
   @override
   void initState() {
@@ -40,8 +43,10 @@ class _SignInPageState extends State<SignInPage> {
   @override
   void dispose() {
     phoneController.dispose();
+    emailController.dispose();
     codeController.dispose();
     phoneFocusNode.dispose();
+    emailFocusNode.dispose();
     super.dispose();
   }
 
@@ -73,7 +78,7 @@ class _SignInPageState extends State<SignInPage> {
               child: Column(
                 children: [
                   SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.30,
+                    height: MediaQuery.of(context).size.height * 0.10,
                   ),
 
                   /// LOGO
@@ -96,45 +101,91 @@ class _SignInPageState extends State<SignInPage> {
 
                   const SizedBox(height: 30),
 
-                  /// PHONE FIELD
-                  TextFormField(
-                    controller: phoneController,
-                    focusNode: phoneFocusNode,
-                    autofocus: true,
-                    keyboardType: TextInputType.phone,
-                    style: const TextStyle(color: Colors.white),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Phone or Email is required";
-                      }
-
-                      bool isEmail = RegExp(
-                        r'^[\w-\.]+@([\w-]+\.)+[\w]{2,4}$',
-                      ).hasMatch(value);
-
-                      bool isPhone = RegExp(
-                        r'^[6-9][0-9]{9}$',
-                      ).hasMatch(value);
-
-                      if (!isEmail && !isPhone) {
-                        return "Enter valid phone number or email";
-                      }
-                      return null;
-                    },
-                    decoration: InputDecoration(
-                      prefixText: "+91 ",
-                      prefixStyle: const TextStyle(color: Colors.white),
-                      hintText: "Phone Number",
-                      hintStyle: const TextStyle(color: Colors.white54),
-                      filled: true,
-                      fillColor: Colors.grey[900],
-                      errorStyle:
-                      const TextStyle(color: Colors.redAccent),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
+                  /// TOGGLE
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Obx(() => ElevatedButton(
+                          onPressed: () => isEmailLogin.value = false,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: !isEmailLogin.value ? AppColors.buttonColor : Colors.grey[900],
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          ),
+                          child: const Text("Phone", style: TextStyle(color: Colors.white)),
+                        )),
                       ),
-                    ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Obx(() => ElevatedButton(
+                          onPressed: () => isEmailLogin.value = true,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: isEmailLogin.value ? AppColors.buttonColor : Colors.grey[900],
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          ),
+                          child: const Text("Email", style: TextStyle(color: Colors.white)),
+                        )),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  /// PHONE/EMAIL FIELD
+                  Obx(() => isEmailLogin.value 
+                    ? TextFormField(
+                        controller: emailController,
+                        focusNode: emailFocusNode,
+                        keyboardType: TextInputType.emailAddress,
+                        style: const TextStyle(color: Colors.white),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return "Email is required";
+                          }
+                          if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w]{2,4}$').hasMatch(value)) {
+                            return "Enter a valid email";
+                          }
+                          return null;
+                        },
+                        decoration: InputDecoration(
+                          hintText: "Email Address",
+                          hintStyle: const TextStyle(color: Colors.white54),
+                          filled: true,
+                          fillColor: Colors.grey[900],
+                          errorStyle: const TextStyle(color: Colors.redAccent),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                      )
+                    : TextFormField(
+                        controller: phoneController,
+                        focusNode: phoneFocusNode,
+                        keyboardType: TextInputType.phone,
+                        style: const TextStyle(color: Colors.white),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return "Phone is required";
+                          }
+                          if (!RegExp(r'^[6-9][0-9]{9}$').hasMatch(value)) {
+                            return "Enter valid phone number";
+                          }
+                          return null;
+                        },
+                        decoration: InputDecoration(
+                          prefixText: "+91 ",
+                          prefixStyle: const TextStyle(color: Colors.white),
+                          hintText: "Phone Number",
+                          hintStyle: const TextStyle(color: Colors.white54),
+                          filled: true,
+                          fillColor: Colors.grey[900],
+                          errorStyle: const TextStyle(color: Colors.redAccent),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                      ),
                   ),
 
                   const SizedBox(height: 15),
@@ -256,8 +307,9 @@ class _SignInPageState extends State<SignInPage> {
                           FocusManager.instance.primaryFocus
                               ?.unfocus();
 
-                          String valueToSend =
-                              "+91${phoneController.text}";
+                          String valueToSend = isEmailLogin.value 
+                              ? emailController.text.trim()
+                              : "+91${phoneController.text.trim()}";
 
                           bool success =
                           await authController

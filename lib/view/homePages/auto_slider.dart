@@ -81,7 +81,7 @@ class _AutoSliderState extends State<AutoSlider> {
     return Column(
       children: [
         SizedBox(
-          height: MediaQuery.of(context).size.height * 0.55,
+          height: MediaQuery.of(context).size.height * 0.40,
           child: PageView.builder(
             controller: _pageController,
             itemCount: null,
@@ -98,7 +98,11 @@ class _AutoSliderState extends State<AutoSlider> {
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   child: GestureDetector(
                     onTap: () {
-                      Get.to(() => DramaDetailsPage(isSignedIn: widget.isSignedIn, content: item));
+                      if (!widget.isSignedIn) {
+                         Get.to(() => const SignInPage());
+                      } else {
+                         Get.to(() => DramaDetailsPage(isSignedIn: widget.isSignedIn, content: item));
+                      }
                     },
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(20),
@@ -121,45 +125,6 @@ class _AutoSliderState extends State<AutoSlider> {
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Obx(() {
-                                  final sub = premiumController.subscriptionData.value;
-                                  final bool isPurchased = sub != null && sub['status'] == 'active';
-
-                                  return ElevatedButton(
-                                    onPressed: () async {
-                                      if (!widget.isSignedIn) {
-                                        FocusManager.instance.primaryFocus?.unfocus();
-                                        _stopTimer();
-
-                                        await Get.to(() => const SignInPage(),
-                                        fullscreenDialog: true,
-                                      transition: Transition.downToUp,
-                                        );
-
-                                      _startTimer();
-                                      }
-                                      else if (!isPurchased) {
-                                        Get.to(() => const GoPremiumPage());
-                                      }
-                                      else {
-                                        Get.to(() => DramaDetailsPage(
-                                            isSignedIn: widget.isSignedIn,
-                                            content: item
-                                        ));
-                                      }
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: AppColors.buttonColor,
-                                    ),
-                                    child: Text(
-                                      !widget.isSignedIn
-                                          ? "Sign In"
-                                          : (isPurchased ? "Play Video" : "Subscribe"),
-                                      style: const TextStyle(color: AppColors.buttonTextColor),
-                                    ),
-                                  );
-                                }),
-                                const SizedBox(height: 8),
                                 Text(
                                   item.title,
                                   textAlign: TextAlign.center,

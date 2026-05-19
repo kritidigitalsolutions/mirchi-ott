@@ -4,6 +4,7 @@ import '../../utils/app_images.dart';
 import '../../data/models/response_model/content_response_model/content_model.dart';
 import '../../app/theme/app_colors.dart';
 import '../../widgets/catagory_widget.dart';
+import '../auth/signInPage.dart';
 import '../dramaDetails/dramaDetailsPage.dart';
 
 class Top10List extends StatelessWidget {
@@ -61,10 +62,14 @@ class Top10List extends StatelessWidget {
               final item = content[index];
               return GestureDetector(
                 onTap: () {
-                  Get.to(() => DramaDetailsPage(
-                    isSignedIn: isSignedIn,
-                    content: item,
-                  ));
+                  if (!isSignedIn) {
+                    Get.to(() => const SignInPage());
+                  } else {
+                    Get.to(() => DramaDetailsPage(
+                      isSignedIn: isSignedIn,
+                      content: item,
+                    ));
+                  }
                 },
                 child: Container(
                   width: 130,

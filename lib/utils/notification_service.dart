@@ -7,6 +7,9 @@ import 'package:hive/hive.dart';
 import '../data/network/base_api_service.dart';
 import '../utils/constants.dart';
 
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
+
 class NotificationService extends GetxController {
   static NotificationService get to => Get.find();
 
@@ -21,6 +24,7 @@ class NotificationService extends GetxController {
 
   Future<void> init() async {
     print("🚀 NotificationService INIT STARTED");
+    tz.initializeTimeZones();
 
     // Initialize Firebase if not already initialized
     await Firebase.initializeApp();
@@ -79,6 +83,43 @@ class NotificationService extends GetxController {
     fetchNotifications(); // Initial fetch from server
     print("🚀 NotificationService INIT COMPLETED");
   }
+
+  Future<void> scheduleNotification({
+    required int id,
+    required String title,
+    required String body,
+    required DateTime scheduledDate,
+  }) async {
+    // If the date is in the past, don't schedule
+    if (scheduledDate.isBefore(DateTime.now())) return;
+
+    await _localNotificationsPlugin.zonedSchedule(
+      id,
+      title,
+      body,
+      tz.TZDateTime.from(scheduledDate, tz.local),
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'mirchi_reminders',
+          'Mirchi OTT Reminders',
+          channelDescription: 'Reminders for upcoming movies and series',
+          importance: Importance.max,
+          priority: Priority.high,
+        ),
+      ),
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+    );
+  }
+
+  Future<void> cancelNotification(int id) async {
+    await _localNotificationsPlugin.cancel(id);
+  }
+
+  // Future<void> cancelNotification(int id) async {
+  //   await _localNotificationsPlugin.cancel(id);
+  // }
 
   /// 📡 Standardized method to send token to backend
   Future<void> uploadToken() async {

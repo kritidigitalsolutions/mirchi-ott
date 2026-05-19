@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mirchi_ott/view/profile/privacy_policy_page.dart';
@@ -30,8 +31,10 @@ class ProfilePage extends StatelessWidget {
     final PremiumController premiumController = Get.put(PremiumController());
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      authController.getProfile();
-      if (authController.isLoggedIn.value) {
+      if (authController.userData.value == null) {
+        authController.getProfile();
+      }
+      if (authController.isLoggedIn.value && premiumController.subscriptionData.value == null) {
         premiumController.fetchSubscriptionStatus();
       }
     });
@@ -55,32 +58,35 @@ class ProfilePage extends StatelessWidget {
                       padding: const EdgeInsets.all(16),
                       child: Row(
                         children: [
-                          // Profile Image from API
-                          Obx(() {
-                            final user = authController.userData.value;
-                            String? imageUrl = user?['avatar'] ??
-                                user?['image'] ??
-                                user?['profileImage'];
+                             Obx(() {
+                              final user = authController.userData.value;
+                              String? imageUrl = user?['avatar'] ??
+                                  user?['image'] ??
+                                  user?['profileImage'];
 
-                            if (imageUrl != null &&
-                                imageUrl.isNotEmpty &&
-                                !imageUrl.startsWith('http')) {
-                              imageUrl = "${AppConstants.serverUrl}/$imageUrl";
-                            }
+                              if (imageUrl != null &&
+                                  imageUrl.isNotEmpty &&
+                                  !imageUrl.startsWith('http')) {
+                                imageUrl = "${AppConstants.serverUrl}/$imageUrl";
+                              }
 
-                            return CircleAvatar(
-                              radius: 25,
-                              backgroundColor: Colors.grey[800],
-                              backgroundImage:
-                                  (imageUrl != null && imageUrl.isNotEmpty)
-                                      ? NetworkImage(imageUrl)
-                                      : null,
-                              child: (imageUrl == null || imageUrl.isEmpty)
-                                  ? const Icon(Icons.person,
-                                      color: AppColors.white, size: 30)
-                                  : null,
-                            );
-                          }),
+                              return CircleAvatar(
+                                radius: 25,
+                                backgroundColor: Colors.grey[800],
+                                child: (imageUrl != null && imageUrl.isNotEmpty)
+                                    ? ClipOval(
+                                        child: CachedNetworkImage(
+                                          imageUrl: imageUrl,
+                                          fit: BoxFit.cover,
+                                          width: 50,
+                                          height: 50,
+                                          placeholder: (context, url) => const Icon(Icons.person, color: AppColors.white, size: 30),
+                                          errorWidget: (context, url, error) => const Icon(Icons.person, color: AppColors.white, size: 30),
+                                        ),
+                                      )
+                                    : const Icon(Icons.person, color: AppColors.white, size: 30),
+                              );
+                            }),
 
                           const SizedBox(width: 12),
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:mirchi_ott/utils/app_images.dart';
 import 'package:mirchi_ott/view_model/auth_controller/auth_controller.dart';
 import 'package:mirchi_ott/view_model/download_controller/download_controller.dart';
@@ -138,31 +139,31 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
                       backgroundColor: AppColors.buttonColor,
                       minimumSize: const Size(double.infinity, 50),
                     ),
-                    onPressed: () {
-                      if (!userLoggedIn) {
-                        Get.to(() => const SignInPage());
-                      } else if (isPurchased || !widget.content.isPremium) {
-                        if (widget.content.videoUrl != null &&
-                            widget.content.videoUrl!.isNotEmpty) {
-                          Get.to(() => AdvancedVideoPlayer(
-                              url: widget.content.videoUrl!,
-                              title: widget.content.title));
+                    onPressed: widget.content.isComingSoon 
+                      ? null 
+                      : () {
+                        if (!userLoggedIn) {
+                          Get.to(() => const SignInPage());
+                        } else if (isPurchased || !widget.content.isPremium) {
+                          if (widget.content.videoUrl != null &&
+                              widget.content.videoUrl!.isNotEmpty) {
+                            Get.to(() => AdvancedVideoPlayer(
+                                url: widget.content.videoUrl!,
+                                title: widget.content.title));
+                          } else {
+                            CustomSnackbar.show(
+                                title: "Error",
+                                message: "Video URL not found",
+                                isError: true);
+                          }
                         } else {
-                          CustomSnackbar.show(
-                              title: "Error",
-                              message: "Video URL not found",
-                              isError: true);
+                          Get.to(() => const GoPremiumPage());
                         }
-                      } else {
-                        Get.to(() => const GoPremiumPage());
-                      }
-                    },
+                      },
                     child: Text(
-                      !userLoggedIn
-                          ? "Sign In to Watch"
-                          : (isPurchased || !widget.content.isPremium
-                              ? "Watch Video"
-                              : "Subscribe to Watch"),
+                      widget.content.isComingSoon 
+                        ? "Coming soon on ${_formatReleaseDate(widget.content.releaseDate)}"
+                        : "Watch Video",
                       style: const TextStyle(color: Colors.white),
                     ),
                   );
@@ -495,6 +496,16 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
         ),
       ),
     );
+  }
+
+  String _formatReleaseDate(String? dateStr) {
+    if (dateStr == null || dateStr.isEmpty) return "Soon";
+    try {
+      final date = DateTime.parse(dateStr);
+      return DateFormat('dd MMM yyyy').format(date);
+    } catch (e) {
+      return "Soon";
+    }
   }
 
   Widget _actionButton({required IconData icon, required String label, required VoidCallback onTap}) {

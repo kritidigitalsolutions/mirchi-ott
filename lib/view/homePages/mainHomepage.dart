@@ -48,7 +48,7 @@ class MainHomePage extends StatelessWidget {
                 () => IndexedStack(
                   index: controller.selectedIndex.value,
                   children: [
-                    _buildShortsContent(notificationService),
+                    _buildUpcomingContent(notificationService, authController),
                     _buildHomeContent(
                       context,
                       controller,
@@ -77,17 +77,20 @@ class MainHomePage extends StatelessWidget {
                 left: 0,
                 right: 0,
                 bottom: 0,
-                child: CustomBottomNavbar(
-                  selectedIndex: selectedIndex,
-                  onItemTapped: (index) {
-                    /// 🔥 Redirect to SignIn if not logged in and clicking More
-                    if (index == 2 && !isLoggedIn) {
-                      Get.to(() => const SignInPage());
-                      return;
-                    }
-                    controller.onItemTapped(index);
-                  },
-                  isLoggedIn: isLoggedIn,
+                child: SafeArea(
+                  top: false,
+                  child: CustomBottomNavbar(
+                    selectedIndex: selectedIndex,
+                    onItemTapped: (index) {
+                      /// 🔥 Redirect to SignIn if not logged in for ANY tab
+                      if (!isLoggedIn) {
+                        Get.to(() => const SignInPage());
+                        return;
+                      }
+                      controller.onItemTapped(index);
+                    },
+                    isLoggedIn: isLoggedIn,
+                  ),
                 ),
               );
             }),
@@ -100,11 +103,11 @@ class MainHomePage extends StatelessWidget {
   /// 🔹 HEADER
   Widget _buildHeader(NotificationService notificationService) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Image.asset(AppImages.logo, height: 60),
+          Image.asset(AppImages.logo, height: 90),
           Row(
             children: [
               IconButton(
@@ -173,12 +176,12 @@ class MainHomePage extends StatelessWidget {
     );
   }
 
-  /// 🔹 SHORTS CONTENT
-  Widget _buildShortsContent(NotificationService notificationService) {
+  /// 🔹 UPCOMING CONTENT
+  Widget _buildUpcomingContent(NotificationService notificationService, AuthController authController) {
     return Column(
       children: [
         _buildHeader(notificationService),
-        const Expanded(child: ShortsPage()),
+        Expanded(child: ComingSoonSection(content: [], isSignedIn: authController.isLoggedIn.value, isFullPage: true)),
       ],
     );
   }
@@ -203,7 +206,7 @@ class MainHomePage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 15),
+                // const SizedBox(height: 15),
 
                 Obx(
                   () => AutoSlider(
@@ -257,12 +260,16 @@ class MainHomePage extends StatelessWidget {
                             padding: const EdgeInsets.symmetric(horizontal: 10),
                             child: GestureDetector(
                               onTap: () {
-                                Get.to(
-                                  () => DramaDetailsPage(
-                                    isSignedIn: authController.isLoggedIn.value,
-                                    content: item,
-                                  ),
-                                );
+                                if (!authController.isLoggedIn.value) {
+                                  Get.to(() => const SignInPage());
+                                } else {
+                                  Get.to(
+                                    () => DramaDetailsPage(
+                                      isSignedIn: authController.isLoggedIn.value,
+                                      content: item,
+                                    ),
+                                  );
+                                }
                               },
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(15),

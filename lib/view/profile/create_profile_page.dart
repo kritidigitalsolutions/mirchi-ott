@@ -96,23 +96,26 @@ class _CreateProfilePageState extends State<CreateProfilePage> {
 
               const SizedBox(height: 15),
 
-              /// Email Field
-              TextField(
-                controller: emailController,
-                style: const TextStyle(color: AppColors.white),
-                decoration: InputDecoration(
-                  hintText: "Email",
-                  hintStyle: const TextStyle(color: Colors.grey),
-                  filled: true,
-                  fillColor: Colors.grey[900],
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide.none,
+              /// Dynamic Field (Email if phone used, or nothing if email used)
+              if (!widget.phone.contains('@')) ...[
+                TextField(
+                  controller: emailController,
+                  style: const TextStyle(color: AppColors.white),
+                  decoration: InputDecoration(
+                    hintText: "Email (Optional)",
+                    hintStyle: const TextStyle(color: Colors.grey),
+                    filled: true,
+                    fillColor: Colors.grey[900],
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide.none,
+                    ),
                   ),
                 ),
-              ),
-
-              const SizedBox(height: 30),
+                const SizedBox(height: 30),
+              ] else ...[
+                 const SizedBox(height: 15),
+              ],
 
               /// Save Button
               SizedBox(
@@ -128,16 +131,15 @@ class _CreateProfilePageState extends State<CreateProfilePage> {
                   onPressed: authController.isLoading.value
                       ? null
                       : () async {
-                          if (nameController.text.trim().isEmpty ||
-                              emailController.text.trim().isEmpty) {
-                            CustomSnackbar.show(title: "Error", message: "Name and Email are required", isError: true);
+                          if (nameController.text.trim().isEmpty) {
+                            CustomSnackbar.show(title: "Error", message: "Name is required", isError: true);
                             return;
                           }
 
                           bool success = await authController.updateAndSaveProfile(
                             name: nameController.text.trim(),
                             email: emailController.text.trim(),
-                            phone: widget.phone,
+                            phone: widget.phone.contains('@') ? "" : widget.phone,
                             imagePath: createProfileController.selectedImage.value?.path,
                           );
 

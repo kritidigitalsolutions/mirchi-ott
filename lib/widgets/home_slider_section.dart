@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../utils/app_images.dart';
 import '../data/models/response_model/content_response_model/content_model.dart';
+import '../view/auth/signInPage.dart';
 import '../view/dramaDetails/dramaDetailsPage.dart';
 import 'catagory_widget.dart';
 
@@ -71,10 +72,14 @@ class HomeSliderSection extends StatelessWidget {
                 child: InkWell(
                   borderRadius: BorderRadius.circular(12),
                   onTap: () {
-                    Get.to(() => DramaDetailsPage(
-                          isSignedIn: isSignedIn,
-                          content: item,
-                        ));
+                    if (!isSignedIn) {
+                      Get.to(() => const SignInPage());
+                    } else {
+                      Get.to(() => DramaDetailsPage(
+                            isSignedIn: isSignedIn,
+                            content: item,
+                          ));
+                    }
                   },
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(12),

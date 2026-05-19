@@ -25,4 +25,15 @@ class PlanModel {
       isActive: json['isActive'] ?? false,
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      '_id': id,
+      'name': name,
+      'price': price,
+      'duration': duration,
+      'features': features,
+      'isActive': isActive,
+    };
+  }
 }

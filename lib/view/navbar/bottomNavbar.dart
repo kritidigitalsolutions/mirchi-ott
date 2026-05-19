@@ -46,7 +46,7 @@ class CustomBottomNavbar extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildNavItem(Icons.play_circle_outline, "Shorts", 0, iconSize, fontSize),
+                _buildNavItem(Icons.calendar_month_outlined, "Upcoming", 0, iconSize, fontSize),
                 _buildNavItem(Icons.home_outlined, "Home", 1, iconSize, fontSize),
                 _buildNavItem(
                   isLoggedIn ? Icons.person_outline : Icons.menu,
