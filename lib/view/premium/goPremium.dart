@@ -34,20 +34,138 @@ class GoPremiumPage extends StatelessWidget {
                   children: [
                     /// Back Icon
                     IconButton(
-                        icon: const Icon(Icons.arrow_back_ios, color: AppColors.white),
-                        onPressed: () {
-                          if (Get.key.currentState?.canPop() ?? false) {
-                            Get.back(); // ✅ If opened via Get.to()
-                          } else {
-                            Get.find<HomeController>().selectedIndex.value = 0; // ✅ If opened via navbar
-                          }
+                      icon: const Icon(
+                        Icons.arrow_back_ios,
+                        color: AppColors.white,
+                      ),
+                      onPressed: () {
+                        if (Get.key.currentState?.canPop() ?? false) {
+                          Get.back();
+                        } else {
+                          Get.find<HomeController>().selectedIndex.value = 0;
                         }
+                      },
+                    ),
+
+                    /// Header Text
+                    const Text(
+                      "Plans ",
+                      style: TextStyle(
+                        color: AppColors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+
+                    /// Empty space to balance the row
+                    const SizedBox(width: 48),
+                  ],
+                ),
+              ),
+
+              // const SizedBox(height: 20),
+              const SizedBox(height: 20),
+
+              /// 🔹 Common Features Card
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 15),
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.25),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: AppColors.borderColor,
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: const [
+
+                    Text(
+                      "All Premium Plans Include",
+                      style: TextStyle(
+                        color: AppColors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+
+                    SizedBox(height: 15),
+
+                    Row(
+                      children: [
+                        Icon(Icons.check_circle, color: Colors.green, size: 20),
+                        SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            "Ad-Free Streaming Experience",
+                            style: TextStyle(
+                              color: AppColors.white,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    SizedBox(height: 12),
+
+                    Row(
+                      children: [
+                        Icon(Icons.check_circle, color: Colors.green, size: 20),
+                        SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            "Unlimited Access to Premium Content",
+                            style: TextStyle(
+                              color: AppColors.white,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    SizedBox(height: 12),
+
+                    Row(
+                      children: [
+                        Icon(Icons.check_circle, color: Colors.green, size: 20),
+                        SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            "Watch on Multiple Devices",
+                            style: TextStyle(
+                              color: AppColors.white,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    SizedBox(height: 12),
+
+                    Row(
+                      children: [
+                        Icon(Icons.check_circle, color: Colors.green, size: 20),
+                        SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            "HD & Full HD Streaming Quality",
+                            style: TextStyle(
+                              color: AppColors.white,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 25),
 
               /// 🔹 Upgrade Text
               const Text(

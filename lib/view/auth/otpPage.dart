@@ -8,43 +8,72 @@ import '../../view_model/auth_controller/otp_controller.dart';
 import '../../app/routes/app_routes.dart';
 import '../../utils/custom_snackbar.dart';
 
-class OtpPage extends StatelessWidget {
+class OtpPage extends StatefulWidget {
   final String phoneNumber;
 
   const OtpPage({super.key, required this.phoneNumber});
 
   @override
-  Widget build(BuildContext context) {
-    final AuthController authController = Get.find<AuthController>();
-    final OtpController otpController = Get.put(OtpController());
+  State<OtpPage> createState() => _OtpPageState();
+}
 
-    void verifyOtp() async {
-      String otp = otpController.controllers.map((e) => e.text).join();
+class _OtpPageState extends State<OtpPage> {
+  late final AuthController authController;
+  late final OtpController otpController;
+  
+  final List<TextEditingController> controllers = List.generate(6, (index) => TextEditingController());
+  final List<FocusNode> focusNodes = List.generate(6, (index) => FocusNode());
 
-      if (otp.length < 6) {
-        CustomSnackbar.show(title: 'Error', message: 'Please enter 6-digit OTP', isError: true);
-        return;
-      }
+  @override
+  void initState() {
+    super.initState();
+    authController = Get.find<AuthController>();
+    otpController = Get.put(OtpController());
+  }
 
-      final response = await authController.verifyOtp(phoneNumber, otp);
+  @override
+  void dispose() {
+    for (var controller in controllers) {
+      controller.dispose();
+    }
+    for (var node in focusNodes) {
+      node.dispose();
+    }
+    super.dispose();
+  }
 
-      if (response != null && response.success) {
-        authController.setLoginStatus(true);
-        
-        bool isNew = response.isNewUser;
-        bool isProfileIncomplete = (response.user != null && response.user!['profileComplete'] == false);
+  void verifyOtp() async {
+    String otp = controllers.map((e) => e.text).join();
 
-        // ✅ Add a small delay to prevent FocusNode issues during navigation
-        Future.delayed(const Duration(milliseconds: 100), () {
-          if (isNew || isProfileIncomplete) {
-            Get.offAll(() => CreateProfilePage(phone: phoneNumber));
-          } else {
-            Get.offAllNamed(AppRoutes.home);
-          }
-        });
-      }
+    if (otp.length < 6) {
+      CustomSnackbar.show(title: 'Error', message: 'Please enter 6-digit OTP', isError: true);
+      return;
     }
 
+    final response = await authController.verifyOtp(widget.phoneNumber, otp);
+
+    if (response != null && response.success) {
+      authController.setLoginStatus(true);
+      
+      bool isNew = response.isNewUser;
+      bool isProfileIncomplete = (response.user != null && response.user!['profileComplete'] == false);
+
+      // ✅ Unfocus before navigating
+      FocusManager.instance.primaryFocus?.unfocus();
+
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (!mounted) return;
+        if (isNew || isProfileIncomplete) {
+          Get.offAll(() => CreateProfilePage(phone: widget.phoneNumber));
+        } else {
+          Get.offAllNamed(AppRoutes.home);
+        }
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -73,7 +102,7 @@ class OtpPage extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               Text(
-                "Enter the OTP sent to $phoneNumber",
+                "Enter the OTP sent to ${widget.phoneNumber}",
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   color: AppColors.white,
@@ -90,8 +119,8 @@ class OtpPage extends StatelessWidget {
                     width: 45,
                     height: 55,
                     child: TextField(
-                      controller: otpController.controllers[index],
-                      focusNode: otpController.focusNodes[index],
+                      controller: controllers[index],
+                      focusNode: focusNodes[index],
                       keyboardType: TextInputType.number,
                       textAlign: TextAlign.center,
                       style: const TextStyle(
@@ -114,15 +143,13 @@ class OtpPage extends StatelessWidget {
                       ),
                       onChanged: (value) {
                         if (value.isNotEmpty && index < 5) {
-                          FocusScope.of(context)
-                              .requestFocus(otpController.focusNodes[index + 1]);
+                          focusNodes[index + 1].requestFocus();
                         }
                         if (value.isEmpty && index > 0) {
-                          FocusScope.of(context)
-                              .requestFocus(otpController.focusNodes[index - 1]);
+                          focusNodes[index - 1].requestFocus();
                         }
                         if (value.length == 1 && index == 5) {
-                           FocusScope.of(context).unfocus();
+                           FocusManager.instance.primaryFocus?.unfocus();
                            verifyOtp();
                         }
                       },
@@ -160,7 +187,7 @@ class OtpPage extends StatelessWidget {
                   onPressed: (otpController.isResendButtonDisabled.value || authController.isLoading.value)
                       ? null
                       : () async {
-                          bool success = await authController.sendOtp(phoneNumber);
+                          bool success = await authController.sendOtp(widget.phoneNumber);
                           if (success) {
                             otpController.startTimer();
                           }

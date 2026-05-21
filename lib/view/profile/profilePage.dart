@@ -181,7 +181,7 @@ class ProfilePage extends StatelessWidget {
                 ),
                 onPressed: authController.isLoggedIn.value 
                     ? onLogout 
-                    : () => Get.to(() => SignInPage()),
+                    : () => Get.to(() => const SignInPage()),
                 child: Text(
                     authController.isLoggedIn.value ? "SIGN OUT" : "SIGN IN", 
                     style: const TextStyle(color: AppColors.white, fontWeight: FontWeight.bold)),

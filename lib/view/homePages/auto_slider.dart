@@ -43,7 +43,7 @@ class _AutoSliderState extends State<AutoSlider> {
 
   void _startTimer() {
     if (_timer?.isActive ?? false) return;
-    _timer = Timer.periodic(const Duration(seconds: 3), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 5), (timer) {
       if (_pageController.hasClients) {
         currentPage++;
         _pageController.animateToPage(

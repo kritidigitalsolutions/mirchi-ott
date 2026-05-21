@@ -19,6 +19,11 @@ import '../../view_model/auth_controller/auth_controller.dart';
 import '../../utils/notification_service.dart';
 import '../notifications/notification_page.dart';
 
+import '../profile/privacy_policy_page.dart';
+import '../profile/terms_condition_page.dart';
+import '../profile/refund_policy_page.dart';
+import '../profile/help_page.dart';
+
 class MainHomePage extends StatelessWidget {
   const MainHomePage({super.key});
 
@@ -82,11 +87,7 @@ class MainHomePage extends StatelessWidget {
                   child: CustomBottomNavbar(
                     selectedIndex: selectedIndex,
                     onItemTapped: (index) {
-                      /// 🔥 Redirect to SignIn if not logged in for ANY tab
-                      if (!isLoggedIn) {
-                        Get.to(() => const SignInPage());
-                        return;
-                      }
+                      /// 🔥 Removed mandatory redirect to SignIn for all tabs
                       controller.onItemTapped(index);
                     },
                     isLoggedIn: isLoggedIn,
@@ -107,7 +108,7 @@ class MainHomePage extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Image.asset(AppImages.logo, height: 90),
+          Image.asset(AppImages.logo1, height: 50),
           Row(
             children: [
               IconButton(
@@ -324,16 +325,19 @@ class MainHomePage extends StatelessWidget {
                   ),
                 ),
 
-                const SizedBox(height: 10),
+                // const SizedBox(height: 10),
 
-                Obx(
-                  () => ComingSoonSection(
-                    content: contentController.allContent
-                        .where((c) => c.isComingSoon == true)
-                        .toList(),
-                    isSignedIn: authController.isLoggedIn.value,
-                  ),
-                ),
+                // Obx(
+                //   () => ComingSoonSection(
+                //     content: contentController.allContent
+                //         .where((c) => c.isComingSoon == true)
+                //         .toList(),
+                //     isSignedIn: authController.isLoggedIn.value,
+                //   ),
+                // ),
+                // const SizedBox(height: 30),
+                //
+                // _buildFooter(),
 
                 const SizedBox(height: 100),
               ],
@@ -341,6 +345,72 @@ class MainHomePage extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  /// 🔹 FOOTER
+  Widget _buildFooter() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
+      // decoration: BoxDecoration(
+      //   color: Colors.grey[900]?.withOpacity(0.5),
+      //   border: const Border(top: BorderSide(color: Colors.white12)),
+      // ),
+      child: Column(
+        children: [
+          Image.asset(AppImages.logo1, height: 60),
+          const SizedBox(height: 10),
+          const Text(
+            "MIRCHI OTT",
+            style: TextStyle(
+              color: AppColors.white,
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.5,
+            ),
+          ),
+          const SizedBox(height: 20),
+          const Text(
+            "The ultimate destination for premium regional content. Watch the latest web series, movies, and originals anytime, anywhere.",
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.white60, fontSize: 13),
+          ),
+          const SizedBox(height: 30),
+          Wrap(
+            alignment: WrapAlignment.center,
+            spacing: 20,
+            runSpacing: 15,
+            children: [
+              _footerLink("Privacy Policy", const PrivacyPolicyPage()),
+              _footerLink("Terms & Conditions", const TermsAndConditionsPage()),
+              _footerLink("Refund Policy", const RefundPolicyPage()),
+              _footerLink("Help & Support", const HelpSupportPage()),
+            ],
+          ),
+          const SizedBox(height: 40),
+          const Divider(color: Colors.white12),
+          const SizedBox(height: 20),
+          const Text(
+            "© 2024 Mirchi OTT. All Rights Reserved.",
+            style: TextStyle(color: Colors.white38, fontSize: 11),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _footerLink(String title, Widget page) {
+    return InkWell(
+      onTap: () => Get.to(() => page),
+      child: Text(
+        title,
+        style: const TextStyle(
+          color: AppColors.primary,
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
     );
   }
 }

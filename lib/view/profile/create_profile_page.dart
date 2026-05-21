@@ -16,7 +16,6 @@ class CreateProfilePage extends StatefulWidget {
 
 class _CreateProfilePageState extends State<CreateProfilePage> {
   late final TextEditingController nameController;
-  late final TextEditingController emailController;
   late final AuthController authController;
   late final CreateProfileController createProfileController;
 
@@ -24,7 +23,6 @@ class _CreateProfilePageState extends State<CreateProfilePage> {
   void initState() {
     super.initState();
     nameController = TextEditingController();
-    emailController = TextEditingController();
     authController = Get.find<AuthController>();
     createProfileController = Get.put(CreateProfileController());
   }
@@ -32,7 +30,6 @@ class _CreateProfilePageState extends State<CreateProfilePage> {
   @override
   void dispose() {
     nameController.dispose();
-    emailController.dispose();
     super.dispose();
   }
 
@@ -83,7 +80,7 @@ class _CreateProfilePageState extends State<CreateProfilePage> {
                 controller: nameController,
                 style: const TextStyle(color: AppColors.white),
                 decoration: InputDecoration(
-                  hintText: "Name",
+                  hintText: "Full Name",
                   hintStyle: const TextStyle(color: Colors.grey),
                   filled: true,
                   fillColor: Colors.grey[900],
@@ -94,28 +91,7 @@ class _CreateProfilePageState extends State<CreateProfilePage> {
                 ),
               ),
 
-              const SizedBox(height: 15),
-
-              /// Dynamic Field (Email if phone used, or nothing if email used)
-              if (!widget.phone.contains('@')) ...[
-                TextField(
-                  controller: emailController,
-                  style: const TextStyle(color: AppColors.white),
-                  decoration: InputDecoration(
-                    hintText: "Email (Optional)",
-                    hintStyle: const TextStyle(color: Colors.grey),
-                    filled: true,
-                    fillColor: Colors.grey[900],
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 30),
-              ] else ...[
-                 const SizedBox(height: 15),
-              ],
+              const SizedBox(height: 30),
 
               /// Save Button
               SizedBox(
@@ -136,10 +112,12 @@ class _CreateProfilePageState extends State<CreateProfilePage> {
                             return;
                           }
 
+                          bool isEmail = widget.phone.contains('@');
+
                           bool success = await authController.updateAndSaveProfile(
                             name: nameController.text.trim(),
-                            email: emailController.text.trim(),
-                            phone: widget.phone.contains('@') ? "" : widget.phone,
+                            email: isEmail ? widget.phone : "",
+                            phone: isEmail ? "" : widget.phone,
                             imagePath: createProfileController.selectedImage.value?.path,
                           );
 

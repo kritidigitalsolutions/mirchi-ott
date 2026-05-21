@@ -143,7 +143,6 @@ class AuthController extends GetxController {
       final response = await repository.createProfile(
         phone: phone,
         name: name,
-        email: email,
         profileImage: imagePath,
       );
 

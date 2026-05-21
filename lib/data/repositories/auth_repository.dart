@@ -38,7 +38,6 @@ class AuthRepository {
   Future<dynamic> createProfile({
     required String phone,
     required String name,
-    required String email,
     String? profileImage,
   }) async {
     try {
@@ -48,7 +47,6 @@ class AuthRepository {
           {
             'phone': phone,
             'name': name,
-            'email': email,
           },
           {'profileImage': profileImage},
         );
@@ -57,7 +55,6 @@ class AuthRepository {
         final response = await apiProvider.postApi(AppConstants.createProfile, {
           'phone': phone,
           'name': name,
-          'email': email,
         });
         return response;
       }
