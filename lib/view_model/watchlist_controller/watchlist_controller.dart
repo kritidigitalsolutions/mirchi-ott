@@ -3,6 +3,7 @@ import '../../data/network/base_api_service.dart';
 import '../../data/repositories/watchlist_repo.dart';
 import '../../utils/custom_snackbar.dart';
 import '../auth_controller/auth_controller.dart';
+import '../../view/auth/signInPage.dart';
 
 class WatchlistController extends GetxController {
   final WatchlistRepo repo = WatchlistRepo(apiProvider: Get.find<BaseApiService>());
@@ -63,6 +64,12 @@ class WatchlistController extends GetxController {
 
   /// ➕ ADD TO WATCHLIST
   Future<void> addToWatchlist(String contentId) async {
+    final authController = Get.find<AuthController>();
+    if (!authController.isLoggedIn.value) {
+      Get.to(() => const SignInPage());
+      return;
+    }
+
     try {
       isLoading.value = true;
       final response = await repo.addToWatchlist(contentId);
@@ -99,6 +106,7 @@ class WatchlistController extends GetxController {
         CustomSnackbar.show(
           title: "Removed",
           message: "Removed from watchlist",
+          isSuccess: true,
         );
       }
     } catch (e) {
@@ -115,6 +123,8 @@ class WatchlistController extends GetxController {
 
   /// 🔄 TOGGLE WATCHLIST
   Future<void> toggleWatchlist(String contentId) async {
+    if (isLoading.value) return;
+
     if (isInWatchlist(contentId)) {
       try {
         final watchlistItem = watchlist.firstWhere((item) {
@@ -131,6 +141,8 @@ class WatchlistController extends GetxController {
         }
       } catch (e) {
         print("Error finding item to remove: $e");
+        // If not found in list but isInWatchlist was true, maybe refresh
+        await getWatchlist();
       }
     } else {
       await addToWatchlist(contentId);

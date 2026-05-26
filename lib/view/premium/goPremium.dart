@@ -18,283 +18,200 @@ class GoPremiumPage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: Obx(() {
-          if (controller.isLoading.value) {
-            return const Center(child: CircularProgressIndicator(color: AppColors.primary));
-          }
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: AppColors.white),
+          onPressed: () => Get.back(),
+        ),
+        title: const Text(
+          "Premium Plans",
+          style: TextStyle(color: AppColors.white, fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
+      ),
+      body: Obx(() {
+        if (controller.isLoading.value) {
+          return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+        }
 
-          return Column(
-            children: [
-              /// 🔹 Top Section
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 15),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    /// Back Icon
-                    IconButton(
-                      icon: const Icon(
-                        Icons.arrow_back_ios,
-                        color: AppColors.white,
-                      ),
-                      onPressed: () {
-                        if (Get.key.currentState?.canPop() ?? false) {
-                          Get.back();
-                        } else {
-                          Get.find<HomeController>().selectedIndex.value = 0;
-                        }
-                      },
-                    ),
-
-                    /// Header Text
-                    const Text(
-                      "Plans ",
-                      style: TextStyle(
-                        color: AppColors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-
-                    /// Empty space to balance the row
-                    const SizedBox(width: 48),
-                  ],
-                ),
-              ),
-
-              // const SizedBox(height: 20),
-              const SizedBox(height: 20),
-
-              /// 🔹 Common Features Card
-              Container(
-                margin: const EdgeInsets.symmetric(horizontal: 15),
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.25),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: AppColors.borderColor,
-                  ),
-                ),
+        return Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-
-                    Text(
-                      "All Premium Plans Include",
+                  children: [
+                    /// 🔹 Header Section with Icon
+                    const SizedBox(height: 20),
+                    const Icon(Icons.stars, color: Colors.amber, size: 60),
+                    const SizedBox(height: 10),
+                    const Text(
+                      "Unlock Premium Content",
                       style: TextStyle(
                         color: AppColors.white,
-                        fontSize: 18,
+                        fontSize: 22,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-
-                    SizedBox(height: 15),
-
-                    Row(
-                      children: [
-                        Icon(Icons.check_circle, color: Colors.green, size: 20),
-                        SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
-                            "Ad-Free Streaming Experience",
-                            style: TextStyle(
-                              color: AppColors.white,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ),
-                      ],
+                    const SizedBox(height: 5),
+                    const Text(
+                      "Choose a plan that works for you",
+                      style: TextStyle(color: AppColors.grey, fontSize: 14),
                     ),
+                    const SizedBox(height: 30),
 
-                    SizedBox(height: 12),
+                    /// 🔹 Common Features
+                    _buildFeaturesList(),
 
-                    Row(
-                      children: [
-                        Icon(Icons.check_circle, color: Colors.green, size: 20),
-                        SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
-                            "Unlimited Access to Premium Content",
-                            style: TextStyle(
-                              color: AppColors.white,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ),
-                      ],
+                    const SizedBox(height: 30),
+
+                    /// 🔹 Plans List
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 15),
+                      child: Obx(() {
+                        if (controller.plans.isEmpty) {
+                          return const Center(
+                            child: Text("No plans available", 
+                            style: TextStyle(color: Colors.white)));
+                        }
+                        return ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: controller.plans.length,
+                          itemBuilder: (context, index) {
+                            final plan = controller.plans[index];
+                            return Obx(() => ExpandablePlanCard(
+                              title: plan.name,
+                              price: "₹${plan.price}",
+                              duration: "/ ${plan.duration} Days",
+                              features: plan.features,
+                              isHighlighted: controller.selectedPlanIndex.value == index,
+                              onSelect: () => controller.selectPlan(index),
+                              onBuy: () {
+                                controller.selectPlan(index);
+                                if (!controller.isUserLoggedIn.value) {
+                                  Get.to(() => const SignInPage());
+                                } else if (controller.hasActiveSubscription) {
+                                  CustomSnackbar.show(title: "Info", message: "Already Purchased");
+                                } else {
+                                  controller.subscribeToPlan(plan.id!);
+                                }
+                              },
+                            ));
+                          },
+                        );
+                      }),
                     ),
-
-                    SizedBox(height: 12),
-
-                    Row(
-                      children: [
-                        Icon(Icons.check_circle, color: Colors.green, size: 20),
-                        SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
-                            "Watch on Multiple Devices",
-                            style: TextStyle(
-                              color: AppColors.white,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    SizedBox(height: 12),
-
-                    Row(
-                      children: [
-                        Icon(Icons.check_circle, color: Colors.green, size: 20),
-                        SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
-                            "HD & Full HD Streaming Quality",
-                            style: TextStyle(
-                              color: AppColors.white,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                    const SizedBox(height: 20),
                   ],
                 ),
               ),
+            ),
 
-              const SizedBox(height: 25),
+            /// 🔹 Bottom Actions
+            _buildBottomActions(controller),
+          ],
+        );
+      }),
+    );
+  }
 
-              /// 🔹 Upgrade Text
-              const Text(
-                "Upgrade Your Plan for More Benefits",
-                style: TextStyle(
-                    color: AppColors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
-              ),
-
-              const SizedBox(height: 20),
-
-              /// 🔹 Plans List
-              Expanded(
-                child: Obx(() {
-                  if (controller.plans.isEmpty) {
-                    return const Center(child: Text("No plans available", style: TextStyle(color: Colors.white)));
-                  }
-                  return ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 15),
-                    itemCount: controller.plans.length,
-                    itemBuilder: (context, index) {
-                      final plan = controller.plans[index];
-                      return Obx(() => ExpandablePlanCard(
-                        title: plan.name,
-                        price: "₹${plan.price}",
-                        duration: "/ ${plan.duration} Days",
-                        features: plan.features,
-                        isHighlighted: controller.selectedPlanIndex.value == index,
-                        onSelect: () => controller.selectPlan(index),
-                        onBuy: () {
-                          controller.selectPlan(index);
-                          if (!controller.isUserLoggedIn.value) {
-                            Get.to(() => const SignInPage());
-                          } else if (controller.hasActiveSubscription) {
-                            CustomSnackbar.show(title: "Info", message: "Already Purchased");
-                          } else {
-                            controller.subscribeToPlan(plan.id!);
-                          }
-                        },
-                      ));
-                    },
-                  );
-                }),
-              ),
-
-              /// 🔹 Bottom 50%-50%
-              Row(
-                children: [
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () {
-                        if (controller.isUserLoggedIn.value) {
-                          Get.dialog(const ApplyPromoPopup());
-                        } else {
-                          _showSignInPopup();
-                        }
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 15),
-                        alignment: Alignment.center,
-                        decoration: const BoxDecoration(
-                          border: Border(
-                            top: BorderSide(color: AppColors.borderColor),
-                            right: BorderSide(color: AppColors.borderColor),
-                          ),
-                        ),
-                        child: const Text("Apply Promo Code",
-                            style: TextStyle(color: AppColors.white)),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () {
-                        if (controller.isUserLoggedIn.value) {
-                          Get.to(() => RedeemVoucherPage());
-                        } else {
-                          _showSignInPopup();
-                        }
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 15),
-                        alignment: Alignment.center,
-                        decoration: const BoxDecoration(
-                          border: Border(
-                            top: BorderSide(color: AppColors.borderColor),
-                          ),
-                        ),
-                        child: const Text("Apply Prepaid Pin",
-                            style: TextStyle(color: AppColors.white)),
-                      ),
-                    ),
-                  ),
-                ],
-              )
-            ],
-          );
-        }),
+  Widget _buildFeaturesList() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 15),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.grey[900],
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white10),
+      ),
+      child: Column(
+        children: [
+          _featureRow(Icons.hd_outlined, "Full HD Streaming Quality"),
+          _featureRow(Icons.ad_units_outlined, "Ad-Free Experience"),
+          _featureRow(Icons.download_for_offline_outlined, "Offline Downloads Available"),
+          _featureRow(Icons.devices_other, "Watch on Mobile, TV & Web"),
+        ],
       ),
     );
   }
 
-  /// 🔹 Sign In Required Popup
+  Widget _featureRow(IconData icon, String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+          Icon(icon, color: AppColors.primary, size: 22),
+          const SizedBox(width: 15),
+          Text(text, style: const TextStyle(color: Colors.white, fontSize: 14)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBottomActions(PremiumController controller) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 10),
+      decoration: BoxDecoration(
+        color: Colors.grey[900],
+        border: const Border(top: BorderSide(color: Colors.white10)),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextButton.icon(
+              onPressed: () {
+                if (controller.isUserLoggedIn.value) {
+                  Get.dialog(const ApplyPromoPopup());
+                } else {
+                  _showSignInPopup();
+                }
+              },
+              icon: const Icon(Icons.local_offer_outlined, color: AppColors.primary),
+              label: const Text("Promo Code", style: TextStyle(color: Colors.white)),
+            ),
+          ),
+          Container(height: 30, width: 1, color: Colors.white10),
+          Expanded(
+            child: TextButton.icon(
+              onPressed: () {
+                if (controller.isUserLoggedIn.value) {
+                  Get.to(() => RedeemVoucherPage());
+                } else {
+                  _showSignInPopup();
+                }
+              },
+              icon: const Icon(Icons.confirmation_num_outlined, color: AppColors.primary),
+              label: const Text("Redeem Pin", style: TextStyle(color: Colors.white)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showSignInPopup() {
     Get.dialog(
       AlertDialog(
-        backgroundColor: Colors.black,
-        title: const Text("Sign In Required", style: TextStyle(color: AppColors.white)),
+        backgroundColor: Colors.grey[900],
+        title: const Text("Sign In Required", style: TextStyle(color: Colors.white)),
         content: const Text(
           "Please sign in to complete the payment.",
-          style: TextStyle(color: AppColors.white),
+          style: TextStyle(color: Colors.white70),
         ),
         actions: [
           TextButton(
             onPressed: () => Get.back(),
-            child: const Text("Cancel", style: TextStyle(color: AppColors.grey)),
+            child: const Text("Cancel", style: TextStyle(color: Colors.white)),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.buttonColor),
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
             onPressed: () {
               Get.back();
               Get.to(() => const SignInPage());
             },
-            child: const Text(
-              "Sign In",
-              style: TextStyle(color: AppColors.white),
-            ),
+            child: const Text("Sign In", style: TextStyle(color: Colors.white)),
           ),
         ],
       ),

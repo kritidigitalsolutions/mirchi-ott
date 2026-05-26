@@ -27,6 +27,10 @@ class ContentController extends GetxController {
     try {
       isLoading.value = true;
       final content = await _repository.getAllContent();
+      
+      // Sort content by priority (lower number = higher priority, e.g. 1 is top)
+      content.sort((a, b) => (a.priority ?? 999).compareTo(b.priority ?? 999));
+      
       allContent.assignAll(content);
       
       // Filter trending for slider

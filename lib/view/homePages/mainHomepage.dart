@@ -203,14 +203,18 @@ class MainHomePage extends StatelessWidget {
 
         /// SCROLL
         Expanded(
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // const SizedBox(height: 15),
+          child: Obx(() {
+            if (contentController.isLoading.value) {
+              return const Center(
+                child: CircularProgressIndicator(color: AppColors.primary),
+              );
+            }
 
-                Obx(
-                  () => AutoSlider(
+            return SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AutoSlider(
                     content: contentController.allContent
                         .where(
                           (c) =>
@@ -220,84 +224,82 @@ class MainHomePage extends StatelessWidget {
                         .toList(),
                     isSignedIn: authController.isLoggedIn.value,
                   ),
-                ),
 
-                const SizedBox(height: 25),
+                  const SizedBox(height: 25),
 
-                /// WEB SERIES
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16),
-                  child: Text(
-                    "Web Series",
-                    style: TextStyle(
-                      color: AppColors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
+                  /// WEB SERIES
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16),
+                    child: Text(
+                      "Web Series",
+                      style: TextStyle(
+                        color: AppColors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
-                ),
 
-                const SizedBox(height: 15),
+                  const SizedBox(height: 15),
 
-                Obx(
-                  () {
-                    final seriesContent = contentController.allContent
-                        .where(
-                          (c) =>
-                              c.contentType == 'series' &&
-                              c.isComingSoon == false,
-                        )
-                        .toList();
+                  Obx(
+                    () {
+                      final seriesContent = contentController.allContent
+                          .where(
+                            (c) =>
+                                c.contentType == 'series' &&
+                                c.isComingSoon == false,
+                          )
+                          .toList();
 
-                    return SizedBox(
-                      height: 170,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: seriesContent.length,
-                        itemBuilder: (context, index) {
-                          final item = seriesContent[index];
+                      return SizedBox(
+                        height: 170,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: seriesContent.length,
+                          itemBuilder: (context, index) {
+                            final item = seriesContent[index];
 
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 10),
-                            child: GestureDetector(
-                              onTap: () {
-                                if (!authController.isLoggedIn.value) {
-                                  Get.to(() => const SignInPage());
-                                } else {
-                                  Get.to(
-                                    () => DramaDetailsPage(
-                                      isSignedIn: authController.isLoggedIn.value,
-                                      content: item,
-                                    ),
-                                  );
-                                }
-                              },
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(15),
-                                child: Image.network(
-                                  item.poster,
-                                  width: 130,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) =>
-                                      Image.asset(
-                                    AppImages.farzi,
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 10),
+                              child: GestureDetector(
+                                onTap: () {
+                                  if (!authController.isLoggedIn.value) {
+                                    Get.to(() => const SignInPage());
+                                  } else {
+                                    Get.to(
+                                      () => DramaDetailsPage(
+                                        isSignedIn: authController.isLoggedIn.value,
+                                        content: item,
+                                      ),
+                                    );
+                                  }
+                                },
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(15),
+                                  child: Image.network(
+                                    item.poster,
                                     width: 130,
                                     fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) =>
+                                        Image.asset(
+                                      AppImages.farzi,
+                                      width: 130,
+                                      fit: BoxFit.cover,
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                          );
-                        },
-                      ),
-                    );
-                  },
-                ),
+                            );
+                          },
+                        ),
+                      );
+                    },
+                  ),
 
-                const SizedBox(height: 10),
+                  const SizedBox(height: 10),
 
-                Obx(
-                  () => Top10List(
+                  Top10List(
                     content: contentController.allContent
                         .where(
                           (c) =>
@@ -307,12 +309,10 @@ class MainHomePage extends StatelessWidget {
                         .toList(),
                     isSignedIn: authController.isLoggedIn.value,
                   ),
-                ),
 
-                const SizedBox(height: 10),
+                  const SizedBox(height: 10),
 
-                Obx(
-                  () => HomeSliderSection(
+                  HomeSliderSection(
                     title: "Movies",
                     content: contentController.allContent
                         .where(
@@ -323,26 +323,12 @@ class MainHomePage extends StatelessWidget {
                         .toList(),
                     isSignedIn: authController.isLoggedIn.value,
                   ),
-                ),
 
-                // const SizedBox(height: 10),
-
-                // Obx(
-                //   () => ComingSoonSection(
-                //     content: contentController.allContent
-                //         .where((c) => c.isComingSoon == true)
-                //         .toList(),
-                //     isSignedIn: authController.isLoggedIn.value,
-                //   ),
-                // ),
-                // const SizedBox(height: 30),
-                //
-                // _buildFooter(),
-
-                const SizedBox(height: 100),
-              ],
-            ),
-          ),
+                  const SizedBox(height: 100),
+                ],
+              ),
+            );
+          }),
         ),
       ],
     );

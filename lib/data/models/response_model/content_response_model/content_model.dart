@@ -21,6 +21,7 @@ class ContentModel {
   final bool isComingSoon;
   final bool isTrending;
   final String? releaseDate;
+  final int? priority;
   
   // Series/Episode specific fields
   final int? totalSeasons;
@@ -50,6 +51,7 @@ class ContentModel {
     this.isComingSoon = false,
     this.isTrending = false,
     this.releaseDate,
+    this.priority,
     this.totalSeasons,
     this.totalEpisodes,
     this.seriesId,
@@ -98,6 +100,7 @@ class ContentModel {
       isComingSoon: json['isComingSoon'] ?? false,
       isTrending: json['isTrending'] ?? false,
       releaseDate: json['releaseDate'],
+      priority: json['priority'],
       totalSeasons: json['totalSeasons'],
       totalEpisodes: json['totalEpisodes'],
       seriesId: json['seriesId'],
@@ -128,6 +131,7 @@ class ContentModel {
       'isComingSoon': isComingSoon,
       'isTrending': isTrending,
       'releaseDate': releaseDate,
+      'priority': priority,
       'totalSeasons': totalSeasons,
       'totalEpisodes': totalEpisodes,
       'seriesId': seriesId,

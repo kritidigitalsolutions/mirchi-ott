@@ -101,14 +101,16 @@ class DownloadsPage extends StatelessWidget {
 
                 /// 📄 TITLE + DETAILS
                 title: Text(
-                  item.title,
+                  item.contentType == 'episode' ? "${item.title}" : item.title,
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 subtitle: Text(
-                  "${item.releaseYear} • ${item.language}",
+                  item.contentType == 'episode' 
+                    ? "S${item.seasonNumber} E${item.episodeNumber} • ${item.duration ?? ''}"
+                    : "${item.releaseYear} • ${item.language}",
                   style: const TextStyle(
                     color: Colors.white54,
                     fontSize: 12,
@@ -149,18 +151,26 @@ class DownloadsPage extends StatelessWidget {
                         color: Colors.redAccent,
                       ),
                       onPressed: () {
-                        Get.defaultDialog(
-                          title: "Delete Download",
-                          middleText:
-                          "Are you sure you want to delete this download?",
-                          textConfirm: "Delete",
-                          textCancel: "Cancel",
-                          confirmTextColor: Colors.white,
-                          buttonColor: AppColors.primary,
-                          onConfirm: () {
-                            downloadController.removeDownload(item.id);
-                            Get.back();
-                          },
+                        Get.dialog(
+                          AlertDialog(
+                            backgroundColor: Colors.grey[900],
+                            title: const Text("Delete Download", style: TextStyle(color: Colors.white)),
+                            content: const Text("Are you sure you want to delete this download?", style: TextStyle(color: Colors.white70)),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Get.back(),
+                                child: const Text("Cancel", style: TextStyle(color: Colors.white)),
+                              ),
+                              ElevatedButton(
+                                style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+                                onPressed: () {
+                                  Get.back(); // Close dialog first
+                                  downloadController.removeDownload(item.id);
+                                },
+                                child: const Text("Delete", style: TextStyle(color: Colors.white)),
+                              ),
+                            ],
+                          ),
                         );
                       },
                     ),

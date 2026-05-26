@@ -43,6 +43,14 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
   @override
   void initState() {
     super.initState();
+    // Fetch interaction status (Like/Dislike)
+    interactionController.fetchStatus(widget.content.id);
+    
+    // Refresh watchlist if needed
+    if (authController.isLoggedIn.value && watchlistController.watchlist.isEmpty) {
+      watchlistController.getWatchlist();
+    }
+
     if (widget.content.contentType == 'series') {
       contentController.fetchEpisodes(widget.content.id);
     }
@@ -192,7 +200,7 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
                     onPressed: () {
                       if (!userLoggedIn) {
                         Get.to(() => const SignInPage());
-                      } else if (isPurchased) {
+                      } else if (isPurchased || !widget.content.isPremium) {
                         if (isAlreadyDownloaded) {
                           CustomSnackbar.show(
                               title: "Info", message: "Already downloaded");
@@ -253,52 +261,60 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
             /// ⭐ Action Buttons Row
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Obx(() => Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Column(
-                    children: [
-                      GestureDetector(
-                        onTap: watchlistController.isLoading.value
-                            ? null
-                            : () => watchlistController.toggleWatchlist(widget.content.id.toString()),
-                        child: Icon(
-                          watchlistController.isInWatchlist(widget.content.id.toString())
-                              ? Icons.bookmark
-                              : Icons.bookmark_border,
-                          color: Colors.white,
-                          size: 30,
-                        ),
+              child: Obx(() {
+                final bool isWatchlistLoading = watchlistController.isLoading.value;
+                final String contentId = widget.content.id;
+                final bool isInteractionLoading = interactionController.isLoading(contentId);
+
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    // Watchlist Button
+                    _actionButton(
+                      icon: watchlistController.isInWatchlist(contentId)
+                          ? Icons.bookmark
+                          : Icons.bookmark_border,
+                      label: "Watchlist",
+                      isLoading: isWatchlistLoading,
+                      onTap: () => watchlistController.toggleWatchlist(contentId),
+                    ),
+
+                    // Like Button
+                    _actionButton(
+                      icon: interactionController.isLiked(contentId) ? Icons.thumb_up : Icons.thumb_up_outlined,
+                      label: "Like",
+                      isLoading: isInteractionLoading,
+                      onTap: () => interactionController.toggleLike(
+                        contentId: contentId,
+                        contentType: widget.content.contentType,
                       ),
-                      const SizedBox(height: 5),
-                      const Text("Watchlist", style: TextStyle(color: Colors.white, fontSize: 12)),
-                    ],
-                  ),
+                    ),
 
-                  _actionButton(
-                    icon: interactionController.isLiked.value ? Icons.thumb_up : Icons.thumb_up_outlined,
-                    label: "Like",
-                    onTap: () => interactionController.toggleLike(contentId: widget.content.id, contentType: widget.content.contentType),
-                  ),
+                    // Dislike Button
+                    _actionButton(
+                      icon: interactionController.isDisliked(contentId) ? Icons.thumb_down : Icons.thumb_down_outlined,
+                      label: "Dislike",
+                      isLoading: isInteractionLoading,
+                      onTap: () => interactionController.toggleDislike(
+                        contentId: contentId,
+                        contentType: widget.content.contentType,
+                      ),
+                    ),
 
-                  _actionButton(
-                    icon: interactionController.isDisliked.value ? Icons.thumb_down : Icons.thumb_down_outlined,
-                    label: "Dislike",
-                    onTap: () => interactionController.toggleDislike(contentId: widget.content.id, contentType: widget.content.contentType),
-                  ),
-
-                  _actionButton(
-                    icon: Icons.share,
-                    label: "Share",
-                    onTap: () {
-                      ShareService.shareContent(
-                        title: widget.content.title,
-                        imageUrl: widget.content.poster,
-                      );
-                    },
-                  ),
-                ],
-              )),
+                    // Share Button
+                    _actionButton(
+                      icon: Icons.share,
+                      label: "Share",
+                      onTap: () {
+                        ShareService.shareContent(
+                          title: widget.content.title,
+                          imageUrl: widget.content.poster,
+                        );
+                      },
+                    ),
+                  ],
+                );
+              }),
             ),
 
             const SizedBox(height: 25),
@@ -370,38 +386,91 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
                   itemCount: episodes.length,
                   itemBuilder: (context, index) {
                     final episode = episodes[index];
-                    return ListTile(
-                      onTap: () {
-                        final userLoggedIn = authController.isLoggedIn.value;
-                        final sub = premiumController.subscriptionData.value;
-                        final bool isPurchased = sub != null && sub['status'] == 'active';
+                    return Obx(() {
+                      final bool isAlreadyDownloaded = downloadController.isDownloaded(episode.id);
+                      final bool downloading = downloadController.isDownloading[episode.id] ?? false;
+                      final double progress = downloadController.downloadProgress[episode.id] ?? 0;
 
-                        if (!userLoggedIn) {
-                          Get.to(() => const SignInPage());
-                        } else if (isPurchased || !episode.isPremium) {
-                          if (episode.videoUrl != null && episode.videoUrl!.isNotEmpty) {
-                            Get.to(() => AdvancedVideoPlayer(url: episode.videoUrl!, title: episode.title));
+                      return ListTile(
+                        onTap: () {
+                          final userLoggedIn = authController.isLoggedIn.value;
+                          final sub = premiumController.subscriptionData.value;
+                          final bool isPurchased = sub != null && sub['status'] == 'active';
+
+                          if (!userLoggedIn) {
+                            Get.to(() => const SignInPage());
+                          } else if (isPurchased || !episode.isPremium) {
+                            if (episode.videoUrl != null && episode.videoUrl!.isNotEmpty) {
+                              Get.to(() => AdvancedVideoPlayer(url: episode.videoUrl!, title: episode.title));
+                            } else {
+                              CustomSnackbar.show(title: "Error", message: "Video URL not found", isError: true);
+                            }
                           } else {
-                            CustomSnackbar.show(title: "Error", message: "Video URL not found", isError: true);
+                            Get.to(() => const GoPremiumPage());
                           }
-                        } else {
-                          Get.to(() => const GoPremiumPage());
-                        }
-                      },
-                      leading: ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: Image.network(
-                          episode.poster,
-                          width: 100,
-                          height: 60,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) => Image.asset(AppImages.farzi, width: 100, height: 60, fit: BoxFit.cover),
+                        },
+                        leading: ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.network(
+                            episode.poster,
+                            width: 100,
+                            height: 60,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) =>
+                                Image.asset(AppImages.farzi, width: 100, height: 60, fit: BoxFit.cover),
+                          ),
                         ),
-                      ),
-                      title: Text(episode.title, style: const TextStyle(color: Colors.white, fontSize: 16)),
-                      subtitle: Text(episode.duration ?? "", style: const TextStyle(color: Colors.white54, fontSize: 12)),
-                      trailing: const Icon(Icons.play_circle_outline, color: Colors.white),
-                    );
+                        title: Text(episode.title,
+                            style: const TextStyle(color: Colors.white, fontSize: 16),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis),
+                        subtitle: Text(episode.duration ?? "",
+                            style: const TextStyle(color: Colors.white54, fontSize: 12)),
+                        trailing: SizedBox(
+                          width: 80,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              IconButton(
+                                icon: downloading
+                                    ? SizedBox(
+                                        height: 20,
+                                        width: 20,
+                                        child: CircularProgressIndicator(
+                                          value: progress,
+                                          color: Colors.white,
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                    : Icon(
+                                        isAlreadyDownloaded ? Icons.check_circle : Icons.download_for_offline,
+                                        color: isAlreadyDownloaded ? Colors.green : Colors.white,
+                                        size: 24,
+                                      ),
+                                onPressed: () {
+                                  final userLoggedIn = authController.isLoggedIn.value;
+                                  final sub = premiumController.subscriptionData.value;
+                                  final bool isPurchased = sub != null && sub['status'] == 'active';
+
+                                  if (!userLoggedIn) {
+                                    Get.to(() => const SignInPage());
+                                  } else if (isPurchased || !episode.isPremium) {
+                                    if (isAlreadyDownloaded) {
+                                      CustomSnackbar.show(title: "Info", message: "Already downloaded");
+                                    } else {
+                                      downloadController.downloadVideo(episode);
+                                    }
+                                  } else {
+                                    _showSubscriptionDialog(context);
+                                  }
+                                },
+                              ),
+                              const Icon(Icons.play_circle_outline, color: Colors.white),
+                            ],
+                          ),
+                        ),
+                      );
+                    });
                   },
                 );
               }),
@@ -508,12 +577,26 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
     }
   }
 
-  Widget _actionButton({required IconData icon, required String label, required VoidCallback onTap}) {
+  Widget _actionButton({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+    bool isLoading = false,
+  }) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: isLoading ? null : onTap,
       child: Column(
         children: [
-          Icon(icon, color: Colors.white),
+          isLoading
+              ? const SizedBox(
+                  height: 24,
+                  width: 24,
+                  child: CircularProgressIndicator(
+                    color: Colors.white,
+                    strokeWidth: 2,
+                  ),
+                )
+              : Icon(icon, color: Colors.white, size: 26),
           const SizedBox(height: 5),
           Text(label, style: const TextStyle(color: Colors.white70, fontSize: 12)),
         ],

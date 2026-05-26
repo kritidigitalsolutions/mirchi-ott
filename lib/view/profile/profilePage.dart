@@ -13,7 +13,7 @@ import '../../app/theme/app_colors.dart';
 import '../../view_model/auth_controller/auth_controller.dart';
 import '../auth/signInPage.dart';
 import '../premium/goPremium.dart';
-import 'account_setting.dart';
+import 'purchased_plans_page.dart';
 import 'Rate_your_app.dart';
 import 'help_page.dart';
 import 'refund_policy_page.dart';
@@ -135,38 +135,56 @@ class ProfilePage extends StatelessWidget {
                     const Divider(color: Colors.grey, height: 1),
 
                     // ---------- DYNAMIC PLAN SECTION ----------
-                    Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Obx(() {
-                        final sub = premiumController.subscriptionData.value;
-                        final bool hasActiveSub = sub != null && sub['status'] == 'active';
+                    InkWell(
+                      onTap: () => Get.to(() => const PurchasedPlansPage()),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Obx(() {
+                          final sub = premiumController.subscriptionData.value;
+                          final bool hasActiveSub = sub != null && sub['status'] == 'active';
 
-                        return Row(
-                          children: [
-                            Text(
-                              hasActiveSub 
-                                  ? (sub['plan']?['name'] ?? "Active Plan") 
-                                  : "No Active Plans",
-                              style: const TextStyle(
-                                  color: AppColors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                            const Spacer(),
-                            if (!hasActiveSub)
-                              ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.buttonColor,
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                ),
-                                onPressed: () => Get.to(() => const GoPremiumPage()),
-                                child: const Text("SUBSCRIBE", style: TextStyle(color: AppColors.white, fontSize: 12)),
-                              )
-                            else
-                              const Icon(Icons.verified, color: Colors.green, size: 24),
-                          ],
-                        );
-                      }),
+                          return Row(
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    "My Plan",
+                                    style: TextStyle(
+                                        color: AppColors.grey,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w500),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    hasActiveSub 
+                                        ? (sub['plan']?['name'] ?? "Active Plan") 
+                                        : "No Active Plans",
+                                    style: const TextStyle(
+                                        color: AppColors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ],
+                              ),
+                              const Spacer(),
+                              if (!hasActiveSub)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.buttonColor,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: const Text("SUBSCRIBE", style: TextStyle(color: AppColors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                                )
+                              else
+                                const Icon(Icons.verified, color: Colors.green, size: 24),
+                              const SizedBox(width: 8),
+                              const Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 14),
+                            ],
+                          );
+                        }),
+                      ),
                     ),
                   ],
                 ),
@@ -175,7 +193,6 @@ class ProfilePage extends StatelessWidget {
 
             const SizedBox(height: 10),
 
-            buildMenuItem(context, Icons.person_outline, "My Account", const AccountSettingsPage()),
             buildMenuItem(context, Icons.bookmark_border, "Watchlist", const WatchlistPage()),
             buildMenuItem(context, Icons.download_for_offline_outlined, "Downloads", const DownloadsPage()),
             buildMenuItem(context, Icons.settings_outlined, "Settings", const SettingsPage()),
