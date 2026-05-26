@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "930297722663",
+    "project_number": "399081225701",
     "project_id": "mirchi-ott",
     "storage_bucket": "mirchi-ott.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:930297722663:android:ee053a9147160ca4e51b02",
+        "mobilesdk_app_id": "1:399081225701:android:9376a991f4b7765dde430c",
         "android_client_info": {
           "package_name": "com.mirchi_ott.app"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBzFeViX8VMVO_p4xsvdOT__d2TEkHz1O4"
+          "current_key": "AIzaSyAczpgbrw_KXK3_aoVBCrEInKyrN-A_I5s"
         }
       ],
       "services": {

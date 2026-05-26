@@ -139,7 +139,7 @@ class NotificationService extends GetxController {
       final BaseApiService apiService = Get.find<BaseApiService>();
       final response = await apiService.postApi(
         AppConstants.updateFcmToken,
-        {'fcmToken': _currentToken},
+        {'token': _currentToken},
       );
       print("✅ FCM Token Synced Successfully: $response");
     } catch (e) {

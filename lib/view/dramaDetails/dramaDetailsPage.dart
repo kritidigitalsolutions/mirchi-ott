@@ -82,7 +82,7 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
                   top: 40,
                   left: 10,
                   child: IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.white),
+                    icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
                     onPressed: () => Get.back(),
                   ),
                 ),

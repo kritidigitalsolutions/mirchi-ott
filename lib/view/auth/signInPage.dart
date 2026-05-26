@@ -43,8 +43,12 @@ class _SignInPageState extends State<SignInPage> {
           leading: IconButton(
             icon: const Icon(Icons.arrow_back_ios, color: AppColors.white),
             onPressed: () {
-              FocusManager.instance.primaryFocus?.unfocus();
-              Get.back();
+              if (isOtpMode.value) {
+                isOtpMode.value = false;
+              } else {
+                FocusManager.instance.primaryFocus?.unfocus();
+                Get.back();
+              }
             },
           ),
         ),

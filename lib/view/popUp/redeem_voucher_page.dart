@@ -49,13 +49,13 @@ class _RedeemVoucherPageState extends State<RedeemVoucherPage> {
 
                 /// 🔹 Logo
                 Image.asset(
-                  AppImages.logo,
-                  height: 80,
-                  width: 80,
+                  AppImages.logo1,
+                  height: 200,
+                  width: 200,
                   fit: BoxFit.contain,
                 ),
 
-                const SizedBox(height: 20),
+                // const SizedBox(height: 20),
 
                 /// 🔹 Instruction Text
                 const Text(

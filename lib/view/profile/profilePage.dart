@@ -8,6 +8,7 @@ import 'package:mirchi_ott/view/profile/watchlist.dart';
 import 'package:mirchi_ott/view/navbar/downloads.dart';
 import 'package:mirchi_ott/view_model/primium_controller/premium_controller.dart';
 import 'package:mirchi_ott/utils/constants.dart';
+import 'package:mirchi_ott/view_model/home_controller/home_controller.dart';
 import '../../app/theme/app_colors.dart';
 import '../../view_model/auth_controller/auth_controller.dart';
 import '../auth/signInPage.dart';
@@ -29,6 +30,7 @@ class ProfilePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final AuthController authController = Get.find<AuthController>();
     final PremiumController premiumController = Get.put(PremiumController());
+    final HomeController homeController = Get.find<HomeController>();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (authController.userData.value == null) {
@@ -41,6 +43,18 @@ class ProfilePage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
+      appBar: AppBar(
+        backgroundColor: AppColors.background,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: AppColors.white),
+          onPressed: () {
+            homeController.selectedIndex.value = 1; // Go back to Home Tab
+          },
+        ),
+        title: const Text("Profile", style: TextStyle(color: AppColors.white)),
+        centerTitle: true,
+      ),
       body: SingleChildScrollView(
         child: Column(
           children: [

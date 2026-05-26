@@ -7,6 +7,8 @@ class ExpandablePlanCard extends StatefulWidget {
   final String duration;
   final List<String> features;
   final bool isHighlighted;
+  final VoidCallback? onBuy;
+  final VoidCallback? onSelect;
 
   const ExpandablePlanCard({
     Key? key,
@@ -15,6 +17,8 @@ class ExpandablePlanCard extends StatefulWidget {
     required this.duration,
     this.features = const [],
     this.isHighlighted = false,
+    this.onBuy,
+    this.onSelect,
   }) : super(key: key);
 
   @override
@@ -33,7 +37,7 @@ class _ExpandablePlanCardState extends State<ExpandablePlanCard> {
         borderRadius: BorderRadius.circular(16),
         border: widget.isHighlighted
             ? Border.all(color: AppColors.buttonColor, width: 2)
-            : null,
+            : Border.all(color: Colors.white12, width: 1),
         gradient: isExpanded
             ? LinearGradient(
           colors: [
@@ -52,10 +56,10 @@ class _ExpandablePlanCardState extends State<ExpandablePlanCard> {
           /// 🔥 Top Section
           InkWell(
             onTap: () {
-              setState(() {
-                isExpanded = !isExpanded;
-              });
+              if (widget.onSelect != null) widget.onSelect!();
+              if (widget.onBuy != null) widget.onBuy!();
             },
+            borderRadius: BorderRadius.circular(16),
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Row(
@@ -81,12 +85,30 @@ class _ExpandablePlanCardState extends State<ExpandablePlanCard> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(width: 6),
-                      Icon(
-                        isExpanded
-                            ? Icons.keyboard_arrow_up
-                            : Icons.keyboard_arrow_down,
-                        color: Colors.white,
+                      const SizedBox(width: 10),
+                      
+                      /// 🔽 Arrow Button for Expansion ONLY
+                      GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            isExpanded = !isExpanded;
+                          });
+                          if (widget.onSelect != null) widget.onSelect!();
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: const BoxDecoration(
+                            color: Colors.white10,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            isExpanded
+                                ? Icons.keyboard_arrow_up
+                                : Icons.keyboard_arrow_down,
+                            color: Colors.white,
+                            size: 24,
+                          ),
+                        ),
                       )
                     ],
                   )
@@ -98,22 +120,24 @@ class _ExpandablePlanCardState extends State<ExpandablePlanCard> {
           /// 🔥 Expanded Section
           if (isExpanded)
             Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
               child: Column(
                 children: [
+                  const Divider(color: Colors.white24),
+                  const SizedBox(height: 15),
 
                   /// Feature Row (Dynamic from API)
                   if (widget.features.isNotEmpty)
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      if (widget.features.length > 0) featureBox(Icons.lock, widget.features[0]),
+                      if (widget.features.isNotEmpty) featureBox(Icons.lock, widget.features[0]),
                       if (widget.features.length > 1) featureBox(Icons.block, widget.features[1]),
                       if (widget.features.length > 2) featureBox(Icons.sd, widget.features[2]),
                     ],
                   ),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 15),
 
                   /// Bullet Points (Rest of features if any)
                   if (widget.features.length > 3)
@@ -122,9 +146,6 @@ class _ExpandablePlanCardState extends State<ExpandablePlanCard> {
                       return bulletText(widget.features[index + 3]);
                     }),
                   ),
-
-                  const SizedBox(height: 20),
-
                 ],
               ),
             ),
@@ -145,12 +166,14 @@ class _ExpandablePlanCardState extends State<ExpandablePlanCard> {
         ),
         child: Column(
           children: [
-            Icon(icon, color: Colors.white),
+            Icon(icon, color: Colors.white, size: 20),
             const SizedBox(height: 6),
             Text(
               text,
-              style: const TextStyle(color: Colors.white, fontSize: 11),
+              style: const TextStyle(color: Colors.white, fontSize: 10),
               textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             )
           ],
         ),
@@ -170,10 +193,10 @@ class _ExpandablePlanCardState extends State<ExpandablePlanCard> {
           Padding(
             padding: const EdgeInsets.only(top: 6),
             child: Container(
-              width: 6,
-              height: 6,
+              width: 5,
+              height: 5,
               decoration: const BoxDecoration(
-                color: Colors.white,
+                color: Colors.white70,
                 shape: BoxShape.circle,
               ),
             ),
@@ -184,7 +207,7 @@ class _ExpandablePlanCardState extends State<ExpandablePlanCard> {
               text,
               style: const TextStyle(
                 color: Colors.white70,
-                fontSize: 13,
+                fontSize: 12,
               ),
             ),
           ),

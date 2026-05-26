@@ -190,24 +190,24 @@ class GoPremiumPage extends StatelessWidget {
                     itemCount: controller.plans.length,
                     itemBuilder: (context, index) {
                       final plan = controller.plans[index];
-                      return GestureDetector(
-                        onTap: () {
-                           if (!controller.isUserLoggedIn.value) {
-                              Get.to(() => const SignInPage());
-                           } else if (controller.hasActiveSubscription) {
-                              CustomSnackbar.show(title: "Info", message: "Already Purchased");
-                           } else {
-                              controller.subscribeToPlan(plan.id!);
-                           }
+                      return Obx(() => ExpandablePlanCard(
+                        title: plan.name,
+                        price: "₹${plan.price}",
+                        duration: "/ ${plan.duration} Days",
+                        features: plan.features,
+                        isHighlighted: controller.selectedPlanIndex.value == index,
+                        onSelect: () => controller.selectPlan(index),
+                        onBuy: () {
+                          controller.selectPlan(index);
+                          if (!controller.isUserLoggedIn.value) {
+                            Get.to(() => const SignInPage());
+                          } else if (controller.hasActiveSubscription) {
+                            CustomSnackbar.show(title: "Info", message: "Already Purchased");
+                          } else {
+                            controller.subscribeToPlan(plan.id!);
+                          }
                         },
-                        child: ExpandablePlanCard(
-                          title: plan.name,
-                          price: "₹${plan.price}",
-                          duration: "/ ${plan.duration} Days",
-                          features: plan.features,
-                          isHighlighted: index == 0,
-                        ),
-                      );
+                      ));
                     },
                   );
                 }),

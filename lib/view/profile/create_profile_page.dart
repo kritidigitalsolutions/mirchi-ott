@@ -40,6 +40,10 @@ class _CreateProfilePageState extends State<CreateProfilePage> {
       appBar: AppBar(
         backgroundColor: AppColors.background,
         elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: AppColors.white),
+          onPressed: () => Get.back(),
+        ),
         title: const Text("Create Profile", style: TextStyle(color: AppColors.white)),
         centerTitle: true,
       ),

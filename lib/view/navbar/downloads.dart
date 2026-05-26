@@ -25,6 +25,10 @@ class DownloadsPage extends StatelessWidget {
         backgroundColor: Colors.black,
         elevation: 0,
         centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+          onPressed: () => Get.back(),
+        ),
         title: const Text(
           "Downloads",
           style: TextStyle(

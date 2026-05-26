@@ -36,45 +36,55 @@ class SearchPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              /// SEARCH BAR
+              /// SEARCH BAR WITH BACK ICON
               Padding(
-                padding: const EdgeInsets.all(15),
-                child: TextField(
-                  controller: controller.searchController,
-                  onChanged: (value) => controller.updateSearchQuery(value),
-                  style: const TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    hintText: "Search for movies, shows & more",
-                    hintStyle: const TextStyle(color: Colors.white54),
-                    filled: true,
-                    fillColor: Colors.grey[900],
-                    prefixIcon: const Icon(Icons.search, color: Colors.white),
-                    suffixIcon: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Obx(() => controller.searchQuery.value.isNotEmpty
-                            ? IconButton(
-                                icon: const Icon(Icons.clear, color: Colors.white),
-                                onPressed: controller.clearSearch,
-                              )
-                            : const SizedBox.shrink()),
-                        IconButton(
-                          icon: const Icon(Icons.mic, color: Colors.white),
-                          onPressed: () async {
-                            final result = await Get.to(() => const VoiceListeningPage());
-                            if (result != null && result is String) {
-                              controller.searchController.text = result;
-                              controller.updateSearchQuery(result);
-                            }
-                          },
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+                      onPressed: () => Get.back(),
+                    ),
+                    Expanded(
+                      child: TextField(
+                        controller: controller.searchController,
+                        onChanged: (value) => controller.updateSearchQuery(value),
+                        style: const TextStyle(color: Colors.white),
+                        decoration: InputDecoration(
+                          hintText: "Search for movies, shows & more",
+                          hintStyle: const TextStyle(color: Colors.white54),
+                          filled: true,
+                          fillColor: Colors.grey[900],
+                          prefixIcon: const Icon(Icons.search, color: Colors.white),
+                          suffixIcon: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Obx(() => controller.searchQuery.value.isNotEmpty
+                                  ? IconButton(
+                                      icon: const Icon(Icons.clear, color: Colors.white),
+                                      onPressed: controller.clearSearch,
+                                    )
+                                  : const SizedBox.shrink()),
+                              IconButton(
+                                icon: const Icon(Icons.mic, color: Colors.white),
+                                onPressed: () async {
+                                  final result = await Get.to(() => const VoiceListeningPage());
+                                  if (result != null && result is String) {
+                                    controller.searchController.text = result;
+                                    controller.updateSearchQuery(result);
+                                  }
+                                },
+                              ),
+                            ],
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: BorderSide.none,
+                          ),
                         ),
-                      ],
+                      ),
                     ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
+                  ],
                 ),
               ),
 

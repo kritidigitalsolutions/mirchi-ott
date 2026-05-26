@@ -80,7 +80,7 @@ class _OtpPageState extends State<OtpPage> {
         backgroundColor: AppColors.background,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.white),
+          icon: const Icon(Icons.arrow_back_ios, color: AppColors.white),
           onPressed: () => Get.back(),
         ),
       ),
