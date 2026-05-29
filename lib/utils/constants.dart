@@ -1,11 +1,12 @@
 class AppConstants {
-  static const String serverUrl = 'http://192.168.1.23:5000';
-  // static const String serverUrl = 'https://mirchi-sigma.vercel.app';
+  // static const String serverUrl = 'http://192.168.1.11:5000';
+  static const String serverUrl = 'https://mirchi-sigma.vercel.app';
   static const String baseUrl = '$serverUrl/api';
 
   // Auth Endpoints
   static const String sendOtp = '$baseUrl/auth/send-otp';
   static const String verifyOtp = '$baseUrl/auth/verify-otp';
+  static const String googleLogin = '$baseUrl/auth/google-login';
   /// user proflie
   static const String getProfile = '$baseUrl/user/profile';
   static const String createProfile = '$baseUrl/user/complete-profile';

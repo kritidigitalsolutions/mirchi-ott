@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:mirchi_ott/utils/app_images.dart';
+import '../../app/routes/app_routes.dart';
 import '../../app/theme/app_colors.dart';
 import '../../view_model/auth_controller/auth_controller.dart';
+import '../profile/create_profile_page.dart';
 import 'otpPage.dart';
 
 class SignInPage extends StatefulWidget {
@@ -19,7 +21,6 @@ class _SignInPageState extends State<SignInPage> {
 
   final isAgeConfirmed = false.obs;
   final showCodeField = false.obs;
-  final isOtpMode = false.obs;
 
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController codeController = TextEditingController();
@@ -43,12 +44,8 @@ class _SignInPageState extends State<SignInPage> {
           leading: IconButton(
             icon: const Icon(Icons.arrow_back_ios, color: AppColors.white),
             onPressed: () {
-              if (isOtpMode.value) {
-                isOtpMode.value = false;
-              } else {
-                FocusManager.instance.primaryFocus?.unfocus();
-                Get.back();
-              }
+              FocusManager.instance.primaryFocus?.unfocus();
+              Get.back();
             },
           ),
         ),
@@ -64,115 +61,134 @@ class _SignInPageState extends State<SignInPage> {
                   const SizedBox(height: 25),
                   const Text(
                     "Welcome",
-                    style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 30),
 
-                  Obx(() => !isOtpMode.value
-                      ? Column(
-                          children: [
-                            SizedBox(
-                              width: double.infinity,
-                              height: 55,
-                              child: ElevatedButton(
-                                onPressed: () => isOtpMode.value = true,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.buttonColor,
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                ),
-                                child: const Text("Login For Continue", style: TextStyle(fontSize: 16, color: Colors.white)),
-                              ),
+                  Column(
+                    children: [
+                      Column(
+                        children: [
+                          TextFormField(
+                            controller: phoneController,
+                            keyboardType: TextInputType.phone,
+                            style: const TextStyle(color: Colors.white),
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                              LengthLimitingTextInputFormatter(10),
+                            ],
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return "Phone is required";
+                              }
+                              if (value.length != 10) {
+                                return "Phone number must be 10 digits";
+                              }
+                              if (!RegExp(r'^[6789]').hasMatch(value)) {
+                                return "Number must start with 6, 7, 8, or 9";
+                              }
+                              return null;
+                            },
+                            decoration: InputDecoration(
+                              prefixText: "+91 ",
+                              prefixStyle: const TextStyle(color: Colors.white),
+                              hintText: "Phone Number",
+                              hintStyle: const TextStyle(color: Colors.white54),
+                              filled: true,
+                              fillColor: Colors.grey[900],
+                              border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide.none),
                             ),
-                          ],
-                        )
-                      : Column(
-                          children: [
-                            TextFormField(
-                              controller: phoneController,
-                              keyboardType: TextInputType.phone,
-                              style: const TextStyle(color: Colors.white),
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly,
-                                LengthLimitingTextInputFormatter(10),
-                              ],
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return "Phone is required";
-                                }
-                                if (value.length != 10) {
-                                  return "Phone number must be 10 digits";
-                                }
-                                if (!RegExp(r'^[6789]').hasMatch(value)) {
-                                  return "Number must start with 6, 7, 8, or 9";
-                                }
-                                return null;
-                              },
-                              decoration: InputDecoration(
-                                prefixText: "+91 ",
-                                prefixStyle: const TextStyle(color: Colors.white),
-                                hintText: "Phone Number",
-                                hintStyle: const TextStyle(color: Colors.white54),
-                                filled: true,
-                                fillColor: Colors.grey[900],
-                                border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    borderSide: BorderSide.none),
-                              ),
-                            ),
-                            const SizedBox(height: 20),
-                            
-                            /// AGE CHECKBOX
-                            _buildAgeCheckbox(),
-                            
-                            const SizedBox(height: 20),
-                            
-                            /// GET OTP BUTTON
-                            _buildGetOtpButton(),
+                          ),
+                          const SizedBox(height: 20),
 
-                            const SizedBox(height: 25),
-                            const Row(
-                              children: [
-                                Expanded(child: Divider(color: Colors.white24)),
-                                Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 10),
-                                  child: Text("OR", style: TextStyle(color: Colors.white54)),
-                                ),
-                                Expanded(child: Divider(color: Colors.white24)),
-                              ],
-                            ),
-                            const SizedBox(height: 25),
+                          /// AGE CHECKBOX
+                          _buildAgeCheckbox(),
 
-                            /// LOGIN WITH EMAIL (GOOGLE STYLE)
-                            SizedBox(
-                              width: double.infinity,
-                              height: 55,
-                              child: OutlinedButton.icon(
-                                onPressed: () {
-                                  _showEmailPicker();
-                                },
-                                icon: const Icon(
-                                  Icons.email,
-                                  color: Colors.white,
+                          const SizedBox(height: 20),
+
+                          /// GET OTP BUTTON
+                          _buildGetOtpButton(),
+                        ],
+                      ),
+                      const SizedBox(height: 25),
+                      const Row(
+                        children: [
+                          Expanded(child: Divider(color: Colors.white24)),
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 10),
+                            child: Text("OR",
+                                style: TextStyle(color: Colors.white54)),
+                          ),
+                          Expanded(child: Divider(color: Colors.white24)),
+                        ],
+                      ),
+                      const SizedBox(height: 25),
+
+                      /// LOGIN WITH GOOGLE
+                      SizedBox(
+                        width: double.infinity,
+                        height: 55,
+                        child: Obx(() => ElevatedButton(
+                              onPressed: authController.isGoogleLoading.value
+                                  ? null
+                                  : () async {
+                                      final response = await authController
+                                          .signInWithGoogle();
+                                      if (response != null) {
+                                        Get.offAllNamed(AppRoutes.navbar);
+                                      }
+                                    },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.buttonColor,
+                                disabledBackgroundColor:
+                                    AppColors.buttonColor.withOpacity(0.6),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
-                                label: const Text(
-                                  "Login with Email",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                style: OutlinedButton.styleFrom(
-                                  backgroundColor: AppColors.primary,
-                                  side: BorderSide.none,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
+                                elevation: 0,
                               ),
-                            ),
-                          ],
-                        )),
+                              child: authController.isGoogleLoading.value
+                                  ? const SizedBox(
+                                      height: 24,
+                                      width: 24,
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Image.network(
+                                          'https://auth.services.adobe.com/img/google_logo.svg',
+                                          height: 24,
+                                          errorBuilder:
+                                              (context, error, stackTrace) =>
+                                                  const Icon(Icons.g_mobiledata,
+                                                      color: Colors.white,
+                                                      size: 30),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        const Text(
+                                          "Continue with Google",
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                            )),
+                      ),
+                    ],
+                  ),
                   const SizedBox(height: 40),
                 ],
               ),

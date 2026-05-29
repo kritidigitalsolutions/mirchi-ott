@@ -35,6 +35,17 @@ class AuthRepository {
     }
   }
 
+  Future<VerifyOtpResponse?> googleLogin(String idToken) async {
+    try {
+      final response = await apiProvider.postApi(AppConstants.googleLogin, {
+        'idToken': idToken,
+      });
+      return VerifyOtpResponse.fromJson(response);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<dynamic> createProfile({
     required String phone,
     required String name,

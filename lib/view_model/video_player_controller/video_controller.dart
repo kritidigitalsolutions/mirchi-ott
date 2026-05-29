@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:video_player/video_player.dart';
 
@@ -8,6 +9,7 @@ class VideoController extends GetxController {
   var isInitialized = false.obs;
   var isPlaying = false.obs;
   var showControls = true.obs;
+  var isFullscreen = false.obs;
 
   var currentPosition = Duration.zero.obs;
   var totalDuration = Duration.zero.obs;
@@ -44,6 +46,24 @@ class VideoController extends GetxController {
     });
 
     _startHideTimer();
+  }
+
+  /// 📺 FULLSCREEN TOGGLE
+  void toggleFullscreen() {
+    isFullscreen.value = !isFullscreen.value;
+
+    if (isFullscreen.value) {
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.landscapeLeft,
+        DeviceOrientation.landscapeRight,
+      ]);
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    } else {
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+      ]);
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    }
   }
 
   /// ▶️ PLAY / PAUSE
@@ -103,6 +123,10 @@ class VideoController extends GetxController {
   void onClose() {
     _hideTimer?.cancel();
     videoPlayerController?.dispose();
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+    ]);
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     super.onClose();
   }
 }

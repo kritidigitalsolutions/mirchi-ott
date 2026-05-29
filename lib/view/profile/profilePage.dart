@@ -120,7 +120,9 @@ class ProfilePage extends StatelessWidget {
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    user?['phone'] ?? "No Phone",
+                                    (user?['email'] != null && user!['email'].toString().isNotEmpty)
+                                        ? user['email']
+                                        : (user?['phone'] ?? "No Contact Info"),
                                     style: const TextStyle(
                                         color: AppColors.grey, fontSize: 14),
                                   ),

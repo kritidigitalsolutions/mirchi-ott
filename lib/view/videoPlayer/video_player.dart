@@ -4,25 +4,33 @@ import 'package:video_player/video_player.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../view_model/video_player_controller/video_controller.dart';
 
-class AdvancedVideoPlayer extends StatelessWidget {
+class AdvancedVideoPlayer extends StatefulWidget {
   final String url;
   final String title;
 
-  AdvancedVideoPlayer({
+  const AdvancedVideoPlayer({
     super.key,
     required this.url,
     required this.title,
   });
 
-  final VideoController controller = Get.put(VideoController());
+  @override
+  State<AdvancedVideoPlayer> createState() => _AdvancedVideoPlayerState();
+}
 
+class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
+  final VideoController controller = Get.put(VideoController());
   final RxBool isLocked = false.obs;
   final RxString quality = "Auto".obs;
 
   @override
-  Widget build(BuildContext context) {
-    controller.initializeVideo(url);
+  void initState() {
+    super.initState();
+    controller.initializeVideo(widget.url);
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
       body: Obx(() {
@@ -98,7 +106,7 @@ class AdvancedVideoPlayer extends StatelessWidget {
               ),
               Expanded(
                 child: Text(
-                  title,
+                  widget.title,
                   style: const TextStyle(
                       color: Colors.white),
                   overflow: TextOverflow.ellipsis,
@@ -108,7 +116,7 @@ class AdvancedVideoPlayer extends StatelessWidget {
                 icon: const Icon(Icons.share,
                     color: Colors.white),
                 onPressed: () {
-                  Share.share(url);
+                  Share.share(widget.url);
                 },
               ),
             ],
@@ -178,6 +186,17 @@ class AdvancedVideoPlayer extends StatelessWidget {
                         color: Colors.white),
                     onPressed: () =>
                         _showQualityDialog(context),
+                  ),
+
+                  /// 📺 FULLSCREEN
+                  IconButton(
+                    icon: Icon(
+                      controller.isFullscreen.value
+                          ? Icons.fullscreen_exit
+                          : Icons.fullscreen,
+                      color: Colors.white,
+                    ),
+                    onPressed: controller.toggleFullscreen,
                   ),
                 ],
               )),

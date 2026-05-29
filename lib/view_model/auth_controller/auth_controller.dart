@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import '../../data/repositories/auth_repository.dart';
 import '../../data/network/api_network_service.dart';
 import '../../data/network/base_api_service.dart';
@@ -14,6 +15,7 @@ class AuthController extends GetxController {
   late AuthRepository repository;
 
   var isLoading = false.obs;
+  var isGoogleLoading = false.obs;
   var isLoggedIn = false.obs;
   final storage = GetStorage();
   var userData = Rxn<Map<String, dynamic>>();
@@ -129,6 +131,61 @@ class AuthController extends GetxController {
       return null;
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  Future<VerifyOtpResponse?> signInWithGoogle() async {
+    isGoogleLoading.value = true;
+    try {
+      final GoogleSignIn googleSignIn = GoogleSignIn(
+        serverClientId: '399081225701-gir0j3n161vkhk0dlrlkf9qccgv7e0gj.apps.googleusercontent.com',
+      );
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+      
+      if (googleUser == null) {
+        isGoogleLoading.value = false;
+        return null;
+      }
+
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final String? idToken = googleAuth.idToken;
+
+      if (idToken == null) {
+        CustomSnackbar.show(
+          title: 'Error',
+          message: 'Failed to get ID Token from Google',
+          isError: true,
+        );
+        return null;
+      }
+
+      final response = await repository.googleLogin(idToken);
+      if (response != null && response.success) {
+        if (response.token != null) {
+          await AppSession.setToken(response.token!);
+          _updateGlobalToken(response.token!);
+        }
+        
+        if (response.user != null) {
+          userData.value = response.user;
+          await storage.write('user_data', response.user);
+        }
+
+        // ✅ Direct login for Google users (even if new)
+        setLoginStatus(true);
+        
+        return response;
+      }
+      return null;
+    } catch (e) {
+      CustomSnackbar.show(
+        title: 'Error',
+        message: e.toString(),
+        isError: true,
+      );
+      return null;
+    } finally {
+      isGoogleLoading.value = false;
     }
   }
 

@@ -12,7 +12,20 @@
           "package_name": "com.mirchi_ott.app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "399081225701-d4a5767bm73ihbn0j42g4ieeo1vpoe5h.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.mirchi_ott.app",
+            "certificate_hash": "6ba88512c9d7999113097ab310311ad632665492"
+          }
+        },
+        {
+          "client_id": "399081225701-gir0j3n161vkhk0dlrlkf9qccgv7e0gj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyAczpgbrw_KXK3_aoVBCrEInKyrN-A_I5s"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "399081225701-gir0j3n161vkhk0dlrlkf9qccgv7e0gj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
