@@ -56,17 +56,19 @@ class _OtpPageState extends State<OtpPage> {
       authController.setLoginStatus(true);
       
       bool isNew = response.isNewUser;
-      bool isProfileIncomplete = (response.user != null && response.user!['profileComplete'] == false);
 
       // ✅ Unfocus before navigating
       FocusManager.instance.primaryFocus?.unfocus();
 
       Future.delayed(const Duration(milliseconds: 100), () {
         if (!mounted) return;
-        if (isNew || isProfileIncomplete) {
+        
+        bool isEmail = widget.phoneNumber.contains('@');
+        
+        if (!isEmail && isNew) {
           Get.offAll(() => CreateProfilePage(phone: widget.phoneNumber));
         } else {
-          Get.offAllNamed(AppRoutes.home);
+          Get.offAllNamed(AppRoutes.navbar);
         }
       });
     }

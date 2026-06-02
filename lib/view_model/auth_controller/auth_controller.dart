@@ -161,9 +161,11 @@ class AuthController extends GetxController {
 
       final response = await repository.googleLogin(idToken);
       if (response != null && response.success) {
-        if (response.token != null) {
+        if (response.token != null && response.token!.isNotEmpty) {
           await AppSession.setToken(response.token!);
           _updateGlobalToken(response.token!);
+        } else {
+          print("⚠️ Google Login Success but NO TOKEN returned");
         }
         
         if (response.user != null) {
@@ -175,6 +177,8 @@ class AuthController extends GetxController {
         setLoginStatus(true);
         
         return response;
+      } else {
+        print("❌ Google Login Failed: ${response?.message}");
       }
       return null;
     } catch (e) {

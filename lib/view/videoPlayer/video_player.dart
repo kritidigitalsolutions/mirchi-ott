@@ -140,67 +140,71 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
         ),
 
         /// ⬇ BOTTOM CONTROLS
-        Padding(
-          padding: const EdgeInsets.all(10),
-          child: Column(
-            children: [
-              /// 🔥 SEEK BAR
-              Obx(() {
-                final total =
-                    controller.totalDuration.value.inSeconds;
-                final current =
-                    controller.currentPosition.value.inSeconds;
+        SafeArea(
+          top: false,
+          bottom: true,
+          child: Padding(
+            padding: const EdgeInsets.all(10),
+            child: Column(
+              children: [
+                /// 🔥 SEEK BAR
+                Obx(() {
+                  final total =
+                      controller.totalDuration.value.inSeconds;
+                  final current =
+                      controller.currentPosition.value.inSeconds;
 
-                final progress =
-                total == 0 ? 0.0 : current / total;
+                  final progress =
+                  total == 0 ? 0.0 : current / total;
 
-                return Slider(
-                  value: progress,
-                  onChanged: controller.seekTo,
-                  activeColor: Colors.red,
-                  inactiveColor: Colors.white30,
-                );
-              }),
+                  return Slider(
+                    value: progress,
+                    onChanged: controller.seekTo,
+                    activeColor: Colors.red,
+                    inactiveColor: Colors.white30,
+                  );
+                }),
 
-              /// ⏱ TIME + OPTIONS
-              Obx(() => Row(
-                children: [
-                  Text(
-                    "${_format(controller.currentPosition.value)} / ${_format(controller.totalDuration.value)}",
-                    style: const TextStyle(
-                        color: Colors.white),
-                  ),
-                  const Spacer(),
-
-                  /// ⚡ SPEED
-                  IconButton(
-                    icon: const Icon(Icons.speed,
-                        color: Colors.white),
-                    onPressed: () =>
-                        _showSpeedDialog(context),
-                  ),
-
-                  /// 🎬 QUALITY
-                  IconButton(
-                    icon: const Icon(Icons.hd,
-                        color: Colors.white),
-                    onPressed: () =>
-                        _showQualityDialog(context),
-                  ),
-
-                  /// 📺 FULLSCREEN
-                  IconButton(
-                    icon: Icon(
-                      controller.isFullscreen.value
-                          ? Icons.fullscreen_exit
-                          : Icons.fullscreen,
-                      color: Colors.white,
+                /// ⏱ TIME + OPTIONS
+                Obx(() => Row(
+                  children: [
+                    Text(
+                      "${_format(controller.currentPosition.value)} / ${_format(controller.totalDuration.value)}",
+                      style: const TextStyle(
+                          color: Colors.white),
                     ),
-                    onPressed: controller.toggleFullscreen,
-                  ),
-                ],
-              )),
-            ],
+                    const Spacer(),
+
+                    /// ⚡ SPEED
+                    IconButton(
+                      icon: const Icon(Icons.speed,
+                          color: Colors.white),
+                      onPressed: () =>
+                          _showSpeedDialog(context),
+                    ),
+
+                    /// 🎬 QUALITY
+                    IconButton(
+                      icon: const Icon(Icons.hd,
+                          color: Colors.white),
+                      onPressed: () =>
+                          _showQualityDialog(context),
+                    ),
+
+                    /// 📺 FULLSCREEN
+                    IconButton(
+                      icon: Icon(
+                        controller.isFullscreen.value
+                            ? Icons.fullscreen_exit
+                            : Icons.fullscreen,
+                        color: Colors.white,
+                      ),
+                      onPressed: controller.toggleFullscreen,
+                    ),
+                  ],
+                )),
+              ],
+            ),
           ),
         ),
       ],

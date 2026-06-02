@@ -58,7 +58,7 @@ class SupportController extends GetxController {
       });
       if (response != null && response['success'] == true) {
         CustomSnackbar.show(title: "Success", message: "Ticket created successfully", isSuccess: true);
-        fetchTickets();
+        await fetchTickets(); // Await to keep isLoading true until finished if desired, or just call it.
         return true;
       }
       return false;
@@ -72,6 +72,7 @@ class SupportController extends GetxController {
 
   Future<bool> replyToTicket(String ticketId, String message) async {
     try {
+      isMessagesLoading.value = true;
       final response = await _repository.replyTicket(ticketId, message);
       if (response != null && response['success'] == true) {
         ticketMessages.assignAll(response['messages'] ?? []);
@@ -82,6 +83,8 @@ class SupportController extends GetxController {
     } catch (e) {
       CustomSnackbar.show(title: "Error", message: e.toString(), isError: true);
       return false;
+    } finally {
+      isMessagesLoading.value = false;
     }
   }
 }

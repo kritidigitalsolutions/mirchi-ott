@@ -23,4 +23,6 @@ abstract class AppRoutes {
   static const search= '/search';
   static const top10= '/top10';
   static const searchWithMic= '/searchWithMic';
+  static const createTicket = '/createTicket';
+  static const ticketChat = '/ticketChat';
 }
