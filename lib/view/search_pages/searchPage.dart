@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:mirchi_ott/utils/responsive.dart';
 import 'package:mirchi_ott/view_model/auth_controller/auth_controller.dart';
 import 'package:mirchi_ott/view_model/content_controller/content_controller.dart';
 import 'package:mirchi_ott/view_model/search_controller/search_controller.dart';
@@ -41,10 +42,7 @@ class SearchPage extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
                 child: Row(
                   children: [
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-                      onPressed: () => Get.back(),
-                    ),
+                    Responsive.backButton(context, onPressed: () => Navigator.maybePop(context)),
                     Expanded(
                       child: TextField(
                         controller: controller.searchController,

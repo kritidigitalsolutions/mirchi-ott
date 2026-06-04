@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mirchi_ott/utils/app_images.dart';
+import 'package:mirchi_ott/utils/responsive.dart';
 import '../../app/theme/app_colors.dart';
 import '../../view_model/primium_controller/premium_controller.dart';
 
@@ -22,10 +23,7 @@ class _RedeemVoucherPageState extends State<RedeemVoucherPage> {
       appBar: AppBar(
         backgroundColor: AppColors.background,
         elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: AppColors.white),
-          onPressed: () => Navigator.pop(context),
-        ),
+        leading: Responsive.backButton(context, onPressed: () => Navigator.pop(context)),
         title: Text(
           "Redeem Voucher",
           style: TextStyle(color: AppColors.white),

@@ -7,6 +7,7 @@ import 'package:mirchi_ott/view_model/content_controller/content_controller.dart
 import 'package:get_storage/get_storage.dart';
 import '../../utils/custom_snackbar.dart';
 import '../../utils/notification_service.dart';
+import '../../utils/responsive.dart';
 import '../auth/signInPage.dart';
 
 class ComingSoonSection extends StatefulWidget {
@@ -15,10 +16,7 @@ class ComingSoonSection extends StatefulWidget {
   final bool isFullPage;
 
   const ComingSoonSection({
-    super.key,
-    required this.content,
-    required this.isSignedIn,
-    this.isFullPage = false,
+    super.key, required this.content, required this.isSignedIn, this.isFullPage = false,
   });
 
   @override
@@ -47,7 +45,6 @@ class _ComingSoonSectionState extends State<ComingSoonSection> {
         title: "Reminder Set",
         message: "We will notify you on ${_formatDate(item.releaseDate)}",
       );
-      // Schedule notification
       if (item.releaseDate != null) {
         try {
           DateTime releaseDate = DateTime.parse(item.releaseDate!);
@@ -73,145 +70,134 @@ class _ComingSoonSectionState extends State<ComingSoonSection> {
   @override
   Widget build(BuildContext context) {
     final ContentController contentController = Get.find<ContentController>();
+    bool isDesktop = Responsive.isDesktop(context);
 
-    final displayContent = widget.isFullPage
-        ? contentController.allContent.where((c) => c.isComingSoon == true).toList()
-        : widget.content;
+    return Obx(() {
+      final displayContent = widget.isFullPage
+          ? contentController.allContent.where((c) => c.isComingSoon == true).toList()
+          : widget.content;
 
-    if (displayContent.isEmpty && !widget.isFullPage) return const SizedBox.shrink();
-    if (displayContent.isEmpty && widget.isFullPage) {
-      return const Center(
-          child: Text("No Upcoming Content", style: TextStyle(color: Colors.white)));
-    }
+      if (displayContent.isEmpty && !widget.isFullPage) return const SizedBox.shrink();
+      if (displayContent.isEmpty && widget.isFullPage) {
+        if (contentController.isLoading.value) {
+          return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+        }
+        return const Center(
+            child: Text("No Upcoming Content", style: TextStyle(color: Colors.white)));
+      }
 
-    if (widget.isFullPage) {
-      return ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: displayContent.length,
-        itemBuilder: (context, index) {
-          final item = displayContent[index];
-          return _buildUpcomingItem(item);
-        },
-      );
-    }
+      if (widget.isFullPage) {
+        return Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1200),
+            child: ListView.builder(
+              padding: const EdgeInsets.all(20),
+              itemCount: displayContent.length,
+              itemBuilder: (context, index) {
+                final item = displayContent[index];
+                return _buildUpcomingItem(item, isDesktop);
+              },
+            ),
+          ),
+        );
+      }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: InkWell(
-            onTap: () {},
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             child: const Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   "Coming Soon",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(width: 6),
-                Icon(
-                  Icons.arrow_forward_ios,
-                  color: Colors.white,
-                  size: 16,
-                ),
+                Icon(Icons.arrow_forward_ios, color: Colors.white, size: 16),
               ],
             ),
           ),
-        ),
-        const SizedBox(height: 15),
-        SizedBox(
-          height: 250,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: displayContent.length,
-            itemBuilder: (context, index) {
-              final item = displayContent[index];
-              return Container(
-                width: 170,
-                margin: const EdgeInsets.only(right: 16),
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(15),
-                  onTap: () {
-                    if (!widget.isSignedIn) {
-                      Get.to(() => const SignInPage());
-                    } else {
-                      Get.to(() =>
-                          DramaDetailsPage(isSignedIn: widget.isSignedIn, content: item));
-                    }
-                  },
-                  child: Stack(
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(15),
-                        child: Image.network(
-                          item.poster,
-                          height: 250,
-                          width: 170,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) => Container(
-                            height: 250,
-                            width: 170,
-                            color: Colors.grey[900],
-                            child: const Icon(Icons.broken_image,
-                                color: Colors.white54, size: 40),
-                          ),
-                          loadingBuilder: (context, child, loadingProgress) {
-                            if (loadingProgress == null) return child;
-                            return Container(
-                              height: 250,
-                              width: 170,
+          const SizedBox(height: 15),
+          SizedBox(
+            height: isDesktop ? 300 : 250,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemCount: displayContent.length,
+              itemBuilder: (context, index) {
+                final item = displayContent[index];
+                return Container(
+                  width: isDesktop ? 200 : 170,
+                  margin: const EdgeInsets.only(right: 16),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(15),
+                    onTap: () {
+                      if (!widget.isSignedIn) {
+                        Get.to(() => const SignInPage());
+                      } else {
+                        Get.to(() => DramaDetailsPage(isSignedIn: widget.isSignedIn, content: item));
+                      }
+                    },
+                    child: Stack(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(15),
+                          child: Image.network(
+                            item.poster,
+                            height: isDesktop ? 300 : 250,
+                            width: isDesktop ? 200 : 170,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) => Container(
+                              height: isDesktop ? 300 : 250,
+                              width: isDesktop ? 200 : 170,
                               color: Colors.grey[900],
-                              child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
-                            );
-                          },
-                        ),
-                      ),
-                      Positioned(
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                          decoration: const BoxDecoration(
-                            color: AppColors.white,
-                            borderRadius: BorderRadius.only(
-                              bottomLeft: Radius.circular(15),
-                              bottomRight: Radius.circular(15),
+                              child: const Icon(Icons.movie, color: Colors.white54, size: 40),
                             ),
                           ),
-                          child: Center(
-                            child: Text(
-                              _formatDate(item.releaseDate),
-                              style: const TextStyle(
-                                color: Colors.black,
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
+                        ),
+                        Positioned(
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            decoration: const BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.only(
+                                bottomLeft: Radius.circular(15),
+                                bottomRight: Radius.circular(15),
+                              ),
+                            ),
+                            child: Center(
+                              child: Text(
+                                _formatDate(item.releaseDate),
+                                style: const TextStyle(color: Colors.black, fontSize: 14, fontWeight: FontWeight.bold),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
-        ),
-      ],
-    );
+        ],
+      );
+    });
   }
 
-  Widget _buildUpcomingItem(ContentModel item) {
+  Widget _buildUpcomingItem(ContentModel item, bool isDesktop) {
     bool reminded = _isReminded(item.id);
     return Container(
-      margin: const EdgeInsets.only(bottom: 20),
+      margin: const EdgeInsets.only(bottom: 30),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(20),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -224,57 +210,60 @@ class _ComingSoonSectionState extends State<ComingSoonSection> {
               }
             },
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(15),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
               child: Image.network(
                 item.banner,
-                height: 200,
+                height: isDesktop ? 400 : 220,
                 width: double.infinity,
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) => Container(
-                  height: 200,
+                  height: isDesktop ? 400 : 220,
                   color: Colors.grey[900],
                   child: const Icon(Icons.broken_image, color: Colors.white, size: 50),
                 ),
               ),
             ),
           ),
-          const SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      item.title,
-                      style: const TextStyle(
-                          color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    Text(
-                      "Releasing on: ${_formatDate(item.releaseDate)}",
-                      style: const TextStyle(color: AppColors.primary, fontSize: 14),
-                    ),
-                  ],
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        item.title,
+                        style: TextStyle(color: Colors.white, fontSize: isDesktop ? 24 : 18, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 5),
+                      Text(
+                        "Releasing on: ${_formatDate(item.releaseDate)}",
+                        style: const TextStyle(color: AppColors.primary, fontSize: 15, fontWeight: FontWeight.w600),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              ElevatedButton.icon(
-                onPressed: () => _toggleReminder(item),
-                icon: Icon(
-                  reminded ? Icons.notifications_active : Icons.notifications_none,
-                  size: 18,
-                  color: Colors.white,
+                ElevatedButton.icon(
+                  onPressed: () => _toggleReminder(item),
+                  icon: Icon(
+                    reminded ? Icons.notifications_active : Icons.notifications_none,
+                    size: 20,
+                    color: Colors.white,
+                  ),
+                  label: Text(
+                    reminded ? "Reminded" : "Remind Me",
+                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: reminded ? Colors.red : AppColors.buttonColor,
+                    padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
                 ),
-                label: Text(
-                  reminded ? "Reminded" : "Remind Me",
-                  style: const TextStyle(color: Colors.white),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: reminded ? Colors.red : Colors.grey[700],
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),

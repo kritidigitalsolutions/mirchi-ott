@@ -13,7 +13,8 @@ import 'package:timezone/timezone.dart' as tz;
 class NotificationService extends GetxController {
   static NotificationService get to => Get.find();
 
-  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
+  // Lazy initialization for Firebase components to avoid crashes on non-configured platforms
+  FirebaseMessaging get _firebaseMessaging => FirebaseMessaging.instance;
   final FlutterLocalNotificationsPlugin _localNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
@@ -23,6 +24,10 @@ class NotificationService extends GetxController {
   String? _currentToken;
 
   Future<void> init() async {
+    if (GetPlatform.isWeb) {
+      print("🌐 Notifications skipped on Web for now.");
+      return;
+    }
     print("🚀 NotificationService INIT STARTED");
     tz.initializeTimeZones();
 
@@ -123,6 +128,7 @@ class NotificationService extends GetxController {
 
   /// 📡 Standardized method to send token to backend
   Future<void> uploadToken() async {
+    if (GetPlatform.isWeb) return;
     try {
       // 🔄 If token is not yet available, try to fetch it
       if (_currentToken == null) {

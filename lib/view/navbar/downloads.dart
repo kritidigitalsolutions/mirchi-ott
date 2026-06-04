@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mirchi_ott/app/theme/app_colors.dart';
+import 'package:mirchi_ott/utils/responsive.dart';
 import 'package:mirchi_ott/view_model/download_controller/download_controller.dart';
 import '../../view_model/auth_controller/auth_controller.dart';
 import '../../view_model/home_controller/home_controller.dart';
@@ -25,10 +26,7 @@ class DownloadsPage extends StatelessWidget {
         backgroundColor: Colors.black,
         elevation: 0,
         centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-          onPressed: () => Get.back(),
-        ),
+        leading: Responsive.backButton(context, onPressed: () => Get.back()),
         title: const Text(
           "Downloads",
           style: TextStyle(

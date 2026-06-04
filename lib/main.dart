@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -32,11 +33,13 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  /// 🔥 Lock orientations to Portrait by default
-  await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-    DeviceOrientation.portraitDown,
-  ]);
+  /// 🔥 Lock orientations only on mobile
+  if (!kIsWeb) {
+    await SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+  }
 
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
@@ -46,11 +49,26 @@ Future<void> main() async {
   ));
 
   /// 🔥 Firebase Init
-  await Firebase.initializeApp();
-  print("✅ Firebase Initialized");
+  try {
+    if (kIsWeb) {
+      // On Web, Firebase.initializeApp() requires options. 
+      // If DefaultFirebaseOptions is missing, we skip or use a try-catch to avoid white screen.
+      // You should run `flutterfire configure` to generate firebase_options.dart
+      print("🌐 Firebase Web: Attempting initialization...");
+      await Firebase.initializeApp();
+    } else {
+      await Firebase.initializeApp();
+    }
+    print("✅ Firebase Initialized");
+  } catch (e) {
+    print("⚠️ Firebase Initialization Failed: $e");
+    print("💡 Tip: For Web, make sure you have configured Firebase correctly (flutterfire configure)");
+  }
 
-  /// 🌙 Background Listener
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  /// 🌙 Background Listener (Mobile only typically, for web it uses service workers)
+  if (!kIsWeb) {
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  }
 
   /// 💾 Local Storage
   await GetStorage.init();
@@ -91,10 +109,12 @@ Future<void> main() async {
   runApp(const MyApp());
 
   /// 🔥 Initialize Notifications AFTER UI LOAD (FIX)
-  Future.delayed(const Duration(seconds: 1), () {
-    print("🚀 Initializing Notification Service (Delayed)");
-    NotificationService.to.init();
-  });
+  if (!kIsWeb) {
+    Future.delayed(const Duration(seconds: 1), () {
+      print("🚀 Initializing Notification Service (Delayed)");
+      NotificationService.to.init();
+    });
+  }
 }
 
 class MyApp extends StatelessWidget {

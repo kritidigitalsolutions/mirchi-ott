@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:mirchi_ott/utils/responsive.dart';
 import 'package:video_player/video_player.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../view_model/video_player_controller/video_controller.dart';
@@ -99,11 +100,7 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
         SafeArea(
           child: Row(
             children: [
-              IconButton(
-                icon: const Icon(Icons.arrow_back,
-                    color: Colors.white),
-                onPressed: () => Get.back(),
-              ),
+              Responsive.backButton(context, onPressed: () => Get.back()),
               Expanded(
                 child: Text(
                   widget.title,

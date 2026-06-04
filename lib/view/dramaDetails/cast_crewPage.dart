@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../data/models/response_model/content_response_model/content_model.dart';
+import '../../utils/responsive.dart';
 import '../../view_model/auth_controller/auth_controller.dart';
 import '../../view_model/content_controller/content_controller.dart';
 import 'dramaDetailsPage.dart';
@@ -17,6 +18,7 @@ class CastDetailsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool isDesktop = Responsive.isDesktop(context);
     final height = MediaQuery.of(context).size.height;
 
     final contentController = Get.find<ContentController>();
@@ -40,211 +42,226 @@ class CastDetailsPage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.black,
-      body: Stack(
-        children: [
-          /// 🔽 MAIN CONTENT
-          SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                /// 🔥 CAST IMAGE
-                Container(
-                  height: height * 0.25,
-                  width: double.infinity,
-                  alignment: Alignment.center,
-                  child: CircleAvatar(
-                    radius: 70,
-                    backgroundImage: (castImage.isNotEmpty &&
-                        castImage.startsWith('http'))
-                        ? NetworkImage(castImage)
-                        : const AssetImage('assets/images/user.png')
-                    as ImageProvider,
-                  ),
-                ),
-
-                const SizedBox(height: 10),
-
-                /// 🔥 CAST NAME
-                Center(
-                  child: Text(
-                    castName,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 25),
-
-                /// 🎬 MOVIES SECTION
-                if (movies.isNotEmpty) ...[
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16),
-                    child: Text(
-                      "Movies",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
+      appBar: isDesktop ? AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Responsive.getBackIcon(context) ?? Icons.arrow_back, color: Colors.white),
+          onPressed: () => Get.back(),
+        ),
+        title: Text(castName, style: const TextStyle(color: Colors.white)),
+      ) : null,
+      body: Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1000),
+          child: Stack(
+            children: [
+              /// 🔽 MAIN CONTENT
+              SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 20),
+                    /// 🔥 CAST IMAGE
+                    Container(
+                      height: isDesktop ? 300 : height * 0.25,
+                      width: double.infinity,
+                      alignment: Alignment.center,
+                      child: CircleAvatar(
+                        radius: isDesktop ? 100 : 70,
+                        backgroundImage: (castImage.isNotEmpty &&
+                            castImage.startsWith('http'))
+                            ? NetworkImage(castImage)
+                            : const AssetImage('assets/images/user.png')
+                        as ImageProvider,
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 10),
 
-                  SizedBox(
-                    height: 180,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: movies.length,
-                      itemBuilder: (context, index) {
-                        final item = movies[index];
+                    const SizedBox(height: 10),
 
-                        return GestureDetector(
-                          onTap: () {
-                            Get.to(() =>
-                                DramaDetailsPage(content: item,
-                                  isSignedIn: authController.isLoggedIn.value,));
-                          },
-                          child: Container(
-                            width: 120,
-                            margin: const EdgeInsets.only(left: 16),
-                            child: Column(
-                              children: [
-                                Expanded(
-                                  child: ClipRRect(
-                                    borderRadius:
-                                    BorderRadius.circular(10),
-                                    child: item.poster.isNotEmpty
-                                        ? Image.network(
-                                      item.poster,
-                                      fit: BoxFit.cover,
-                                    )
-                                        : Container(
-                                      color: Colors.grey,
-                                      child: const Icon(
-                                        Icons.image,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 5),
-                                Text(
-                                  item.title,
-                                  style: const TextStyle(
-                                      color: Colors.white),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                ],
-
-                /// 📺 SERIES SECTION
-                if (series.isNotEmpty) ...[
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16),
-                    child: Text(
-                      "Series",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-
-                  SizedBox(
-                    height: 180,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: series.length,
-                      itemBuilder: (context, index) {
-                        final item = series[index];
-
-                        return GestureDetector(
-                          onTap: () {
-                            Get.to(() =>
-                                DramaDetailsPage(content: item,
-                                  isSignedIn: authController.isLoggedIn.value,));
-                          },
-                          child: Container(
-                            width: 120,
-                            margin: const EdgeInsets.only(left: 16),
-                            child: Column(
-                              children: [
-                                Expanded(
-                                  child: ClipRRect(
-                                    borderRadius:
-                                    BorderRadius.circular(10),
-                                    child: item.poster.isNotEmpty
-                                        ? Image.network(
-                                      item.poster,
-                                      fit: BoxFit.cover,
-                                    )
-                                        : Container(
-                                      color: Colors.grey,
-                                      child: const Icon(
-                                        Icons.image,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 5),
-                                Text(
-                                  item.title,
-                                  style: const TextStyle(
-                                      color: Colors.white),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-
-                /// ❌ EMPTY STATE
-                if (movies.isEmpty && series.isEmpty)
-                  const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(20),
+                    /// 🔥 CAST NAME
+                    if (!isDesktop) Center(
                       child: Text(
-                        "No content found for this cast",
-                        style: TextStyle(color: Colors.white54),
+                        castName,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
-                  ),
 
-                const SizedBox(height: 30),
-              ],
-            ),
-          ),
+                    const SizedBox(height: 25),
 
-          /// 🔙 BACK BUTTON
-          Positioned(
-            top: 40,
-            left: 10,
-            child: IconButton(
-              icon:
-              const Icon(Icons.arrow_back_ios, color: Colors.white),
-              onPressed: () {
-                Get.back();
-              },
-            ),
+                    /// 🎬 MOVIES SECTION
+                    if (movies.isNotEmpty) ...[
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: isDesktop ? 40 : 16),
+                        child: const Text(
+                          "Movies",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+
+                      SizedBox(
+                        height: isDesktop ? 250 : 180,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: movies.length,
+                          padding: EdgeInsets.symmetric(horizontal: isDesktop ? 24 : 0),
+                          itemBuilder: (context, index) {
+                            final item = movies[index];
+
+                            return GestureDetector(
+                              onTap: () {
+                                Get.to(() =>
+                                    DramaDetailsPage(content: item,
+                                      isSignedIn: authController.isLoggedIn.value,));
+                              },
+                              child: Container(
+                                width: isDesktop ? 180 : 120,
+                                margin: const EdgeInsets.only(left: 16),
+                                child: Column(
+                                  children: [
+                                    Expanded(
+                                      child: ClipRRect(
+                                        borderRadius:
+                                        BorderRadius.circular(10),
+                                        child: item.poster.isNotEmpty
+                                            ? Image.network(
+                                          item.poster,
+                                          fit: BoxFit.cover,
+                                        )
+                                            : Container(
+                                          color: Colors.grey,
+                                          child: const Icon(
+                                            Icons.image,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 5),
+                                    Text(
+                                      item.title,
+                                      style: const TextStyle(
+                                          color: Colors.white),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                    ],
+
+                    /// 📺 SERIES SECTION
+                    if (series.isNotEmpty) ...[
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: isDesktop ? 40 : 16),
+                        child: const Text(
+                          "Series",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+
+                      SizedBox(
+                        height: isDesktop ? 250 : 180,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: series.length,
+                          padding: EdgeInsets.symmetric(horizontal: isDesktop ? 24 : 0),
+                          itemBuilder: (context, index) {
+                            final item = series[index];
+
+                            return GestureDetector(
+                              onTap: () {
+                                Get.to(() =>
+                                    DramaDetailsPage(content: item,
+                                      isSignedIn: authController.isLoggedIn.value,));
+                              },
+                              child: Container(
+                                width: isDesktop ? 180 : 120,
+                                margin: const EdgeInsets.only(left: 16),
+                                child: Column(
+                                  children: [
+                                    Expanded(
+                                      child: ClipRRect(
+                                        borderRadius:
+                                        BorderRadius.circular(10),
+                                        child: item.poster.isNotEmpty
+                                            ? Image.network(
+                                          item.poster,
+                                          fit: BoxFit.cover,
+                                        )
+                                            : Container(
+                                          color: Colors.grey,
+                                          child: const Icon(
+                                            Icons.image,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 5),
+                                    Text(
+                                      item.title,
+                                      style: const TextStyle(
+                                          color: Colors.white),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+
+                    /// ❌ EMPTY STATE
+                    if (movies.isEmpty && series.isEmpty)
+                      const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(20),
+                          child: Text(
+                            "No content found for this cast",
+                            style: TextStyle(color: Colors.white54),
+                          ),
+                        ),
+                      ),
+
+                    const SizedBox(height: 30),
+                  ],
+                ),
+              ),
+
+              /// 🔙 BACK BUTTON (Mobile only)
+              if (!isDesktop) Positioned(
+                top: 40,
+                left: 10,
+                child: IconButton(
+                  icon: Icon(Responsive.getBackIcon(context) ?? Icons.arrow_back, color: Colors.white),
+                  onPressed: () => Get.back(),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

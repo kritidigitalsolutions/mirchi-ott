@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:mirchi_ott/utils/responsive.dart';
 import '../../app/theme/app_colors.dart';
 import '../../view_model/auth_controller/auth_controller.dart';
 import '../../view_model/profile/create_profile_controller.dart';
@@ -40,112 +41,114 @@ class _CreateProfilePageState extends State<CreateProfilePage> {
       appBar: AppBar(
         backgroundColor: AppColors.background,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: AppColors.white),
-          onPressed: () => Get.back(),
-        ),
+        leading: Responsive.backButton(context, onPressed: () => Get.back()),
         title: const Text("Create Profile", style: TextStyle(color: AppColors.white)),
         centerTitle: true,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              const SizedBox(height: 30),
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 500),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  const SizedBox(height: 30),
 
-              /// Profile Image (Optional)
-              GestureDetector(
-                onTap: createProfileController.pickImage,
-                child: Obx(() => CircleAvatar(
-                  radius: 50,
-                  backgroundColor: Colors.grey[900],
-                  backgroundImage: createProfileController.selectedImage.value != null
-                      ? FileImage(createProfileController.selectedImage.value!)
-                      : null,
-                  child: createProfileController.selectedImage.value == null
-                      ? const Icon(Icons.camera_alt, size: 40, color: Colors.white54)
-                      : null,
-                )),
-              ),
-
-              TextButton(
-                onPressed: createProfileController.pickImage,
-                child: const Text(
-                  "Choose Profile Picture",
-                  style: TextStyle(color: AppColors.buttonColor),
-                ),
-              ),
-
-              const SizedBox(height: 10),
-
-              /// Show Email or Phone
-              Text(
-                widget.phone,
-                style: const TextStyle(color: Colors.white70, fontSize: 16, fontWeight: FontWeight.w500),
-              ),
-
-              const SizedBox(height: 20),
-
-              /// Name Field
-              TextField(
-                controller: nameController,
-                style: const TextStyle(color: AppColors.white),
-                decoration: InputDecoration(
-                  hintText: "Full Name",
-                  hintStyle: const TextStyle(color: Colors.grey),
-                  filled: true,
-                  fillColor: Colors.grey[900],
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide.none,
+                  /// Profile Image (Optional)
+                  GestureDetector(
+                    onTap: createProfileController.pickImage,
+                    child: Obx(() => CircleAvatar(
+                          radius: 50,
+                          backgroundColor: Colors.grey[900],
+                          backgroundImage: createProfileController.selectedImage.value != null
+                              ? FileImage(createProfileController.selectedImage.value!)
+                              : null,
+                          child: createProfileController.selectedImage.value == null
+                              ? const Icon(Icons.camera_alt, size: 40, color: Colors.white54)
+                              : null,
+                        )),
                   ),
-                ),
-              ),
 
-              const SizedBox(height: 30),
-
-              /// Save Button
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: Obx(() => ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.buttonColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                  TextButton(
+                    onPressed: createProfileController.pickImage,
+                    child: const Text(
+                      "Choose Profile Picture",
+                      style: TextStyle(color: AppColors.buttonColor),
                     ),
                   ),
-                  onPressed: authController.isLoading.value
-                      ? null
-                      : () async {
-                          if (nameController.text.trim().isEmpty) {
-                            CustomSnackbar.show(title: "Error", message: "Name is required", isError: true);
-                            return;
-                          }
 
-                          bool isEmail = widget.phone.contains('@');
+                  const SizedBox(height: 10),
 
-                          bool success = await authController.updateAndSaveProfile(
-                            name: nameController.text.trim(),
-                            email: isEmail ? widget.phone : "",
-                            phone: isEmail ? "" : widget.phone,
-                            imagePath: createProfileController.selectedImage.value?.path,
-                          );
+                  /// Show Email or Phone
+                  Text(
+                    widget.phone,
+                    style: const TextStyle(color: Colors.white70, fontSize: 16, fontWeight: FontWeight.w500),
+                  ),
 
-                          if (success) {
-                            Get.offAllNamed('/'); // Navigate to home
-                          }
-                        },
-                  child: authController.isLoading.value
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text(
-                          "Save",
-                          style: TextStyle(color: AppColors.white, fontSize: 16),
-                        ),
-                )),
-              )
-            ],
+                  const SizedBox(height: 20),
+
+                  /// Name Field
+                  TextField(
+                    controller: nameController,
+                    style: const TextStyle(color: AppColors.white),
+                    decoration: InputDecoration(
+                      hintText: "Full Name",
+                      hintStyle: const TextStyle(color: Colors.grey),
+                      filled: true,
+                      fillColor: Colors.grey[900],
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 30),
+
+                  /// Save Button
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: Obx(() => ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.buttonColor,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          onPressed: authController.isLoading.value
+                              ? null
+                              : () async {
+                                  if (nameController.text.trim().isEmpty) {
+                                    CustomSnackbar.show(title: "Error", message: "Name is required", isError: true);
+                                    return;
+                                  }
+
+                                  bool isEmail = widget.phone.contains('@');
+
+                                  bool success = await authController.updateAndSaveProfile(
+                                    name: nameController.text.trim(),
+                                    email: isEmail ? widget.phone : "",
+                                    phone: isEmail ? "" : widget.phone,
+                                    imagePath: createProfileController.selectedImage.value?.path,
+                                  );
+
+                                  if (success) {
+                                    Get.offAllNamed('/'); // Navigate to home
+                                  }
+                                },
+                          child: authController.isLoading.value
+                              ? const CircularProgressIndicator(color: Colors.white)
+                              : const Text(
+                                  "Save",
+                                  style: TextStyle(color: AppColors.white, fontSize: 16),
+                                ),
+                        )),
+                  )
+                ],
+              ),
+            ),
           ),
         ),
       ),

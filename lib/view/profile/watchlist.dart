@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:mirchi_ott/utils/responsive.dart';
 import '../../app/theme/app_colors.dart';
 import '../../data/models/response_model/content_response_model/content_model.dart';
 import '../../view_model/auth_controller/auth_controller.dart';
@@ -20,7 +21,7 @@ class WatchlistPage extends StatelessWidget {
       backgroundColor: AppColors.black,
       appBar: AppBar(
         backgroundColor: AppColors.black,
-        iconTheme: const IconThemeData(color: Colors.white),
+        leading: Responsive.backButton(context, onPressed: () => Get.back()),
         title: const Text(
           "Watchlist",
           style: TextStyle(color: AppColors.white),

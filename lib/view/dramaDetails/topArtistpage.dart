@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:mirchi_ott/utils/responsive.dart';
 import 'cast_crewPage.dart';
 
 class TopArtistsPage extends StatelessWidget {
@@ -17,80 +17,98 @@ class TopArtistsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool isDesktop = Responsive.isDesktop(context);
+
     return Scaffold(
       backgroundColor: Colors.black,
+      appBar: isDesktop ? AppBar(
+        backgroundColor: Colors.black,
+        elevation: 0,
+        leading: Responsive.backButton(context, onPressed: () => Navigator.pop(context)),
+        title: const Text("Top Artists", style: TextStyle(color: Colors.white)),
+      ) : null,
       body: SafeArea(
-        child: Column(
-          children: [
-            /// 🔹 Header
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.white),
-                    onPressed: () => Navigator.pop(context),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1200),
+            child: Column(
+              children: [
+                /// 🔹 Header (Mobile only)
+                if (!isDesktop) Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                  child: Row(
+                    children: [
+                      Responsive.backButton(context, onPressed: () => Navigator.pop(context)),
+                      const SizedBox(width: 10),
+                      const Text(
+                        "Top Artists",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 10),
-                  const Text(
-                    "Top Artists",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            /// 🔹 Grid Artists
-            Expanded(
-              child: GridView.builder(
-                padding: const EdgeInsets.all(15),
-                itemCount: artists.length,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 4,
-                  crossAxisSpacing: 10,
-                  mainAxisSpacing: 15,
-                  childAspectRatio: 0.65,
                 ),
-                itemBuilder: (context, index) {
-                  final artist = artists[index];
 
-                  return GestureDetector(
-                    onTap: () {
-                      print("Clicked on ${artist["name"]}");
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => CastDetailsPage(
-                            castName: artist["name"]!,
-                            castImage: artist["image"]!,
-                          ),
+                /// 🔹 Grid Artists
+                Expanded(
+                  child: GridView.builder(
+                    padding: const EdgeInsets.all(15),
+                    itemCount: artists.length,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: isDesktop ? 8 : 4,
+                      crossAxisSpacing: 10,
+                      mainAxisSpacing: 15,
+                      childAspectRatio: 0.65,
+                    ),
+                    itemBuilder: (context, index) {
+                      final artist = artists[index];
+
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => CastDetailsPage(
+                                castName: artist["name"]!,
+                                castImage: artist["image"]!,
+                              ),
+                            ),
+                          );
+                        },
+                        child: Column(
+                          children: [
+                            Container(
+                              height: 110,
+                              width: 110,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.rectangle,
+                                borderRadius: BorderRadius.circular(12),
+                                image: DecorationImage(
+                                  image: AssetImage(artist["image"]!),
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            ),
+                            if (isDesktop) const SizedBox(height: 5),
+                            if (isDesktop) Text(
+                              artist["name"]!,
+                              style: const TextStyle(color: Colors.white, fontSize: 12),
+                              textAlign: TextAlign.center,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
                         ),
                       );
                     },
-                    child: Column(
-                      children: [
-                        Container(
-                          height: 110,
-                          width: 110,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.rectangle,
-                            image: DecorationImage(
-                              image: AssetImage(artist["image"]!),
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );

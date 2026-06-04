@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:mirchi_ott/utils/responsive.dart';
 import '../../app/theme/app_colors.dart';
 import '../../view_model/primium_controller/premium_controller.dart';
 import '../premium/goPremium.dart';
@@ -16,10 +17,7 @@ class PurchasedPlansPage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: AppColors.white),
-          onPressed: () => Get.back(),
-        ),
+        leading: Responsive.backButton(context, onPressed: () => Get.back()),
         title: const Text(
           "Purchased Plans",
           style: TextStyle(color: AppColors.white, fontWeight: FontWeight.bold),

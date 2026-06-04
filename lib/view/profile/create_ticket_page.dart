@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:mirchi_ott/utils/responsive.dart';
 import '../../app/theme/app_colors.dart';
 import '../../view_model/support_controller/support_controller.dart';
 
@@ -38,11 +39,11 @@ class _CreateTicketPageState extends State<CreateTicketPage> {
       appBar: AppBar(
         backgroundColor: AppColors.background,
         elevation: 0,
+        leading: Responsive.backButton(context, onPressed: () => Get.back()),
         title: const Text(
           "New Support Ticket",
           style: TextStyle(color: AppColors.white, fontWeight: FontWeight.bold),
         ),
-        iconTheme: const IconThemeData(color: AppColors.white),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),

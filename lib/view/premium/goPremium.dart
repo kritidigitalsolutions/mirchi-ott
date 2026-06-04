@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:mirchi_ott/utils/responsive.dart';
 import 'package:mirchi_ott/view_model/primium_controller/premium_controller.dart';
 import '../../app/theme/app_colors.dart';
 import '../../view_model/home_controller/home_controller.dart';
@@ -21,10 +22,7 @@ class GoPremiumPage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: AppColors.white),
-          onPressed: () => Get.back(),
-        ),
+        leading: Responsive.backButton(context, onPressed: () => Get.back()),
         title: const Text(
           "Premium Plans",
           style: TextStyle(color: AppColors.white, fontWeight: FontWeight.bold),

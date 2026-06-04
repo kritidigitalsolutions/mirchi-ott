@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:mirchi_ott/utils/responsive.dart';
 import '../../utils/notification_service.dart';
 import '../../app/theme/app_colors.dart';
 
@@ -20,12 +21,7 @@ class NotificationPage extends StatelessWidget {
           'Notifications',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
-        leading: Navigator.canPop(context)
-            ? IconButton(
-                icon: const Icon(Icons.arrow_back, color: Colors.white),
-                onPressed: () => Get.back(),
-              )
-            : null,
+        leading: Responsive.backButton(context, onPressed: () => Get.back()),
         actions: [
           Obx(() => notificationService.notifications.isNotEmpty
               ? IconButton(

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mirchi_ott/utils/app_images.dart';
+import 'package:mirchi_ott/utils/responsive.dart';
 import 'package:mirchi_ott/view_model/primium_controller/premium_controller.dart';
 import '../../data/models/response_model/content_response_model/content_model.dart';
 import '../auth/signInPage.dart';
@@ -23,8 +24,6 @@ class AutoSlider extends StatefulWidget {
   State<AutoSlider> createState() => _AutoSliderState();
 }
 
-// ... (existing imports)
-
 class _AutoSliderState extends State<AutoSlider> {
   late PageController _pageController;
   int currentPage = 0;
@@ -34,7 +33,7 @@ class _AutoSliderState extends State<AutoSlider> {
   void initState() {
     super.initState();
     _pageController = PageController(
-      viewportFraction: 0.75,
+      viewportFraction: Responsive.isDesktop(Get.context!) ? 0.9 : 0.8,
       initialPage: 1000,
     );
     currentPage = 1000;
@@ -48,8 +47,8 @@ class _AutoSliderState extends State<AutoSlider> {
         currentPage++;
         _pageController.animateToPage(
           currentPage,
-          duration: const Duration(milliseconds: 600),
-          curve: Curves.easeInOut,
+          duration: const Duration(milliseconds: 1000),
+          curve: Curves.easeInOutQuart,
         );
       }
     });
@@ -69,7 +68,7 @@ class _AutoSliderState extends State<AutoSlider> {
 
   @override
   Widget build(BuildContext context) {
-    final PremiumController premiumController = Get.put(PremiumController());
+    bool isDesktop = Responsive.isDesktop(context);
 
     if (widget.content.isEmpty) {
       return const SizedBox(
@@ -78,77 +77,158 @@ class _AutoSliderState extends State<AutoSlider> {
       );
     }
 
-    return Column(
-      children: [
-        SizedBox(
-          height: MediaQuery.of(context).size.height * 0.40,
-          child: PageView.builder(
-            controller: _pageController,
-            itemCount: null,
-            onPageChanged: (index) => setState(() => currentPage = index),
-            itemBuilder: (context, index) {
-              final item = widget.content[index % widget.content.length];
-              double scale = currentPage == index ? 1 : 0.9;
+    return TweenAnimationBuilder(
+      tween: Tween<double>(begin: 0, end: 1),
+      duration: const Duration(milliseconds: 1200),
+      curve: Curves.easeOutExpo,
+      builder: (context, double opacity, child) {
+        return Opacity(
+          opacity: opacity,
+          child: Transform.translate(
+            offset: Offset(0, 40 * (1 - opacity)),
+            child: child,
+          ),
+        );
+      },
+      child: Column(
+        children: [
+          SizedBox(
+            height: isDesktop ? 750 : MediaQuery.of(context).size.height * 0.40,
+            child: PageView.builder(
+              controller: _pageController,
+              itemCount: null,
+              onPageChanged: (index) => setState(() => currentPage = index),
+              itemBuilder: (context, index) {
+                final item = widget.content[index % widget.content.length];
+                bool isSelected = currentPage == index;
+                double scale = isSelected ? 1 : 0.92;
 
-              return TweenAnimationBuilder(
-                tween: Tween<double>(begin: scale, end: scale),
-                duration: const Duration(milliseconds: 400),
-                builder: (context, value, child) => Transform.scale(scale: value, child: child),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: GestureDetector(
-                    onTap: () {
-                      if (!widget.isSignedIn) {
-                         Get.to(() => const SignInPage());
-                      } else {
-                         Get.to(() => DramaDetailsPage(isSignedIn: widget.isSignedIn, content: item));
-                      }
-                    },
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(20),
-                      child: Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          Image.network(
-                            item.banner,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) => Image.asset(
-                              AppImages.farzi,
-                              fit: BoxFit.cover,
+                return TweenAnimationBuilder(
+                  tween: Tween<double>(begin: scale, end: scale),
+                  duration: const Duration(milliseconds: 600),
+                  curve: Curves.easeOutBack,
+                  builder: (context, value, child) => Transform.scale(scale: value, child: child),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: GestureDetector(
+                      onTap: () {
+                        if (!widget.isSignedIn) {
+                           Get.to(() => const SignInPage());
+                        } else {
+                           Get.to(() => DramaDetailsPage(isSignedIn: widget.isSignedIn, content: item));
+                        }
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(25),
+                          boxShadow: [
+                            BoxShadow(
+                              color: isSelected ? AppColors.primary.withOpacity(0.3) : Colors.black.withOpacity(0.5),
+                              blurRadius: 25,
+                              spreadRadius: 2,
+                              offset: const Offset(0, 15),
                             ),
-                          ),
-                          Container(color: AppColors.black.withOpacity(0.3)),
-                          Positioned(
-                            bottom: 25,
-                            left: 0,
-                            right: 0,
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  item.title,
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(
-                                    color: AppColors.white,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
+                          ],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(25),
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              /// CINEMATIC IMAGE WITH ZOOM
+                              AnimatedScale(
+                                duration: const Duration(seconds: 5),
+                                scale: isSelected ? 1.1 : 1.0,
+                                child: Image.network(
+                                  isDesktop ? item.banner : item.poster,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) => Image.asset(
+                                    AppImages.farzi,
+                                    fit: BoxFit.cover,
+                                  ),
+                                  loadingBuilder: (context, child, loadingProgress) {
+                                    if (loadingProgress == null) return child;
+                                    return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+                                  },
+                                ),
+                              ),
+                              /// TOP GRADIENT (Darker for Navbar contrast)
+                              Container(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.center,
+                                    stops: const [0.0, 0.4],
+                                    colors: [
+                                      Colors.black.withOpacity(0.9),
+                                      Colors.transparent,
+                                    ],
                                   ),
                                 ),
-                              ],
-                            ),
+                              ),
+                              /// BOTTOM GRADIENT (Cinematic fade)
+                              Container(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.center,
+                                    end: Alignment.bottomCenter,
+                                    colors: [
+                                      Colors.transparent,
+                                      Colors.black.withOpacity(0.9),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              /// CONTENT
+                              Positioned(
+                                bottom: isDesktop ? 80 : 40,
+                                left: 50,
+                                right: 50,
+                                child: AnimatedOpacity(
+                                  duration: const Duration(milliseconds: 600),
+                                  opacity: isSelected ? 1 : 0,
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        item.title.toUpperCase(),
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          color: AppColors.white,
+                                          fontSize: isDesktop ? 56 : 26,
+                                          fontWeight: FontWeight.w900,
+                                          letterSpacing: 2.0,
+                                          shadows: [
+                                            Shadow(
+                                              color: Colors.red.withOpacity(0.8),
+                                              offset: const Offset(0, 0),
+                                              blurRadius: 20,
+                                            ),
+                                            Shadow(
+                                              color: Colors.black,
+                                              offset: const Offset(3, 5),
+                                              blurRadius: 10,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
-        ),
-        const SizedBox(height: 18),
-        // ... Pagination dots Row ...
-      ],
+          const SizedBox(height: 25),
+        ],
+      ),
     );
   }
 }

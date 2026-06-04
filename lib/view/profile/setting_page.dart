@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:mirchi_ott/utils/responsive.dart';
 import '../../app/theme/app_colors.dart';
 import '../../view_model/profile/settings_controller.dart';
 
@@ -19,10 +20,7 @@ class SettingsPage extends StatelessWidget {
           "Settings",
           style: TextStyle(color: AppColors.white),
         ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.white),
-          onPressed: () => Get.back(),
-        ),
+        leading: Responsive.backButton(context, onPressed: () => Get.back()),
       ),
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
