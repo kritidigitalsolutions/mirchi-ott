@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:mirchi_ott/widgets/custom_network_image.dart';
 import 'package:video_player/video_player.dart';
 import 'package:mirchi_ott/app/theme/app_colors.dart';
 import 'package:mirchi_ott/data/models/shorts_model.dart';
@@ -137,11 +138,9 @@ class _ShortDramaListItemState extends State<ShortDramaListItem> {
                                 child: VideoPlayer(_controller!),
                               ),
                             )
-                          : Image.network(
-                              widget.drama.banner,
+                          : CustomNetworkImage(
+                              imageUrl: widget.drama.banner,
                               fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) =>
-                                  const Icon(Icons.movie, color: Colors.white, size: 50),
                             ),
                     ),
 

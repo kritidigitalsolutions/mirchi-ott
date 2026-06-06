@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mirchi_ott/app/theme/app_colors.dart';
 import 'package:mirchi_ott/data/models/response_model/content_response_model/content_model.dart';
+import 'package:mirchi_ott/widgets/custom_network_image.dart';
 import '../dramaDetails/dramaDetailsPage.dart';
 import 'package:mirchi_ott/view_model/content_controller/content_controller.dart';
 import 'package:get_storage/get_storage.dart';
@@ -142,20 +143,12 @@ class _ComingSoonSectionState extends State<ComingSoonSection> {
                     },
                     child: Stack(
                       children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(15),
-                          child: Image.network(
-                            item.poster,
-                            height: isDesktop ? 300 : 250,
-                            width: isDesktop ? 200 : 170,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) => Container(
-                              height: isDesktop ? 300 : 250,
-                              width: isDesktop ? 200 : 170,
-                              color: Colors.grey[900],
-                              child: const Icon(Icons.movie, color: Colors.white54, size: 40),
-                            ),
-                          ),
+                        CustomNetworkImage(
+                          imageUrl: item.poster,
+                          height: isDesktop ? 300 : 250,
+                          width: isDesktop ? 200 : 170,
+                          fit: BoxFit.cover,
+                          borderRadius: 15,
                         ),
                         Positioned(
                           bottom: 0,
@@ -209,19 +202,12 @@ class _ComingSoonSectionState extends State<ComingSoonSection> {
                 Get.to(() => DramaDetailsPage(isSignedIn: widget.isSignedIn, content: item));
               }
             },
-            child: ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-              child: Image.network(
-                item.banner,
-                height: isDesktop ? 400 : 220,
-                width: double.infinity,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => Container(
-                  height: isDesktop ? 400 : 220,
-                  color: Colors.grey[900],
-                  child: const Icon(Icons.broken_image, color: Colors.white, size: 50),
-                ),
-              ),
+            child: CustomNetworkImage(
+              imageUrl: item.banner,
+              height: isDesktop ? 400 : 220,
+              width: double.infinity,
+              fit: BoxFit.cover,
+              customBorderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
             ),
           ),
           Padding(

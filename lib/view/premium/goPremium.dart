@@ -126,10 +126,10 @@ class GoPremiumPage extends StatelessWidget {
       ),
       child: Column(
         children: [
-          _featureRow(Icons.hd_outlined, "Full HD Streaming Quality"),
-          _featureRow(Icons.ad_units_outlined, "Ad-Free Experience"),
-          _featureRow(Icons.download_for_offline_outlined, "Offline Downloads Available"),
-          _featureRow(Icons.devices_other, "Watch on Mobile, TV & Web"),
+          _featureRow(Icons.hd_outlined, "High Quality Videos"),
+          _featureRow(Icons.ad_units_outlined, "Ad Free Experience"),
+          _featureRow(Icons.download_for_offline_outlined, "Affordable Packs"),
+          _featureRow(Icons.devices_other, "New Releases"),
         ],
       ),
     );
@@ -181,7 +181,7 @@ class GoPremiumPage extends StatelessWidget {
                 }
               },
               icon: const Icon(Icons.confirmation_num_outlined, color: AppColors.primary),
-              label: const Text("Redeem Pin", style: TextStyle(color: Colors.white)),
+              label: const Text("Redeem Code", style: TextStyle(color: Colors.white)),
             ),
           ),
         ],

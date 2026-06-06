@@ -5,6 +5,7 @@ import '../../utils/responsive.dart';
 import '../../data/models/response_model/content_response_model/content_model.dart';
 import '../../app/theme/app_colors.dart';
 import '../../widgets/catagory_widget.dart';
+import '../../widgets/custom_network_image.dart';
 import '../auth/signInPage.dart';
 import '../dramaDetails/dramaDetailsPage.dart';
 
@@ -22,7 +23,7 @@ class Top10List extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        /// 🔥 TOP 10 TITLE
+        /// 🔥 Trending on Mirchi TITLE
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: InkWell(
@@ -31,7 +32,7 @@ class Top10List extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  "Top 10",
+                  "Trending on Mirchi",
                   style: TextStyle(
                     color: AppColors.white,
                     fontSize: 22,
@@ -158,20 +159,12 @@ class _Top10HoverCardState extends State<_Top10HoverCard> {
                       )
                     ],
                   ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.network(
-                      widget.item.poster,
-                      width: widget.isDesktop ? 150 : 95,
-                      height: widget.isDesktop ? 230 : 140,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => Image.asset(
-                        AppImages.farzi,
-                        width: widget.isDesktop ? 150 : 95,
-                        height: widget.isDesktop ? 230 : 140,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
+                  child: CustomNetworkImage(
+                    imageUrl: widget.item.poster,
+                    width: widget.isDesktop ? 150 : 95,
+                    height: widget.isDesktop ? 230 : 140,
+                    fit: BoxFit.cover,
+                    borderRadius: 12,
                   ),
                 ),
               ),

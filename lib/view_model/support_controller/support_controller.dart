@@ -1,3 +1,4 @@
+import 'package:file_picker/file_picker.dart' as fp;
 import 'package:get/get.dart';
 import '../../data/repositories/support_repository.dart';
 import '../../data/network/base_api_service.dart';
@@ -11,12 +12,34 @@ class SupportController extends GetxController {
   var tickets = <dynamic>[].obs;
   var ticketMessages = <dynamic>[].obs;
   var categories = ["PAYMENT", "TECHNICAL", "SUBSCRIPTION", "ACCOUNT", "OTHER"];
+  
+  var selectedFilePaths = <String>[].obs;
 
   @override
   void onInit() {
     super.onInit();
     _repository = SupportRepository(Get.find<BaseApiService>());
     fetchTickets();
+  }
+
+  void pickFiles() async {
+    try {
+      fp.FilePickerResult? result = await fp.FilePicker.pickFiles(
+        allowMultiple: true,
+        type: fp.FileType.custom,
+        allowedExtensions: ['jpg', 'jpeg', 'png', 'pdf'],
+      );
+
+      if (result != null) {
+        selectedFilePaths.addAll(result.paths.whereType<String>());
+      }
+    } catch (e) {
+      print("Error picking files: $e");
+    }
+  }
+
+  void removeFile(int index) {
+    selectedFilePaths.removeAt(index);
   }
 
   Future<void> fetchTickets() async {
@@ -55,10 +78,12 @@ class SupportController extends GetxController {
         "subject": subject,
         "message": message,
         "category": category
-      });
+      }, filePaths: selectedFilePaths);
+      
       if (response != null && response['success'] == true) {
         CustomSnackbar.show(title: "Success", message: "Ticket created successfully", isSuccess: true);
-        await fetchTickets(); // Await to keep isLoading true until finished if desired, or just call it.
+        selectedFilePaths.clear();
+        await fetchTickets();
         return true;
       }
       return false;

@@ -5,6 +5,7 @@ import '../utils/responsive.dart';
 import '../data/models/response_model/content_response_model/content_model.dart';
 import '../view/auth/signInPage.dart';
 import '../view/dramaDetails/dramaDetailsPage.dart';
+import 'custom_network_image.dart';
 import 'catagory_widget.dart';
 
 class HomeSliderSection extends StatelessWidget {
@@ -132,18 +133,13 @@ class _HoverCardState extends State<_HoverCard> {
                 )
               ],
             ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(15),
-              child: Stack(
+            child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  Image.network(
-                    widget.item.poster,
+                  CustomNetworkImage(
+                    imageUrl: widget.item.poster,
                     fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Image.asset(
-                      AppImages.farzi,
-                      fit: BoxFit.cover,
-                    ),
+                    borderRadius: 15,
                   ),
                   if (widget.isDesktop) AnimatedOpacity(
                     duration: const Duration(milliseconds: 200),
@@ -190,7 +186,6 @@ class _HoverCardState extends State<_HoverCard> {
             ),
           ),
         ),
-      ),
     );
   }
 }

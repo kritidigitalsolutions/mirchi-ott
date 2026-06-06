@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:mirchi_ott/widgets/custom_network_image.dart';
 import '../../data/models/response_model/content_response_model/content_model.dart';
 import '../../utils/responsive.dart';
 import '../../view_model/auth_controller/auth_controller.dart';
@@ -63,19 +64,22 @@ class CastDetailsPage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 20),
-                    /// 🔥 CAST IMAGE
                     Container(
                       height: isDesktop ? 300 : height * 0.25,
                       width: double.infinity,
                       alignment: Alignment.center,
-                      child: CircleAvatar(
-                        radius: isDesktop ? 100 : 70,
-                        backgroundImage: (castImage.isNotEmpty &&
-                            castImage.startsWith('http'))
-                            ? NetworkImage(castImage)
-                            : const AssetImage('assets/images/user.png')
-                        as ImageProvider,
-                      ),
+                      child: (castImage.isNotEmpty && castImage.startsWith('http'))
+                          ? CustomNetworkImage(
+                              imageUrl: castImage,
+                              width: isDesktop ? 200 : 140,
+                              height: isDesktop ? 200 : 140,
+                              fit: BoxFit.cover,
+                              borderRadius: 100,
+                            )
+                          : CircleAvatar(
+                              radius: isDesktop ? 100 : 70,
+                              backgroundImage: const AssetImage('assets/images/user.png'),
+                            ),
                     ),
 
                     const SizedBox(height: 10),
@@ -130,21 +134,10 @@ class CastDetailsPage extends StatelessWidget {
                                 child: Column(
                                   children: [
                                     Expanded(
-                                      child: ClipRRect(
-                                        borderRadius:
-                                        BorderRadius.circular(10),
-                                        child: item.poster.isNotEmpty
-                                            ? Image.network(
-                                          item.poster,
-                                          fit: BoxFit.cover,
-                                        )
-                                            : Container(
-                                          color: Colors.grey,
-                                          child: const Icon(
-                                            Icons.image,
-                                            color: Colors.white,
-                                          ),
-                                        ),
+                                      child: CustomNetworkImage(
+                                        imageUrl: item.poster,
+                                        fit: BoxFit.cover,
+                                        borderRadius: 10,
                                       ),
                                     ),
                                     const SizedBox(height: 5),
@@ -200,21 +193,10 @@ class CastDetailsPage extends StatelessWidget {
                                 child: Column(
                                   children: [
                                     Expanded(
-                                      child: ClipRRect(
-                                        borderRadius:
-                                        BorderRadius.circular(10),
-                                        child: item.poster.isNotEmpty
-                                            ? Image.network(
-                                          item.poster,
-                                          fit: BoxFit.cover,
-                                        )
-                                            : Container(
-                                          color: Colors.grey,
-                                          child: const Icon(
-                                            Icons.image,
-                                            color: Colors.white,
-                                          ),
-                                        ),
+                                      child: CustomNetworkImage(
+                                        imageUrl: item.poster,
+                                        fit: BoxFit.cover,
+                                        borderRadius: 10,
                                       ),
                                     ),
                                     const SizedBox(height: 5),

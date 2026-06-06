@@ -5,6 +5,7 @@ import '../../app/theme/app_colors.dart';
 import '../../utils/app_images.dart';
 import '../../utils/responsive.dart';
 import '../../view_model/content_controller/content_controller.dart';
+import '../../widgets/custom_network_image.dart';
 import '../navbar/bottomNavbar.dart';
 import '../dramaDetails/dramaDetailsPage.dart';
 import 'auto_slider.dart';
@@ -371,7 +372,7 @@ class MainHomePage extends StatelessWidget {
                     isDesktop: isDesktop,
                     delay: 600,
                     child: HomeSliderSection(
-                      title: "MOVIES",
+                      title: "Mirchi Exclusives",
                       content: contentController.allContent.where((c) => c.contentType == 'movie' && c.isComingSoon == false).toList(),
                       isSignedIn: authController.isLoggedIn.value,
                     ),
@@ -503,14 +504,10 @@ class _WebSeriesHoverCardState extends State<_WebSeriesHoverCard> {
                 )
               ],
             ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(15),
-              child: Image.network(
-                widget.item.poster,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) =>
-                    Image.asset(AppImages.farzi, fit: BoxFit.cover),
-              ),
+            child: CustomNetworkImage(
+              imageUrl: widget.item.poster,
+              fit: BoxFit.cover,
+              borderRadius: 15,
             ),
           ),
         ),

@@ -123,18 +123,29 @@ class NetworkApiService extends BaseApiService {
 
   @override
   Future<dynamic> postMultipartApi(String url, Map<String, dynamic> data,
-      Map<String, String> files) async {
+      Map<String, dynamic> files) async {
     try {
       debugPrint("POST MULTIPART API CALL => $url");
       
       Map<String, dynamic> formDataMap = Map.from(data);
       
       for (var entry in files.entries) {
-        if (entry.value.isNotEmpty) {
+        if (entry.value is String && entry.value.isNotEmpty) {
           formDataMap[entry.key] = await MultipartFile.fromFile(
             entry.value,
             filename: entry.value.split('/').last,
           );
+        } else if (entry.value is List<String>) {
+          List<MultipartFile> multipartFiles = [];
+          for (String path in entry.value) {
+            if (path.isNotEmpty) {
+              multipartFiles.add(await MultipartFile.fromFile(
+                path,
+                filename: path.split('/').last,
+              ));
+            }
+          }
+          formDataMap[entry.key] = multipartFiles;
         }
       }
 

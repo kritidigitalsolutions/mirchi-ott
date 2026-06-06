@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:mirchi_ott/utils/app_images.dart';
 import 'package:mirchi_ott/utils/responsive.dart';
 import 'package:mirchi_ott/view_model/primium_controller/premium_controller.dart';
+import 'package:mirchi_ott/widgets/custom_network_image.dart';
 import '../../data/models/response_model/content_response_model/content_model.dart';
 import '../auth/signInPage.dart';
 import '../dramaDetails/dramaDetailsPage.dart';
@@ -139,17 +140,10 @@ class _AutoSliderState extends State<AutoSlider> {
                               AnimatedScale(
                                 duration: const Duration(seconds: 5),
                                 scale: isSelected ? 1.1 : 1.0,
-                                child: Image.network(
-                                  isDesktop ? item.banner : item.poster,
+                                child: CustomNetworkImage(
+                                  imageUrl: isDesktop ? item.banner : item.poster,
                                   fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) => Image.asset(
-                                    AppImages.farzi,
-                                    fit: BoxFit.cover,
-                                  ),
-                                  loadingBuilder: (context, child, loadingProgress) {
-                                    if (loadingProgress == null) return child;
-                                    return const Center(child: CircularProgressIndicator(color: AppColors.primary));
-                                  },
+                                  borderRadius: 25,
                                 ),
                               ),
                               /// TOP GRADIENT (Darker for Navbar contrast)

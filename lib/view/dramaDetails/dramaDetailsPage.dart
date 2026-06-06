@@ -7,6 +7,7 @@ import 'package:mirchi_ott/utils/responsive.dart';
 import 'package:mirchi_ott/view_model/auth_controller/auth_controller.dart';
 import 'package:mirchi_ott/view_model/download_controller/download_controller.dart';
 import 'package:mirchi_ott/view_model/primium_controller/premium_controller.dart';
+import 'package:mirchi_ott/widgets/custom_network_image.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../app/theme/app_colors.dart';
@@ -151,17 +152,11 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
         children: [
           /// THE ACTUAL BANNER (Full image shown)
           Center(
-            child: Image.network(
-              widget.content.banner,
+            child: CustomNetworkImage(
+              imageUrl: widget.content.banner,
               width: double.infinity,
               height: isDesktop ? 750 : 350,
               fit: BoxFit.contain, // Shows full banner without zooming
-              errorBuilder: (context, error, stackTrace) => Image.asset(
-                AppImages.farzi,
-                width: double.infinity,
-                height: isDesktop ? 750 : 350,
-                fit: BoxFit.contain,
-              ),
             ),
           ),
           /// SUBTLE GRADIENT OVERLAY
@@ -491,17 +486,12 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
           Stack(
             alignment: Alignment.center,
             children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.network(ep.poster,
-                    width: isDesktop ? 220 : 130,
-                    height: isDesktop ? 125 : 75,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Image.asset(
-                        AppImages.farzi,
-                        width: 130,
-                        height: 75,
-                        fit: BoxFit.cover)),
+              CustomNetworkImage(
+                imageUrl: ep.poster,
+                width: isDesktop ? 220 : 130,
+                height: isDesktop ? 125 : 75,
+                fit: BoxFit.cover,
+                borderRadius: 8,
               ),
               const Icon(Icons.play_circle_fill, color: Colors.white70, size: 36),
             ],
@@ -576,7 +566,14 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
                   padding: const EdgeInsets.only(right: 35),
                   child: Column(
                     children: [
-                      CircleAvatar(radius: 50, backgroundImage: NetworkImage(actor.image)),
+                      ClipOval(
+                        child: CustomNetworkImage(
+                          imageUrl: actor.image,
+                          width: 100,
+                          height: 100,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
                       const SizedBox(height: 12),
                       Text(actor.name, style: const TextStyle(color: Colors.white70, fontSize: 14, fontWeight: FontWeight.w500)),
                     ],
@@ -608,7 +605,11 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
                 child: Container(
                   width: 170,
                   margin: const EdgeInsets.only(right: 20),
-                  child: ClipRRect(borderRadius: BorderRadius.circular(8), child: Image.network(item.poster, fit: BoxFit.cover)),
+                  child: CustomNetworkImage(
+                    imageUrl: item.poster,
+                    fit: BoxFit.cover,
+                    borderRadius: 8,
+                  ),
                 ),
               );
             },

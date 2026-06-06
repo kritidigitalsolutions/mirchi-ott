@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../data/models/response_model/content_response_model/content_model.dart';
 import '../utils/responsive.dart';
 import '../view/dramaDetails/dramaDetailsPage.dart';
+import 'custom_network_image.dart';
 
 class CategoryGridPage extends StatelessWidget {
   final String title;
@@ -74,16 +75,10 @@ class CategoryGridPage extends StatelessWidget {
                                 content: item,
                               ));
                         },
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: Image.network(
-                            item.poster,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) => Image.asset(
-                              "assets/images/farzi.jpg",
-                              fit: BoxFit.cover,
-                            ),
-                          ),
+                        child: CustomNetworkImage(
+                          imageUrl: item.poster,
+                          fit: BoxFit.cover,
+                          borderRadius: 12,
                         ),
                       );
                     },

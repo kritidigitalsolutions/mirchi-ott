@@ -6,6 +6,7 @@ import 'package:mirchi_ott/view/shorts/vertical_shorts_player.dart';
 import 'package:mirchi_ott/view_model/shorts_controller/shorts_controller.dart';
 import 'package:mirchi_ott/view_model/auth_controller/auth_controller.dart';
 import 'package:mirchi_ott/view_model/primium_controller/premium_controller.dart';
+import 'package:mirchi_ott/widgets/custom_network_image.dart';
 
 class ShortsEpisodesGrid extends StatelessWidget {
   final ShortDrama drama;
@@ -76,20 +77,17 @@ class ShortsEpisodesGrid extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: Stack(
-                          fit: StackFit.expand,
-                          children: [
-                            Image.network(
-                              episode.thumbnail,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) =>
-                                  const Icon(Icons.movie, color: Colors.white, size: 30),
-                            ),
-                            Container(
-                              color: isLocked ? Colors.black45 : Colors.transparent,
-                            ),
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          CustomNetworkImage(
+                            imageUrl: episode.thumbnail,
+                            fit: BoxFit.cover,
+                            borderRadius: 8,
+                          ),
+                          Container(
+                            color: isLocked ? Colors.black45 : Colors.transparent,
+                          ),
                             Center(
                               child: Icon(
                                 isLocked ? Icons.lock : Icons.play_circle_outline,
@@ -100,7 +98,6 @@ class ShortsEpisodesGrid extends StatelessWidget {
                           ],
                         ),
                       ),
-                    ),
                     const SizedBox(height: 4),
                     Text(
                       episode.title,

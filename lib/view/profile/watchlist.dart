@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mirchi_ott/utils/responsive.dart';
+import 'package:mirchi_ott/widgets/custom_network_image.dart';
 import '../../app/theme/app_colors.dart';
 import '../../data/models/response_model/content_response_model/content_model.dart';
 import '../../view_model/auth_controller/auth_controller.dart';
@@ -81,19 +82,15 @@ class WatchlistPage extends StatelessWidget {
                         ));
                   }
                 },
-                leading: ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: poster.isNotEmpty
-                      ? Image.network(
-                          poster,
-                          width: 50,
-                          height: 70,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) =>
-                              const Icon(Icons.movie, color: Colors.white),
-                        )
-                      : const Icon(Icons.movie, color: Colors.white, size: 50),
-                ),
+                leading: poster.isNotEmpty
+                    ? CustomNetworkImage(
+                        imageUrl: poster,
+                        width: 50,
+                        height: 70,
+                        fit: BoxFit.cover,
+                        borderRadius: 8,
+                      )
+                    : const Icon(Icons.movie, color: Colors.white, size: 50),
                 title: Text(
                   title,
                   style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),

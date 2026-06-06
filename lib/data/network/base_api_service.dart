@@ -9,5 +9,5 @@ abstract class BaseApiService {
 
   Future<dynamic> deleteApi(String url, dynamic data);
 
-  Future<dynamic> postMultipartApi(String url, Map<String, dynamic> data, Map<String, String> files);
+  Future<dynamic> postMultipartApi(String url, Map<String, dynamic> data, Map<String, dynamic> files);
 }

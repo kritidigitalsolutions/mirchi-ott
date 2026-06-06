@@ -4,6 +4,7 @@ import 'package:mirchi_ott/utils/responsive.dart';
 import 'package:mirchi_ott/view_model/auth_controller/auth_controller.dart';
 import 'package:mirchi_ott/view_model/content_controller/content_controller.dart';
 import 'package:mirchi_ott/view_model/search_controller/search_controller.dart';
+import 'package:mirchi_ott/widgets/custom_network_image.dart';
 
 import '../../app/theme/app_colors.dart';
 import '../../data/models/response_model/content_response_model/content_model.dart';
@@ -129,16 +130,12 @@ class SearchPage extends StatelessWidget {
                   content: item,
                 ));
           },
-          leading: ClipRRect(
-            borderRadius: BorderRadius.circular(5),
-            child: Image.network(
-              item.poster,
-              width: 50,
-              height: 70,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) =>
-                  Image.asset("assets/images/farzi.jpg", width: 50, height: 70, fit: BoxFit.cover),
-            ),
+          leading: CustomNetworkImage(
+            imageUrl: item.poster,
+            width: 50,
+            height: 70,
+            fit: BoxFit.cover,
+            borderRadius: 5,
           ),
           title: Text(
             item.title,
@@ -204,15 +201,11 @@ class SearchPage extends StatelessWidget {
                             content: item,
                           ));
                     },
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(5),
-                      child: Image.network(
-                        item.poster,
-                        width: 170,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) =>
-                            Image.asset("assets/images/farzi.jpg", width: 170, fit: BoxFit.cover),
-                      ),
+                    child: CustomNetworkImage(
+                      imageUrl: item.poster,
+                      width: 170,
+                      fit: BoxFit.cover,
+                      borderRadius: 5,
                     ),
                   ),
                 );

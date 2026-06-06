@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:mirchi_ott/utils/app_images.dart';
 import 'package:mirchi_ott/utils/responsive.dart';
+import 'package:mirchi_ott/widgets/custom_network_image.dart';
 import '../../app/routes/app_routes.dart';
 import '../../app/theme/app_colors.dart';
 import '../../view_model/auth_controller/auth_controller.dart';
@@ -165,14 +166,10 @@ class _SignInPageState extends State<SignInPage> {
                                           mainAxisAlignment:
                                               MainAxisAlignment.center,
                                           children: [
-                                            Image.network(
-                                              'https://auth.services.adobe.com/img/google_logo.svg',
+                                            CustomNetworkImage(
+                                              imageUrl: 'https://auth.services.adobe.com/img/google_logo.svg',
                                               height: 24,
-                                              errorBuilder:
-                                                  (context, error, stackTrace) =>
-                                                      const Icon(Icons.g_mobiledata,
-                                                          color: Colors.white,
-                                                          size: 30),
+                                              errorWidget: const Icon(Icons.g_mobiledata, color: Colors.white, size: 30),
                                             ),
                                             const SizedBox(width: 12),
                                             const Text(

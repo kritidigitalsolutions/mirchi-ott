@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:mirchi_ott/app/theme/app_colors.dart';
 import 'package:mirchi_ott/utils/responsive.dart';
 import 'package:mirchi_ott/view_model/download_controller/download_controller.dart';
+import 'package:mirchi_ott/widgets/custom_network_image.dart';
 import '../../view_model/auth_controller/auth_controller.dart';
 import '../../view_model/home_controller/home_controller.dart';
 import '../auth/signInPage.dart';
@@ -85,16 +86,12 @@ class DownloadsPage extends StatelessWidget {
                 },
 
                 /// 🎞 POSTER
-                leading: ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.network(
-                    item.poster,
-                    width: 55,
-                    height: 75,
-                    fit: BoxFit.cover,
-                    errorBuilder: (c, e, s) =>
-                    const Icon(Icons.movie, color: Colors.white, size: 50),
-                  ),
+                leading: CustomNetworkImage(
+                  imageUrl: item.poster,
+                  width: 55,
+                  height: 75,
+                  fit: BoxFit.cover,
+                  borderRadius: 8,
                 ),
 
                 /// 📄 TITLE + DETAILS

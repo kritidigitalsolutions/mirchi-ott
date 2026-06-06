@@ -6,10 +6,20 @@ class SupportRepository {
 
   SupportRepository(this._apiService);
 
-  Future<dynamic> createTicket(Map<String, dynamic> data) async {
+  Future<dynamic> createTicket(Map<String, dynamic> data, {List<String>? filePaths}) async {
     try {
-      final response = await _apiService.postApi(AppConstants.createTicket, data);
-      return response;
+      if (filePaths == null || filePaths.isEmpty) {
+        final response = await _apiService.postApi(AppConstants.createTicket, data);
+        return response;
+      } else {
+        // Send all files under the 'attachments' key as a list
+        final response = await _apiService.postMultipartApi(
+          AppConstants.createTicket, 
+          data, 
+          {'attachments': filePaths}
+        );
+        return response;
+      }
     } catch (e) {
       rethrow;
     }

@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mirchi_ott/utils/responsive.dart';
@@ -8,6 +7,7 @@ import 'package:mirchi_ott/view/profile/setting_page.dart';
 import 'package:mirchi_ott/view_model/primium_controller/premium_controller.dart';
 import 'package:mirchi_ott/utils/constants.dart';
 import 'package:mirchi_ott/view_model/home_controller/home_controller.dart';
+import 'package:mirchi_ott/widgets/custom_network_image.dart';
 import '../../app/theme/app_colors.dart';
 import '../../view_model/auth_controller/auth_controller.dart';
 import '../auth/signInPage.dart';
@@ -74,100 +74,129 @@ class ProfilePage extends StatelessWidget {
                       children: [
                         Padding(
                           padding: const EdgeInsets.all(16),
-                          child: Row(
-                            children: [
-                                 Obx(() {
-                                  final user = authController.userData.value;
-                                  String? imageUrl = user?['avatar'] ??
-                                      user?['image'] ??
-                                      user?['profileImage'];
+                          child: Obx(() {
+                            final bool isLoggedIn = authController.isLoggedIn.value;
+                            final user = authController.userData.value;
 
-                                  if (imageUrl != null &&
-                                      imageUrl.isNotEmpty &&
-                                      !imageUrl.startsWith('http')) {
-                                    imageUrl = "${AppConstants.serverUrl}/$imageUrl";
-                                  }
-
-                                  return CircleAvatar(
+                            if (!isLoggedIn) {
+                              return Row(
+                                children: [
+                                  const CircleAvatar(
                                     radius: 25,
-                                    backgroundColor: Colors.grey[800],
-                                    child: (imageUrl != null && imageUrl.isNotEmpty)
-                                        ? ClipOval(
-                                            child: CachedNetworkImage(
-                                              imageUrl: imageUrl,
-                                              fit: BoxFit.cover,
-                                              width: 50,
-                                              height: 50,
-                                              placeholder: (context, url) => const Icon(Icons.person, color: AppColors.white, size: 30),
-                                              errorWidget: (context, url, error) => const Icon(Icons.person, color: AppColors.white, size: 30),
+                                    backgroundColor: AppColors.grey,
+                                    child: Icon(Icons.person, color: AppColors.white, size: 30),
+                                  ),
+                                  const SizedBox(width: 15),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: const [
+                                        Text(
+                                          "Welcome Guest",
+                                          style: TextStyle(color: AppColors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                                        ),
+                                        Text(
+                                          "Sign in to access all features",
+                                          style: TextStyle(color: AppColors.grey, fontSize: 13),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  ElevatedButton(
+                                    onPressed: () => Get.to(() => const SignInPage()),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppColors.buttonColor,
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                    ),
+                                    child: const Text("SIGN IN", style: TextStyle(color: AppColors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                                  ),
+                                ],
+                              );
+                            }
+
+                            String? imageUrl = user?['avatar'] ?? user?['image'] ?? user?['profileImage'];
+                            if (imageUrl != null && imageUrl.isNotEmpty && !imageUrl.startsWith('http')) {
+                              imageUrl = "${AppConstants.serverUrl}/$imageUrl";
+                            }
+
+                            return Row(
+                              children: [
+                                CircleAvatar(
+                                  radius: 25,
+                                  backgroundColor: Colors.grey[800],
+                                  child: (imageUrl != null && imageUrl.isNotEmpty)
+                                      ? CustomNetworkImage(
+                                          imageUrl: imageUrl,
+                                          fit: BoxFit.cover,
+                                          width: 50,
+                                          height: 50,
+                                          borderRadius: 25,
+                                          placeholder: const SizedBox(
+                                            width: 20,
+                                            height: 20,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              valueColor: AlwaysStoppedAnimation<Color>(AppColors.buttonColor),
                                             ),
-                                          )
-                                        : const Icon(Icons.person, color: AppColors.white, size: 30),
-                                  );
-                                }),
-
-                              const SizedBox(width: 12),
-
-                              Expanded(
-                                child: Obx(() {
-                                  final user = authController.userData.value;
-                                  return Column(
+                                          ),
+                                          errorWidget: const Icon(Icons.person, color: AppColors.white, size: 30),
+                                        )
+                                      : const Icon(Icons.person, color: AppColors.white, size: 30),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         user?['name'] ?? "User Name",
-                                        style: const TextStyle(
-                                            color: AppColors.white,
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold),
+                                        style: const TextStyle(color: AppColors.white, fontSize: 16, fontWeight: FontWeight.bold),
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
                                         (user?['email'] != null && user!['email'].toString().isNotEmpty)
                                             ? user['email']
                                             : (user?['phone'] ?? "No Contact Info"),
-                                        style: const TextStyle(
-                                            color: AppColors.grey, fontSize: 14),
+                                        style: const TextStyle(color: AppColors.grey, fontSize: 14),
                                       ),
                                     ],
-                                  );
-                                }),
-                              ),
-                            ],
-                          ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          }),
                         ),
 
                         const Divider(color: Colors.grey, height: 1),
 
-                        InkWell(
-                          onTap: () => Get.to(() => const PurchasedPlansPage()),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Obx(() {
-                              final sub = premiumController.subscriptionData.value;
-                              final bool hasActiveSub = sub != null && sub['status'] == 'active';
+                        Obx(() {
+                          final sub = premiumController.subscriptionData.value;
+                          final bool hasActiveSub = sub != null && sub['status'] == 'active';
 
-                              return Row(
+                          return InkWell(
+                            onTap: () {
+                              if (hasActiveSub) {
+                                Get.to(() => const PurchasedPlansPage());
+                              } else {
+                                Get.to(() => const GoPremiumPage());
+                              }
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Row(
                                 children: [
                                   Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       const Text(
                                         "My Plan",
-                                        style: TextStyle(
-                                            color: AppColors.grey,
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w500),
+                                        style: TextStyle(color: AppColors.grey, fontSize: 12, fontWeight: FontWeight.w500),
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
-                                        hasActiveSub 
-                                            ? (sub['plan']?['name'] ?? "Active Plan") 
-                                            : "No Active Plans",
-                                        style: const TextStyle(
-                                            color: AppColors.white,
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold),
+                                        hasActiveSub ? (sub['plan']?['name'] ?? "Active Plan") : "No Active Plans",
+                                        style: const TextStyle(color: AppColors.white, fontSize: 16, fontWeight: FontWeight.bold),
                                       ),
                                     ],
                                   ),
@@ -186,10 +215,10 @@ class ProfilePage extends StatelessWidget {
                                   const SizedBox(width: 8),
                                   const Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 14),
                                 ],
-                              );
-                            }),
-                          ),
-                        ),
+                              ),
+                            ),
+                          );
+                        }),
                       ],
                     ),
                   ),

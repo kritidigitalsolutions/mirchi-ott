@@ -102,6 +102,74 @@ class _CreateTicketPageState extends State<CreateTicketPage> {
               decoration: _inputDecoration("Provide more details here..."),
             ),
             
+            const SizedBox(height: 20),
+            _buildLabel("Attachments (Optional)"),
+            Obx(() => Column(
+              children: [
+                if (supportController.selectedFilePaths.isNotEmpty)
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: supportController.selectedFilePaths.length,
+                      itemBuilder: (context, index) {
+                        String path = supportController.selectedFilePaths[index];
+                        String fileName = path.split('/').last;
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 8),
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.05),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: Colors.white10),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.attach_file, color: Colors.white54, size: 20),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  fileName,
+                                  style: const TextStyle(color: Colors.white70, fontSize: 13),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.close, color: Colors.redAccent, size: 20),
+                                onPressed: () => supportController.removeFile(index),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                InkWell(
+                  onTap: () => supportController.pickFiles(),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                    decoration: BoxDecoration(
+                      color: AppColors.buttonColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: AppColors.buttonColor.withOpacity(0.3), style: BorderStyle.solid),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: const [
+                        Icon(Icons.cloud_upload_outlined, color: AppColors.buttonColor, size: 20),
+                        SizedBox(width: 10),
+                        Text(
+                          "Upload Attachment",
+                          style: TextStyle(color: AppColors.buttonColor, fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            )),
+            
             const SizedBox(height: 40),
             Obx(() => ElevatedButton(
               onPressed: supportController.isLoading.value ? null : () async {
