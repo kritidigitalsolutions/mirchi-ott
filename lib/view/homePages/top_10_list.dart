@@ -105,14 +105,10 @@ class _Top10HoverCardState extends State<_Top10HoverCard> {
           : Matrix4.identity(),
         child: GestureDetector(
           onTap: () {
-            if (!widget.isSignedIn) {
-              Get.to(() => const SignInPage());
-            } else {
-              Get.to(() => DramaDetailsPage(
-                isSignedIn: widget.isSignedIn,
-                content: widget.item,
-              ));
-            }
+            Get.to(() => DramaDetailsPage(
+              isSignedIn: widget.isSignedIn,
+              content: widget.item,
+            ));
           },
           child: Stack(
             clipBehavior: Clip.none,
@@ -163,7 +159,7 @@ class _Top10HoverCardState extends State<_Top10HoverCard> {
                     imageUrl: widget.item.poster,
                     width: widget.isDesktop ? 150 : 95,
                     height: widget.isDesktop ? 230 : 140,
-                    fit: BoxFit.cover,
+                    fit: BoxFit.fill,
                     borderRadius: 12,
                   ),
                 ),

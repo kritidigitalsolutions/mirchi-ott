@@ -97,9 +97,9 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
                         ),
                         const SizedBox(height: 12),
                         InkWell(
-                          onTap: () => launchUrl(Uri.parse("mailto:themirchipost@gmail.com")),
+                          onTap: () => launchUrl(Uri.parse("mailto:support@mirchiapp.in")),
                           child: const Text(
-                            "Mail - themirchipost@gmail.com",
+                            "Mail - support@mirchiapp.in ",
                             style: TextStyle(color: AppColors.primary, fontSize: 14, fontWeight: FontWeight.w600),
                           ),
                         ),

@@ -141,7 +141,11 @@ class _SignInPageState extends State<SignInPage> {
                                           final response = await authController
                                               .signInWithGoogle();
                                           if (response != null) {
-                                            Get.offAllNamed(AppRoutes.navbar);
+                                            if (Get.previousRoute == AppRoutes.navbar || Get.previousRoute == AppRoutes.home) {
+                                              Get.offAllNamed(AppRoutes.navbar);
+                                            } else {
+                                              Get.back();
+                                            }
                                           }
                                         },
                                   style: ElevatedButton.styleFrom(

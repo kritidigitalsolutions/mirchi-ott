@@ -318,7 +318,7 @@ class MainHomePage extends StatelessWidget {
                     isSignedIn: authController.isLoggedIn.value,
                   ),
                   
-                  const SizedBox(height: 30),
+                  SizedBox(height: isDesktop ? 30 : 0),
 
                   _buildAnimatedSection(
                     isDesktop: isDesktop,
@@ -329,11 +329,11 @@ class MainHomePage extends StatelessWidget {
                         const Padding(
                           padding: EdgeInsets.symmetric(horizontal: 16),
                           child: Text(
-                            "WEB SERIES",
-                            style: TextStyle(color: AppColors.white, fontSize: 28, fontWeight: FontWeight.w900, letterSpacing: 1.2),
+                            "Web Series",
+                            style: TextStyle(color: AppColors.white, fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: 1.2),
                           ),
                         ),
-                        const SizedBox(height: 20),
+                        // const SizedBox(height: 20),
                         Obx(() {
                           final seriesContent = contentController.allContent
                               .where((c) => c.contentType == 'series' && c.isComingSoon == false)
@@ -423,8 +423,8 @@ class MainHomePage extends StatelessWidget {
           const Text("The ultimate destination for premium regional content. Watch the latest web series, movies, and originals anytime, anywhere.", textAlign: TextAlign.center, style: TextStyle(color: Colors.white70, fontSize: 16, height: 1.5)),
           const SizedBox(height: 20),
           InkWell(
-            onTap: () => launchUrl(Uri.parse("mailto:themirchipost@gmail.com")),
-            child: const Text("Email: themirchipost@gmail.com", style: TextStyle(color: AppColors.primary, fontSize: 16, fontWeight: FontWeight.w600)),
+            onTap: () => launchUrl(Uri.parse("mailto:support@mirchiapp.in")),
+            child: const Text("Email: support@mirchiapp.in", style: TextStyle(color: AppColors.primary, fontSize: 16, fontWeight: FontWeight.w600)),
           ),
           const SizedBox(height: 40),
           Wrap(
@@ -486,11 +486,7 @@ class _WebSeriesHoverCardState extends State<_WebSeriesHoverCard> {
           : Matrix4.identity(),
         child: GestureDetector(
           onTap: () {
-            if (!widget.isSignedIn) {
-              Get.to(() => const SignInPage());
-            } else {
-              Get.to(() => DramaDetailsPage(isSignedIn: widget.isSignedIn, content: widget.item));
-            }
+            Get.to(() => DramaDetailsPage(isSignedIn: widget.isSignedIn, content: widget.item));
           },
           child: Container(
             decoration: BoxDecoration(
@@ -512,7 +508,7 @@ class _WebSeriesHoverCardState extends State<_WebSeriesHoverCard> {
             ),
             child: CustomNetworkImage(
               imageUrl: widget.item.poster,
-              fit: BoxFit.cover,
+              fit: BoxFit.fill,
               borderRadius: 15,
             ),
           ),

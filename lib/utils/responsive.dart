@@ -50,9 +50,20 @@ class Responsive extends StatelessWidget {
     if (kIsWeb && hideOnWeb) return const SizedBox.shrink();
     
     final icon = getBackIcon(context) ?? Icons.arrow_back;
-    return IconButton(
-      icon: Icon(icon, color: color),
-      onPressed: onPressed ?? () => Navigator.maybePop(context),
+    return Padding(
+      padding: const EdgeInsets.all(4.0),
+      child: Material(
+        color: Colors.white.withOpacity(0.05),
+        shape: const CircleBorder(),
+        child: InkWell(
+          customBorder: const CircleBorder(),
+          onTap: onPressed ?? () => Navigator.maybePop(context),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Icon(icon, color: color, size: 22),
+          ),
+        ),
+      ),
     );
   }
 }

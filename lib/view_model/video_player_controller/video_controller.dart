@@ -16,6 +16,7 @@ class VideoController extends GetxController {
   var totalDuration = Duration.zero.obs;
 
   var playbackSpeed = 1.0.obs;
+  var volume = 1.0.obs;
 
   Timer? _hideTimer;
 
@@ -119,6 +120,12 @@ class VideoController extends GetxController {
   void setPlaybackSpeed(double speed) {
     playbackSpeed.value = speed;
     videoPlayerController?.setPlaybackSpeed(speed);
+  }
+
+  /// 🔊 VOLUME
+  void setVolume(double value) {
+    volume.value = value;
+    videoPlayerController?.setVolume(value);
   }
 
   /// ❌ DISPOSE

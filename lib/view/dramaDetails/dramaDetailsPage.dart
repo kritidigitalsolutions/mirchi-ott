@@ -70,11 +70,7 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: Container(
-          margin: const EdgeInsets.all(8),
-          decoration: BoxDecoration(color: Colors.black.withOpacity(0.5), shape: BoxShape.circle),
-          child: Responsive.backButton(context, onPressed: () => Navigator.maybePop(context)),
-        ),
+        leading: Responsive.backButton(context, onPressed: () => Navigator.maybePop(context)),
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -119,13 +115,13 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
                       if (widget.content.contentType == 'series')
                         _buildEpisodesSection(context, isDesktop),
 
-                      const SizedBox(height: 50),
+                      const SizedBox(height: 30),
 
                       /// 🎭 CAST & CREW
                       if (widget.content.cast != null && widget.content.cast!.isNotEmpty)
                         _buildCastSection(isDesktop),
 
-                      const SizedBox(height: 50),
+                      const SizedBox(height: 30),
 
                       /// ❤️ MORE LIKE THIS
                       if (relatedContent.isNotEmpty)
@@ -150,14 +146,12 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
       color: Colors.black,
       child: Stack(
         children: [
-          /// THE ACTUAL BANNER (Full image shown)
-          Center(
-            child: CustomNetworkImage(
-              imageUrl: widget.content.banner,
-              width: double.infinity,
-              height: isDesktop ? 750 : 350,
-              fit: BoxFit.contain, // Shows full banner without zooming
-            ),
+          /// THE ACTUAL BANNER
+          CustomNetworkImage(
+            imageUrl: widget.content.banner,
+            width: double.infinity,
+            height: isDesktop ? 750 : 350,
+            fit: BoxFit.fill, // Shows full banner without cropping or black bars
           ),
           /// SUBTLE GRADIENT OVERLAY
           Container(
@@ -254,8 +248,8 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
           /// TRAILER BUTTON AT BOTTOM RIGHT
           if (widget.content.trailerUrl != null && widget.content.trailerUrl!.isNotEmpty)
             Positioned(
-              bottom: 30,
-              right: isDesktop ? 60 : 20,
+              bottom: 10,
+              right: 10,
               child: _buildTrailerButton(isDesktop: isDesktop),
             ),
         ],
@@ -333,19 +327,24 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
   }
 
   Widget _buildTrailerButton({required bool isDesktop}) {
-    return OutlinedButton.icon(
+    return ElevatedButton.icon(
       onPressed: () async {
+        if (!authController.isLoggedIn.value) {
+          Get.to(() => const SignInPage());
+          return;
+        }
         final bool? isOver18 = await Get.dialog<bool>(const AgeRestrictionPopup());
         if (isOver18 == true) {
           Get.to(() => AdvancedVideoPlayer(url: widget.content.trailerUrl!, title: '${widget.content.title} - Trailer'));
         }
       },
-      icon: const Icon(Icons.play_circle_outline, size: 28, color: Colors.white),
-      label: const Text("TRAILER", style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
-      style: OutlinedButton.styleFrom(
-        side: const BorderSide(color: Colors.white, width: 2),
-        padding: EdgeInsets.symmetric(horizontal: isDesktop ? 40 : 20, vertical: isDesktop ? 22 : 15),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      icon: const Icon(Icons.play_circle_outline, size: 18, color: Colors.white),
+      label: const Text("TRAILER", style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold)),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.red,
+        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+        elevation: 5,
       ),
     );
   }
@@ -353,25 +352,44 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
   Widget _buildSmallActionsRow() {
     return Obx(() {
       final String contentId = widget.content.id;
+      final bool userLoggedIn = authController.isLoggedIn.value;
       return Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           _circleActionBtn(
             icon: watchlistController.isInWatchlist(contentId) ? Icons.check : Icons.add,
             label: "Watchlist",
-            onTap: () => watchlistController.toggleWatchlist(contentId),
+            onTap: () {
+              if (!userLoggedIn) {
+                Get.to(() => const SignInPage());
+              } else {
+                watchlistController.toggleWatchlist(contentId);
+              }
+            },
           ),
           const SizedBox(width: 25),
           _circleActionBtn(
             icon: interactionController.isLiked(contentId) ? Icons.thumb_up : Icons.thumb_up_outlined,
             label: "Like",
-            onTap: () => interactionController.toggleLike(contentId: contentId, contentType: widget.content.contentType),
+            onTap: () {
+              if (!userLoggedIn) {
+                Get.to(() => const SignInPage());
+              } else {
+                interactionController.toggleLike(contentId: contentId, contentType: widget.content.contentType);
+              }
+            },
           ),
           const SizedBox(width: 25),
           _circleActionBtn(
             icon: Icons.share_outlined,
             label: "Share",
-            onTap: () => ShareService.shareContent(title: widget.content.title, imageUrl: widget.content.poster),
+            onTap: () {
+              if (!userLoggedIn) {
+                Get.to(() => const SignInPage());
+              } else {
+                ShareService.shareContent(title: widget.content.title, imageUrl: widget.content.poster);
+              }
+            },
           ),
         ],
       );
@@ -435,6 +453,8 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
           }),
         ),
 
+        const SizedBox(height: 25),
+
         /// EPISODES LIST (Clean Rows)
         Obx(() {
           if (contentController.isEpisodesLoading.value) {
@@ -467,82 +487,115 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
   }
 
   Widget _buildEpisodeRow(ContentModel ep, bool isDesktop) {
-    return InkWell(
-      onTap: () => _playEpisode(ep),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          /// NUMBER
-          Padding(
-            padding: const EdgeInsets.only(top: 15, right: 15),
-            child: Text("${ep.episodeNumber}",
-                style: const TextStyle(
-                    color: Colors.white24,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold)),
-          ),
-
-          /// THUMBNAIL
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              CustomNetworkImage(
-                imageUrl: ep.poster,
-                width: isDesktop ? 220 : 130,
-                height: isDesktop ? 125 : 75,
-                fit: BoxFit.cover,
-                borderRadius: 8,
-              ),
-              const Icon(Icons.play_circle_fill, color: Colors.white70, size: 36),
-            ],
-          ),
-
-          const SizedBox(width: 20),
-
-          /// DETAILS
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(ep.title,
-                          style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold)),
-                    ),
-                    const SizedBox(width: 10),
-                    Text(ep.duration ?? "24m",
-                        style: const TextStyle(
-                            color: Colors.white70,
-                            fontSize: 14)),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  ep.description ??
-                      "Watch episode ${ep.episodeNumber} of ${widget.content.title}.",
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.02),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: InkWell(
+        onTap: () => _playEpisode(ep),
+        borderRadius: BorderRadius.circular(12),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            /// NUMBER
+            SizedBox(
+              width: 30,
+              child: Text("${ep.episodeNumber}",
                   style: const TextStyle(
-                      color: Colors.white38,
-                      fontSize: 13,
-                      height: 1.4),
-                  maxLines: 4,
-                  overflow: TextOverflow.ellipsis,
+                      color: Colors.white24,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold)),
+            ),
+
+            /// THUMBNAIL
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                CustomNetworkImage(
+                  imageUrl: ep.poster,
+                  width: isDesktop ? 200 : 120,
+                  height: isDesktop ? 110 : 70,
+                  fit: BoxFit.cover,
+                  borderRadius: 8,
+                ),
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.4),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 24),
                 ),
               ],
             ),
-          ),
 
-          const SizedBox(width: 10),
+            const SizedBox(width: 15),
 
-          /// DOWNLOAD BUTTON
-          IconButton(
-            icon: const Icon(Icons.download_for_offline_outlined, color: Colors.white70, size: 28),
-            onPressed: () => _downloadEpisode(ep),
-          ),
-        ],
+            /// DETAILS
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(ep.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Text(ep.duration ?? " ",
+                          style: const TextStyle(
+                              color: Colors.white38,
+                              fontSize: 12)),
+                      const SizedBox(width: 8),
+                      Container(
+                        width: 3,
+                        height: 3,
+                        decoration: const BoxDecoration(color: Colors.white24, shape: BoxShape.circle),
+                      ),
+                      // const SizedBox(width: 8),
+                      // const Text("FREE", style: TextStyle(color: Colors.green, fontSize: 10, fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+
+            /// DOWNLOAD BUTTON (More integrated & attractive)
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () => _downloadEpisode(ep),
+                borderRadius: BorderRadius.circular(8),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.white10),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.download_for_offline_outlined,
+                        color: AppColors.primary,
+                        size: 30,
+                      ),
+                      const SizedBox(height: 2),
+                      const Text("SAVE", style: TextStyle(color: AppColors.primary, fontSize: 8, fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -594,7 +647,7 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
         const Text("More Like This", style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
         const SizedBox(height: 30),
         SizedBox(
-          height: 160,
+          height: isDesktop ? 300 : 200,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: related.length,
@@ -603,7 +656,7 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
               return GestureDetector(
                 onTap: () => Get.to(() => DramaDetailsPage(isSignedIn: authController.isLoggedIn.value, content: item), preventDuplicates: false),
                 child: Container(
-                  width: 170,
+                  width: isDesktop ? 200 : 135,
                   margin: const EdgeInsets.only(right: 20),
                   child: CustomNetworkImage(
                     imageUrl: item.poster,

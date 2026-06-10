@@ -106,14 +106,10 @@ class _HoverCardState extends State<_HoverCard> {
         child: InkWell(
           borderRadius: BorderRadius.circular(15),
           onTap: () {
-            if (!widget.isSignedIn) {
-              Get.to(() => const SignInPage());
-            } else {
-              Get.to(() => DramaDetailsPage(
-                    isSignedIn: widget.isSignedIn,
-                    content: widget.item,
-                  ));
-            }
+            Get.to(() => DramaDetailsPage(
+                  isSignedIn: widget.isSignedIn,
+                  content: widget.item,
+                ));
           },
           child: Container(
             decoration: BoxDecoration(
@@ -138,7 +134,7 @@ class _HoverCardState extends State<_HoverCard> {
                 children: [
                   CustomNetworkImage(
                     imageUrl: widget.item.poster,
-                    fit: BoxFit.cover,
+                    fit: BoxFit.fill,
                     borderRadius: 15,
                   ),
                   if (widget.isDesktop) AnimatedOpacity(

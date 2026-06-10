@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../../app/theme/app_colors.dart';
 
 class AgeRestrictionPopup extends StatelessWidget {
@@ -8,64 +7,101 @@ class AgeRestrictionPopup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      backgroundColor: AppColors.black,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 40),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-
-            const Text(
-              "Age-Restricted : 18+",
-              style: TextStyle(
-                color: AppColors.error,
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-              ),
+      backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 400),
+          child: Container(
+            decoration: BoxDecoration(
+              color: const Color(0xFF1A1A1A),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: Colors.white12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.5),
+                  blurRadius: 20,
+                  spreadRadius: 5,
+                )
+              ],
             ),
-
-            const SizedBox(height: 15),
-
-            const Text(
-              "Amount of violence, sex, adult language, nudity, or substance use may be present.",
-              textAlign: TextAlign.center,
-              style: TextStyle(color: AppColors.white),
-            ),
-
-            const SizedBox(height: 25),
-
-            /// OVER 18 BUTTON
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.buttonColor,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 30),
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.red.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Text(
+                    "18+",
+                    style: TextStyle(
+                      color: Colors.red,
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
-                onPressed: () {
-                  Navigator.pop(context, true);
-                },
-                child: const Text("I'M OVER 18",
-                    style: TextStyle(color: AppColors.white)),
-              ),
+                const SizedBox(height: 20),
+                const Text(
+                  "Age-Restricted Content",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 15),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 24),
+                  child: Text(
+                    "This content may contain violence, adult language, or other mature themes. Please confirm you are over 18 to proceed.",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.white70, fontSize: 14, height: 1.5),
+                  ),
+                ),
+                const SizedBox(height: 30),
+                const Divider(color: Colors.white12, height: 1),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextButton(
+                        onPressed: () => Navigator.pop(context, false),
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 20),
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.only(bottomLeft: Radius.circular(20)),
+                          ),
+                        ),
+                        child: const Text(
+                          "CANCEL",
+                          style: TextStyle(color: Colors.white54, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                    Container(width: 1, height: 60, color: Colors.white12),
+                    Expanded(
+                      child: TextButton(
+                        onPressed: () => Navigator.pop(context, true),
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 20),
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.only(bottomRight: Radius.circular(20)),
+                          ),
+                        ),
+                        child: const Text(
+                          "I'M OVER 18",
+                          style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-
-            const SizedBox(height: 10),
-            /// CANCEL BUTTON
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context, false);
-              },
-              child: const Text(
-                "CANCEL",
-                style: TextStyle(color: AppColors.white),
-              ),
-            )
-          ],
+          ),
         ),
       ),
     );

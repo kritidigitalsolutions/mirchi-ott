@@ -233,7 +233,7 @@ class ProfilePage extends StatelessWidget {
                 buildMenuItem(context, Icons.info_outline, "Terms & Conditions", const TermsAndConditionsPage()),
                 buildMenuItem(context, Icons.privacy_tip, "Privacy Policy", const PrivacyPolicyPage()),
                 buildMenuItem(context, Icons.currency_rupee, "Refund Policy", const RefundPolicyPage()),
-                buildMenuItem(context, Icons.help_outline, "Help", const HelpSupportPage()),
+                // buildMenuItem(context, Icons.help_outline, "Help", const HelpSupportPage()),
 
                 const SizedBox(height: 20),
                 Center(

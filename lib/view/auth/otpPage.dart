@@ -69,7 +69,15 @@ class _OtpPageState extends State<OtpPage> {
         if (!isEmail && isNew) {
           Get.offAll(() => CreateProfilePage(phone: widget.phoneNumber));
         } else {
-          Get.offAllNamed(AppRoutes.navbar);
+          // Check if we came from a content page
+          if (Get.previousRoute == AppRoutes.navbar || Get.previousRoute == AppRoutes.home || Get.previousRoute == AppRoutes.splash) {
+            Get.offAllNamed(AppRoutes.navbar);
+          } else {
+            // Pop until we are back to the page that initiated the login flow
+            // This usually means popping OtpPage and SignInPage
+            Get.back();
+            Get.back();
+          }
         }
       });
     }

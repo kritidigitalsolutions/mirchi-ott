@@ -135,11 +135,7 @@ class _ComingSoonSectionState extends State<ComingSoonSection> {
                   child: InkWell(
                     borderRadius: BorderRadius.circular(15),
                     onTap: () {
-                      if (!widget.isSignedIn) {
-                        Get.to(() => const SignInPage());
-                      } else {
-                        Get.to(() => DramaDetailsPage(isSignedIn: widget.isSignedIn, content: item));
-                      }
+                      Get.to(() => DramaDetailsPage(isSignedIn: widget.isSignedIn, content: item));
                     },
                     child: Stack(
                       children: [
@@ -196,11 +192,7 @@ class _ComingSoonSectionState extends State<ComingSoonSection> {
         children: [
           GestureDetector(
             onTap: () {
-              if (!widget.isSignedIn) {
-                Get.to(() => const SignInPage());
-              } else {
-                Get.to(() => DramaDetailsPage(isSignedIn: widget.isSignedIn, content: item));
-              }
+              Get.to(() => DramaDetailsPage(isSignedIn: widget.isSignedIn, content: item));
             },
             child: CustomNetworkImage(
               imageUrl: item.banner,

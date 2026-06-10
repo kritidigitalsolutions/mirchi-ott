@@ -34,7 +34,7 @@ class _AutoSliderState extends State<AutoSlider> {
   void initState() {
     super.initState();
     _pageController = PageController(
-      viewportFraction: Responsive.isDesktop(Get.context!) ? 0.9 : 0.8,
+      viewportFraction: Responsive.isDesktop(Get.context!) ? 0.9 : 0.85,
       initialPage: 1000,
     );
     currentPage = 1000;
@@ -102,116 +102,57 @@ class _AutoSliderState extends State<AutoSlider> {
               itemBuilder: (context, index) {
                 final item = widget.content[index % widget.content.length];
                 bool isSelected = currentPage == index;
-                double scale = isSelected ? 1 : 0.92;
 
-                return TweenAnimationBuilder(
-                  tween: Tween<double>(begin: scale, end: scale),
-                  duration: const Duration(milliseconds: 600),
-                  curve: Curves.easeOutBack,
-                  builder: (context, value, child) => Transform.scale(scale: value, child: child),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: GestureDetector(
-                      onTap: () {
-                        if (!widget.isSignedIn) {
-                           Get.to(() => const SignInPage());
-                        } else {
-                           Get.to(() => DramaDetailsPage(isSignedIn: widget.isSignedIn, content: item));
-                        }
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(25),
-                          boxShadow: [
-                            BoxShadow(
-                              color: isSelected ? AppColors.primary.withOpacity(0.3) : Colors.black.withOpacity(0.5),
-                              blurRadius: 25,
-                              spreadRadius: 2,
-                              offset: const Offset(0, 15),
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: GestureDetector(
+                    onTap: () {
+                      Get.to(() => DramaDetailsPage(isSignedIn: widget.isSignedIn, content: item));
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.black,
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(15),
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            /// CINEMATIC IMAGE
+                            CustomNetworkImage(
+                              imageUrl: isDesktop ? item.banner : item.poster,
+                              fit: BoxFit.fill,
+                              borderRadius: 15,
+                            ),
+                            /// TOP GRADIENT
+                            Container(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.center,
+                                  stops: const [0.0, 0.4],
+                                  colors: [
+                                    Colors.black.withOpacity(0.5),
+                                    Colors.transparent,
+                                  ],
+                                ),
+                              ),
+                            ),
+                            /// BOTTOM GRADIENT
+                            Container(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.center,
+                                  end: Alignment.bottomCenter,
+                                  colors: [
+                                    Colors.transparent,
+                                    Colors.black.withOpacity(0.5),
+                                  ],
+                                ),
+                              ),
                             ),
                           ],
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(25),
-                          child: Stack(
-                            fit: StackFit.expand,
-                            children: [
-                              /// CINEMATIC IMAGE WITH ZOOM
-                              AnimatedScale(
-                                duration: const Duration(seconds: 5),
-                                scale: isSelected ? 1.1 : 1.0,
-                                child: CustomNetworkImage(
-                                  imageUrl: isDesktop ? item.banner : item.poster,
-                                  fit: BoxFit.cover,
-                                  borderRadius: 25,
-                                ),
-                              ),
-                              /// TOP GRADIENT (Darker for Navbar contrast)
-                              Container(
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    begin: Alignment.topCenter,
-                                    end: Alignment.center,
-                                    stops: const [0.0, 0.4],
-                                    colors: [
-                                      Colors.black.withOpacity(0.9),
-                                      Colors.transparent,
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              /// BOTTOM GRADIENT (Cinematic fade)
-                              Container(
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    begin: Alignment.center,
-                                    end: Alignment.bottomCenter,
-                                    colors: [
-                                      Colors.transparent,
-                                      Colors.black.withOpacity(0.9),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              /// CONTENT
-                              Positioned(
-                                bottom: isDesktop ? 80 : 40,
-                                left: 50,
-                                right: 50,
-                                child: AnimatedOpacity(
-                                  duration: const Duration(milliseconds: 600),
-                                  opacity: isSelected ? 1 : 0,
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        item.title.toUpperCase(),
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          color: AppColors.white,
-                                          fontSize: isDesktop ? 56 : 26,
-                                          fontWeight: FontWeight.w900,
-                                          letterSpacing: 2.0,
-                                          shadows: [
-                                            Shadow(
-                                              color: Colors.red.withOpacity(0.8),
-                                              offset: const Offset(0, 0),
-                                              blurRadius: 20,
-                                            ),
-                                            Shadow(
-                                              color: Colors.black,
-                                              offset: const Offset(3, 5),
-                                              blurRadius: 10,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
                         ),
                       ),
                     ),
@@ -220,7 +161,7 @@ class _AutoSliderState extends State<AutoSlider> {
               },
             ),
           ),
-          const SizedBox(height: 25),
+          SizedBox(height: isDesktop ? 25 : 10),
         ],
       ),
     );
