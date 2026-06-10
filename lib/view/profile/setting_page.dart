@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mirchi_ott/utils/responsive.dart';
+import 'package:mirchi_ott/view/profile/help_page.dart';
 import '../../app/theme/app_colors.dart';
 import '../../view_model/profile/settings_controller.dart';
 
@@ -46,6 +47,7 @@ class SettingsPage extends StatelessWidget {
           const SizedBox(height: 20),
           _buildSectionHeader("Account"),
           _buildActionTile("Language", "English", () {}),
+          _buildActionTile("Help & Support", "", () => Get.to(() => const HelpSupportPage())),
           _buildActionTile("App Version", "1.0.0", null),
         ],
       ),

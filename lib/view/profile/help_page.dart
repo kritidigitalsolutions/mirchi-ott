@@ -74,11 +74,46 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
                         child: _buildActionCard(
                           icon: Icons.phone_in_talk_outlined,
                           label: "Call Customer Care",
-                          onTap: () => _makePhoneCall("+911234567890"),
+                          onTap: () => _makePhoneCall("+91 8369720507"),
                           color: Colors.green,
                         ),
                       ),
                     ],
+                  ),
+                  const SizedBox(height: 20),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.05),
+                      borderRadius: BorderRadius.circular(15),
+                      border: Border.all(color: Colors.white10),
+                    ),
+                    child: Column(
+                      children: [
+                        const Text(
+                          "Contact Us Directly",
+                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                        ),
+                        const SizedBox(height: 12),
+                        InkWell(
+                          onTap: () => launchUrl(Uri.parse("mailto:themirchipost@gmail.com")),
+                          child: const Text(
+                            "Mail - themirchipost@gmail.com",
+                            style: TextStyle(color: AppColors.primary, fontSize: 14, fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          "Call - +91 8369720507",
+                          style: TextStyle(color: Colors.green, fontSize: 14, fontWeight: FontWeight.w600),
+                        ),
+                        const Text(
+                          "(Mon - Sat 12pm - 8pm)",
+                          style: TextStyle(color: Colors.white38, fontSize: 12),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),

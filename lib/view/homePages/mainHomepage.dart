@@ -6,6 +6,7 @@ import '../../utils/app_images.dart';
 import '../../utils/responsive.dart';
 import '../../view_model/content_controller/content_controller.dart';
 import '../../widgets/custom_network_image.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../navbar/bottomNavbar.dart';
 import '../dramaDetails/dramaDetailsPage.dart';
 import 'auto_slider.dart';
@@ -378,7 +379,7 @@ class MainHomePage extends StatelessWidget {
                     ),
                   ),
                   
-                  if (isDesktop) _buildFooter(),
+                  _buildFooter(),
                   const SizedBox(height: 100),
                 ],
               ),
@@ -420,6 +421,11 @@ class MainHomePage extends StatelessWidget {
           const Text("MIRCHI OTT", style: TextStyle(color: AppColors.white, fontSize: 26, fontWeight: FontWeight.bold, letterSpacing: 2.0)),
           const SizedBox(height: 30),
           const Text("The ultimate destination for premium regional content. Watch the latest web series, movies, and originals anytime, anywhere.", textAlign: TextAlign.center, style: TextStyle(color: Colors.white70, fontSize: 16, height: 1.5)),
+          const SizedBox(height: 20),
+          InkWell(
+            onTap: () => launchUrl(Uri.parse("mailto:themirchipost@gmail.com")),
+            child: const Text("Email: themirchipost@gmail.com", style: TextStyle(color: AppColors.primary, fontSize: 16, fontWeight: FontWeight.w600)),
+          ),
           const SizedBox(height: 40),
           Wrap(
             alignment: WrapAlignment.center,
@@ -435,7 +441,7 @@ class MainHomePage extends StatelessWidget {
           const SizedBox(height: 50),
           const Divider(color: Colors.white12),
           const SizedBox(height: 30),
-          const Text("© 2024 Mirchi OTT. All Rights Reserved.", style: TextStyle(color: Colors.white38, fontSize: 13)),
+          const Text("© 2024 Mirchi OTT All Rights Reserved", style: TextStyle(color: Colors.white38, fontSize: 13)),
         ],
       ),
     );
