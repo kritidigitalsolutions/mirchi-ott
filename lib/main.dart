@@ -51,11 +51,18 @@ Future<void> main() async {
   /// 🔥 Firebase Init
   try {
     if (kIsWeb) {
-      // On Web, Firebase.initializeApp() requires options. 
-      // If DefaultFirebaseOptions is missing, we skip or use a try-catch to avoid white screen.
-      // You should run `flutterfire configure` to generate firebase_options.dart
       print("🌐 Firebase Web: Attempting initialization...");
-      await Firebase.initializeApp();
+      await Firebase.initializeApp(
+        options: const FirebaseOptions(
+          apiKey: "AIzaSyCQjTiOSB_D9kYg2tMIN0iIjS-vbNH5ne0",
+          authDomain: "mirchi-ott.firebaseapp.com",
+          projectId: "mirchi-ott",
+          storageBucket: "mirchi-ott.firebasestorage.app",
+          messagingSenderId: "399081225701",
+          appId: "1:399081225701:web:9f92eeb3b185c34ede430c",
+          measurementId: "G-YEZ9EVGS3J",
+        ),
+      );
     } else {
       await Firebase.initializeApp();
     }
