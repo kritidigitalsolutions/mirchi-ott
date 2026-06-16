@@ -185,7 +185,7 @@ class SearchPage extends StatelessWidget {
           const SizedBox(height: 15),
 
           SizedBox(
-            height: 140,
+            height: 220,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               itemCount: topSeries.length,
@@ -203,9 +203,9 @@ class SearchPage extends StatelessWidget {
                     },
                     child: CustomNetworkImage(
                       imageUrl: item.poster,
-                      width: 170,
-                      fit: BoxFit.cover,
-                      borderRadius: 5,
+                      width: 150,
+                      fit: BoxFit.fill,
+                      borderRadius: 8,
                     ),
                   ),
                 );
@@ -216,7 +216,8 @@ class SearchPage extends StatelessWidget {
 
         const SizedBox(height: 25),
 
-        /// TOP ARTISTS
+        /// TOP ARTISTS (Commented out for now)
+        /*
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 15),
           child: InkWell(
@@ -282,6 +283,7 @@ class SearchPage extends StatelessWidget {
             },
           ),
         ),
+        */
         const SizedBox(height: 30),
       ],
     );

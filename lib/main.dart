@@ -6,6 +6,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
 
 import 'package:mirchi_ott/app/routes/app_pages.dart';
 import 'package:mirchi_ott/view_model/like_dislike_controller/like_dislike_controller.dart';
@@ -31,6 +32,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 }
 
 Future<void> main() async {
+  usePathUrlStrategy();
   WidgetsFlutterBinding.ensureInitialized();
 
   /// 🔥 Lock orientations only on mobile

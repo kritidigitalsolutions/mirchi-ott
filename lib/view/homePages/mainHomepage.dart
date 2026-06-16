@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../app/routes/app_routes.dart';
 import '../../app/theme/app_colors.dart';
 import '../../utils/app_images.dart';
 import '../../utils/responsive.dart';
@@ -432,24 +433,33 @@ class MainHomePage extends StatelessWidget {
             spacing: 30,
             runSpacing: 20,
             children: [
-              _footerLink("Privacy Policy", const PrivacyPolicyPage()),
-              _footerLink("Terms & Conditions", const TermsAndConditionsPage()),
-              _footerLink("Refund Policy", const RefundPolicyPage()),
-              _footerLink("Help & Support", const HelpSupportPage()),
+              _footerLink("Privacy Policy", AppRoutes.privacy),
+              _footerLink("Terms & Conditions", AppRoutes.terms),
+              _footerLink("Refund Policy", AppRoutes.refund),
+              _footerLink("Help & Support", AppRoutes.help),
             ],
           ),
           const SizedBox(height: 50),
           const Divider(color: Colors.white12),
           const SizedBox(height: 30),
           const Text("© 2024 Mirchi OTT All Rights Reserved", style: TextStyle(color: Colors.white38, fontSize: 13)),
+          const SizedBox(height: 15),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text("POWERED BY", style: TextStyle(color: Colors.white30, fontSize: 11, letterSpacing: 1.5)),
+              const SizedBox(width: 8),
+              const Text("WHITE MULTIMEDIA", style: TextStyle(color: AppColors.primary, fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 2.0)),
+            ],
+          ),
         ],
       ),
     );
   }
 
-  Widget _footerLink(String title, Widget page) {
+  Widget _footerLink(String title, String route) {
     return InkWell(
-      onTap: () => Get.to(() => page),
+      onTap: () => Get.toNamed(route),
       child: Text(
         title,
         style: const TextStyle(color: AppColors.primary, fontSize: 16, fontWeight: FontWeight.w600),
