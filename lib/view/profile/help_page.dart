@@ -108,6 +108,20 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
                           "Call - +91 8369720507",
                           style: TextStyle(color: Colors.green, fontSize: 14, fontWeight: FontWeight.w600),
                         ),
+                        const SizedBox(height: 12),
+                        const Divider(color: Colors.white10),
+                        const SizedBox(height: 12),
+                        const Text(
+                          "Address",
+                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          "Floor No 12, 1202, Residences Tanaji Nagar, Tanaji Nagar Road No 1, Near Time of India off, W.E. Highway, Malad East, Mumbai, Maharashtra - 400097",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: Colors.white60, fontSize: 12),
+                        ),
+                        const SizedBox(height: 8),
                         const Text(
                           "(Mon - Sat 12pm - 8pm)",
                           style: TextStyle(color: Colors.white38, fontSize: 12),

@@ -442,14 +442,22 @@ class MainHomePage extends StatelessWidget {
           const SizedBox(height: 50),
           const Divider(color: Colors.white12),
           const SizedBox(height: 30),
-          const Text("© 2024 Mirchi OTT All Rights Reserved", style: TextStyle(color: Colors.white38, fontSize: 13)),
+          const Text("© 2024 Mirchi OTT All Rights Reserved", style: TextStyle(color: Colors.white70, fontSize: 13)),
           const SizedBox(height: 15),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text("POWERED BY", style: TextStyle(color: Colors.white30, fontSize: 11, letterSpacing: 1.5)),
+              const Text("POWERED BY", style: TextStyle(color: Colors.white70, fontSize: 11, letterSpacing: 1.5)),
               const SizedBox(width: 8),
               const Text("WHITE MULTIMEDIA", style: TextStyle(color: AppColors.primary, fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 2.0)),
+            ],
+          ),
+          const SizedBox(height: 20),
+          const Column(
+            children: [
+              Text("Floor No 12, 1202, Residences Tanaji Nagar,", style: TextStyle(color: Colors.white70, fontSize: 14)),
+              Text("Tanaji Nagar Road No 1, Near Time of India off, W.E. Highway,", style: TextStyle(color: Colors.white70, fontSize: 14)),
+              Text("Malad East, Mumbai, Maharashtra - 400097", style: TextStyle(color: Colors.white70, fontSize: 14)),
             ],
           ),
         ],
