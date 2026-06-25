@@ -8,6 +8,8 @@ import '../../view/profile/privacy_policy_page.dart';
 import '../../view/profile/terms_condition_page.dart';
 import '../../view/profile/refund_policy_page.dart';
 import '../../view/profile/help_page.dart';
+import '../../view/premium/payment_screen.dart';
+import '../../view/premium/goPremium.dart';
 import '../../view/profile/profilePage.dart';
 import '../../view/root_page.dart';
 import 'app_routes.dart';
@@ -24,5 +26,7 @@ class AppPages {
     GetPage(name: AppRoutes.refund, page: () => const RefundPolicyPage()),
     GetPage(name: AppRoutes.help, page: () => const HelpSupportPage()),
     GetPage(name: AppRoutes.profile, page: () => ProfilePage(onLogout: () {})),
+    GetPage(name: AppRoutes.goPremium, page: () => const GoPremiumPage()),
+    GetPage(name: AppRoutes.payment, page: () => const PaymentScreen()),
   ];
 }

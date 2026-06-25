@@ -67,6 +67,10 @@ class AuthController extends GetxController {
     await AppSession.setLogin(status);
     
     if (status) {
+      String? token = AppSession.getToken();
+      if (token != null) {
+        _updateGlobalToken(token);
+      }
       // ✅ Fetch all notifications from API when user logs in
       _syncNotificationsAfterLogin();
     }

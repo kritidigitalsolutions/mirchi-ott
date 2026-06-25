@@ -3,15 +3,17 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../app/theme/app_colors.dart';
 import '../../data/models/response_model/plan_response/plan_model.dart';
 import '../../data/network/base_api_service.dart';
 import '../../data/repositories/premium_repository.dart';
 import '../../utils/constants.dart';
+import '../../utils/app_session.dart';
 import '../../utils/custom_snackbar.dart';
 import '../auth_controller/auth_controller.dart';
 
-class PremiumController extends GetxController {
+class PremiumController extends GetxController with WidgetsBindingObserver {
   late final PremiumRepository _repository;
   final AuthController _authController = Get.find<AuthController>();
   late Razorpay _razorpay;
@@ -40,6 +42,7 @@ class PremiumController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    WidgetsBinding.instance.addObserver(this);
     _repository = PremiumRepository(Get.find<BaseApiService>());
     _razorpay = Razorpay();
     _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
@@ -68,8 +71,19 @@ class PremiumController extends GetxController {
 
   @override
   void onClose() {
+    WidgetsBinding.instance.removeObserver(this);
     _razorpay.clear();
     super.onClose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // Refresh subscription status when user returns to app after payment
+      if (isUserLoggedIn.value) {
+        fetchSubscriptionStatus();
+      }
+    }
   }
 
   Future<void> fetchPlans() async {
@@ -235,7 +249,7 @@ class PremiumController extends GetxController {
           ElevatedButton(
             onPressed: () {
               Get.back();
-              _setDemoActiveSubscription(planId);
+              startSabPaisaPayment(planId);
             },
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.buttonColor),
             child: const Text("OK", style: TextStyle(color: Colors.white)),
@@ -243,6 +257,68 @@ class PremiumController extends GetxController {
         ],
       ),
     );
+  }
+
+  Future<void> startSabPaisaPayment(String planId) async {
+    try {
+      final token = AppSession.getToken() ?? "";
+      
+      // Points directly to the payment route of your web app.
+      // Since your local web app is at /GoPremiumPage, we use that.
+      final String baseUrl = "http://localhost:62518/payment";
+      
+      final Uri paymentUri = Uri.parse(baseUrl).replace(queryParameters: {
+        'token': token,
+        'planId': planId,
+        'promoCode': isPromoApplied.value ? appliedPromoCode.value : "",
+        'source': 'app',
+      });
+
+      debugPrint("🚀 Redirecting to Web App Payment: $paymentUri");
+
+      if (await canLaunchUrl(paymentUri)) {
+        await launchUrl(
+          paymentUri,
+          mode: LaunchMode.externalApplication,
+        );
+      } else {
+        CustomSnackbar.show(title: "Error", message: "Could not open payment page", isError: true);
+      }
+    } catch (e) {
+      debugPrint("❌ Payment Redirection Error: $e");
+      CustomSnackbar.show(title: "Error", message: "Something went wrong starting payment", isError: true);
+    }
+  }
+
+  Future<void> initiateSabPaisaWebPayment(String planId) async {
+    try {
+      isSubscribing.value = true;
+      final apiService = Get.find<BaseApiService>();
+      
+      Map<String, dynamic> body = {"planId": planId};
+      if (isPromoApplied.value) body["promoCode"] = appliedPromoCode.value;
+      body["paymentMethod"] = "sabpaisa";
+
+      // Assuming your backend create-order returns a payment URL for SabPaisa
+      final response = await apiService.postApi(AppConstants.createOrder, body);
+      
+      if (response != null && response['success'] == true) {
+        String? paymentUrl = response['paymentUrl'] ?? response['url'];
+        
+        if (paymentUrl != null && await canLaunchUrl(Uri.parse(paymentUrl))) {
+          await launchUrl(Uri.parse(paymentUrl), mode: LaunchMode.externalApplication);
+        } else {
+          CustomSnackbar.show(title: "Error", message: "Payment gateway unavailable", isError: true);
+        }
+      } else {
+        CustomSnackbar.show(title: "Error", message: response['message'] ?? "Failed to create order", isError: true);
+      }
+    } catch (e) {
+      debugPrint("❌ SabPaisa Web Error: $e");
+      CustomSnackbar.show(title: "Error", message: "Something went wrong", isError: true);
+    } finally {
+      isSubscribing.value = false;
+    }
   }
 
   void _setDemoActiveSubscription(String planId) {

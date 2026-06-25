@@ -1,8 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mirchi_ott/utils/responsive.dart';
 import 'package:mirchi_ott/view_model/primium_controller/premium_controller.dart';
 import '../../app/theme/app_colors.dart';
+import '../../utils/app_session.dart';
+import '../../view_model/auth_controller/auth_controller.dart';
 import '../../view_model/home_controller/home_controller.dart';
 import '../../widgets/expendable_plan_card.dart';
 import '../auth/signInPage.dart';
@@ -13,9 +16,53 @@ import '../../utils/custom_snackbar.dart';
 class GoPremiumPage extends StatelessWidget {
   const GoPremiumPage({super.key});
 
+  void _handleWebParams(PremiumController controller) async {
+    final String? token = Get.parameters['token'];
+    final String? planId = Get.parameters['planId'];
+    final String? promoCode = Get.parameters['promoCode'];
+
+    if (token != null && token.isNotEmpty) {
+      debugPrint("🌐 Web Auto-Login: Token found in URL");
+      await AppSession.setToken(token);
+      final AuthController authController = Get.find<AuthController>();
+      authController.setLoginStatus(true);
+      await authController.getProfile();
+      
+      if (planId != null) {
+        // Wait for plans to load if necessary
+        if (controller.plans.isEmpty) {
+          ever(controller.plans, (plans) {
+            if (plans.isNotEmpty) {
+              _selectAndApply(controller, planId, promoCode);
+            }
+          });
+        } else {
+          _selectAndApply(controller, planId, promoCode);
+        }
+      }
+    }
+  }
+
+  void _selectAndApply(PremiumController controller, String planId, String? promoCode) {
+    int index = controller.plans.indexWhere((p) => p.id == planId);
+    if (index != -1) {
+      controller.selectPlan(index);
+      if (promoCode != null && promoCode.isNotEmpty) {
+        controller.applyPromoCode(promoCode);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final PremiumController controller = Get.put(PremiumController());
+    final PremiumController controller = Get.isRegistered<PremiumController>()
+        ? Get.find<PremiumController>()
+        : Get.put(PremiumController());
+
+    // Trigger auto-login if running on Web and params are present
+    if (kIsWeb) {
+      _handleWebParams(controller);
+    }
 
     return Scaffold(
       backgroundColor: AppColors.background,
