@@ -10,6 +10,7 @@ import 'package:mirchi_ott/view_model/primium_controller/premium_controller.dart
 import 'package:mirchi_ott/widgets/custom_network_image.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../app/routes/app_routes.dart';
 import '../../app/theme/app_colors.dart';
 import '../../data/models/response_model/content_response_model/content_model.dart';
 import '../../view_model/content_controller/content_controller.dart';
@@ -271,7 +272,7 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
         ),
         onPressed: () {
           if (!userLoggedIn) {
-            Get.to(() => const SignInPage());
+            Get.toNamed(AppRoutes.signIn);
           } else if (isAlreadyDownloaded) {
             CustomSnackbar.show(title: "Info", message: "Already downloaded");
           } else {
@@ -314,15 +315,15 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
 
   void _handlePlay(dynamic item, bool isPurchased, bool userLoggedIn) {
     if (!userLoggedIn) {
-      Get.to(() => const SignInPage());
+      Get.toNamed(AppRoutes.signIn);
     } else if (isPurchased || !item.isPremium) {
       if (item.videoUrl != null && item.videoUrl!.isNotEmpty) {
-        Get.to(() => AdvancedVideoPlayer(url: item.videoUrl!, title: item.title));
+        Get.toNamed(AppRoutes.videoPlayer, arguments: {'url': item.videoUrl!, 'title': item.title});
       } else {
         CustomSnackbar.show(title: "Error", message: "Video URL not found", isError: true);
       }
     } else {
-      Get.to(() => const GoPremiumPage());
+      Get.toNamed(AppRoutes.goPremium);
     }
   }
 
@@ -330,12 +331,12 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
     return ElevatedButton.icon(
       onPressed: () async {
         if (!authController.isLoggedIn.value) {
-          Get.to(() => const SignInPage());
+          Get.toNamed(AppRoutes.signIn);
           return;
         }
         final bool? isOver18 = await Get.dialog<bool>(const AgeRestrictionPopup());
         if (isOver18 == true) {
-          Get.to(() => AdvancedVideoPlayer(url: widget.content.trailerUrl!, title: '${widget.content.title} - Trailer'));
+          Get.toNamed(AppRoutes.videoPlayer, arguments: {'url': widget.content.trailerUrl!, 'title': '${widget.content.title} - Trailer'});
         }
       },
       icon: const Icon(Icons.play_circle_outline, size: 18, color: Colors.white),
@@ -361,7 +362,7 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
             label: "Watchlist",
             onTap: () {
               if (!userLoggedIn) {
-                Get.to(() => const SignInPage());
+                Get.toNamed(AppRoutes.signIn);
               } else {
                 watchlistController.toggleWatchlist(contentId);
               }
@@ -373,7 +374,7 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
             label: "Like",
             onTap: () {
               if (!userLoggedIn) {
-                Get.to(() => const SignInPage());
+                Get.toNamed(AppRoutes.signIn);
               } else {
                 interactionController.toggleLike(contentId: contentId, contentType: widget.content.contentType);
               }
@@ -385,7 +386,7 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
             label: "Share",
             onTap: () {
               if (!userLoggedIn) {
-                Get.to(() => const SignInPage());
+                Get.toNamed(AppRoutes.signIn);
               } else {
                 ShareService.shareContent(title: widget.content.title, imageUrl: widget.content.poster);
               }
@@ -614,7 +615,7 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
             itemBuilder: (context, index) {
               final actor = widget.content.cast![index];
               return GestureDetector(
-                onTap: () => Get.to(() => CastDetailsPage(castName: actor.name, castImage: actor.image)),
+                onTap: () => Get.toNamed(AppRoutes.castDetails, arguments: {'name': actor.name, 'image': actor.image}),
                 child: Padding(
                   padding: const EdgeInsets.only(right: 35),
                   child: Column(
@@ -654,7 +655,7 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
             itemBuilder: (context, index) {
               final item = related[index];
               return GestureDetector(
-                onTap: () => Get.to(() => DramaDetailsPage(isSignedIn: authController.isLoggedIn.value, content: item), preventDuplicates: false),
+                onTap: () => Get.toNamed(AppRoutes.dramaDetails, arguments: item, preventDuplicates: false),
                 child: Container(
                   width: isDesktop ? 200 : 135,
                   margin: const EdgeInsets.only(right: 20),
@@ -681,7 +682,7 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
 
   void _downloadEpisode(ContentModel episode) {
      if (!authController.isLoggedIn.value) {
-      Get.to(() => const SignInPage());
+      Get.toNamed(AppRoutes.signIn);
       return;
     }
     downloadController.downloadVideo(episode);
@@ -717,7 +718,7 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
                 children: [
                   Expanded(child: TextButton(onPressed: () => Get.back(), child: const Text("CANCEL", style: TextStyle(color: Colors.white54)))),
                   const SizedBox(width: 15),
-                  Expanded(child: ElevatedButton(style: ElevatedButton.styleFrom(backgroundColor: AppColors.buttonColor), onPressed: () { Get.back(); Get.to(() => const GoPremiumPage()); }, child: const Text("EXPLORE PLANS", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)))),
+                  Expanded(child: ElevatedButton(style: ElevatedButton.styleFrom(backgroundColor: AppColors.buttonColor), onPressed: () { Get.back(); Get.toNamed(AppRoutes.goPremium); }, child: const Text("EXPLORE PLANS", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)))),
                 ],
               ),
             ],

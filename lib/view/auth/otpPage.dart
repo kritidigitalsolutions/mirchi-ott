@@ -67,7 +67,7 @@ class _OtpPageState extends State<OtpPage> {
         bool isEmail = widget.phoneNumber.contains('@');
         
         if (!isEmail && isNew) {
-          Get.offAll(() => CreateProfilePage(phone: widget.phoneNumber));
+          Get.offAllNamed(AppRoutes.createProfile, arguments: widget.phoneNumber);
         } else {
           // Check if we came from a content page
           if (Get.previousRoute == AppRoutes.navbar || Get.previousRoute == AppRoutes.home || Get.previousRoute == AppRoutes.splash) {

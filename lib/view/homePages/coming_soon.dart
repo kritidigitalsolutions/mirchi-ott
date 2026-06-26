@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:mirchi_ott/app/theme/app_colors.dart';
 import 'package:mirchi_ott/data/models/response_model/content_response_model/content_model.dart';
 import 'package:mirchi_ott/widgets/custom_network_image.dart';
+import '../../app/routes/app_routes.dart';
 import '../dramaDetails/dramaDetailsPage.dart';
 import 'package:mirchi_ott/view_model/content_controller/content_controller.dart';
 import 'package:get_storage/get_storage.dart';
@@ -33,7 +34,7 @@ class _ComingSoonSectionState extends State<ComingSoonSection> {
 
   void _toggleReminder(ContentModel item) {
     if (!widget.isSignedIn) {
-      Get.to(() => const SignInPage());
+      Get.toNamed(AppRoutes.signIn);
       return;
     }
 
@@ -135,7 +136,7 @@ class _ComingSoonSectionState extends State<ComingSoonSection> {
                   child: InkWell(
                     borderRadius: BorderRadius.circular(15),
                     onTap: () {
-                      Get.to(() => DramaDetailsPage(isSignedIn: widget.isSignedIn, content: item));
+                      Get.toNamed(AppRoutes.dramaDetails, arguments: item);
                     },
                     child: Stack(
                       children: [
@@ -192,7 +193,7 @@ class _ComingSoonSectionState extends State<ComingSoonSection> {
         children: [
           GestureDetector(
             onTap: () {
-              Get.to(() => DramaDetailsPage(isSignedIn: widget.isSignedIn, content: item));
+              Get.toNamed(AppRoutes.dramaDetails, arguments: item);
             },
             child: CustomNetworkImage(
               imageUrl: item.banner,

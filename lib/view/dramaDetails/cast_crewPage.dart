@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mirchi_ott/widgets/custom_network_image.dart';
+import '../../app/routes/app_routes.dart';
 import '../../data/models/response_model/content_response_model/content_model.dart';
 import '../../utils/responsive.dart';
 import '../../view_model/auth_controller/auth_controller.dart';
@@ -124,9 +125,7 @@ class CastDetailsPage extends StatelessWidget {
 
                             return GestureDetector(
                               onTap: () {
-                                Get.to(() =>
-                                    DramaDetailsPage(content: item,
-                                      isSignedIn: authController.isLoggedIn.value,));
+                                Get.toNamed(AppRoutes.dramaDetails, arguments: item);
                               },
                               child: Container(
                                 width: isDesktop ? 180 : 120,
@@ -183,9 +182,7 @@ class CastDetailsPage extends StatelessWidget {
 
                             return GestureDetector(
                               onTap: () {
-                                Get.to(() =>
-                                    DramaDetailsPage(content: item,
-                                      isSignedIn: authController.isLoggedIn.value,));
+                                Get.toNamed(AppRoutes.dramaDetails, arguments: item);
                               },
                               child: Container(
                                 width: isDesktop ? 180 : 120,

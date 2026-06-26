@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../app/routes/app_routes.dart';
 import '../../utils/app_images.dart';
 import '../../utils/responsive.dart';
 import '../../data/models/response_model/content_response_model/content_model.dart';
@@ -105,10 +106,7 @@ class _Top10HoverCardState extends State<_Top10HoverCard> {
           : Matrix4.identity(),
         child: GestureDetector(
           onTap: () {
-            Get.to(() => DramaDetailsPage(
-              isSignedIn: widget.isSignedIn,
-              content: widget.item,
-            ));
+            Get.toNamed(AppRoutes.dramaDetails, arguments: widget.item);
           },
           child: Stack(
             clipBehavior: Clip.none,

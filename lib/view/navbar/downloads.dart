@@ -5,6 +5,7 @@ import 'package:mirchi_ott/app/theme/app_colors.dart';
 import 'package:mirchi_ott/utils/responsive.dart';
 import 'package:mirchi_ott/view_model/download_controller/download_controller.dart';
 import 'package:mirchi_ott/widgets/custom_network_image.dart';
+import '../../app/routes/app_routes.dart';
 import '../../view_model/auth_controller/auth_controller.dart';
 import '../../view_model/home_controller/home_controller.dart';
 import '../auth/signInPage.dart';
@@ -44,7 +45,7 @@ class DownloadsPage extends StatelessWidget {
           return _baseEmptyView(
             title: "Please sign in to view your downloads",
             buttonText: "Sign In",
-            onTap: () => Get.to(() => const SignInPage()),
+            onTap: () => Get.toNamed(AppRoutes.signIn),
           );
         }
 
@@ -79,10 +80,7 @@ class DownloadsPage extends StatelessWidget {
 
                 /// 🎬 OPEN DETAILS PAGE
                 onTap: () {
-                  Get.to(() => DramaDetailsPage(
-                    isSignedIn: authController.isLoggedIn.value,
-                    content: item,
-                  ));
+                  Get.toNamed(AppRoutes.dramaDetails, arguments: item);
                 },
 
                 /// 🎞 POSTER
@@ -125,10 +123,10 @@ class DownloadsPage extends StatelessWidget {
                       ),
                       onPressed: () {
                         if (localPath != null && File(localPath).existsSync()) {
-                          Get.to(() => AdvancedVideoPlayer(
-                            url: localPath,
-                            title: item.title,
-                          ));
+                          Get.toNamed(AppRoutes.videoPlayer, arguments: {
+                            'url': localPath,
+                            'title': item.title,
+                          });
                         } else {
                           CustomSnackbar.show(
                             title: "Error",

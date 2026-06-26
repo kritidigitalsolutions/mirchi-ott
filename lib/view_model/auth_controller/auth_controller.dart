@@ -171,7 +171,7 @@ class AuthController extends GetxController {
         } else {
           print("⚠️ Google Login Success but NO TOKEN returned");
         }
-        
+
         if (response.user != null) {
           userData.value = response.user;
           await storage.write('user_data', response.user);
@@ -179,7 +179,7 @@ class AuthController extends GetxController {
 
         // ✅ Direct login for Google users (even if new)
         setLoginStatus(true);
-        
+
         return response;
       } else {
         print("❌ Google Login Failed: ${response?.message}");
@@ -194,6 +194,30 @@ class AuthController extends GetxController {
       return null;
     } finally {
       isGoogleLoading.value = false;
+    }
+  }
+
+  Future<bool> websiteLogin(String token) async {
+    isLoading.value = true;
+    try {
+      await AppSession.setToken(token);
+      _updateGlobalToken(token);
+      
+      final response = await repository.websiteLogin();
+      if (response != null && response.success) {
+        if (response.user != null) {
+          userData.value = response.user;
+          await storage.write('user_data', response.user);
+        }
+        setLoginStatus(true);
+        return true;
+      }
+      return false;
+    } catch (e) {
+      debugPrint("❌ Website Login Error: $e");
+      return false;
+    } finally {
+      isLoading.value = false;
     }
   }
 

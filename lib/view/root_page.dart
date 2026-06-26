@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:mirchi_ott/view/homePages/mainHomepage.dart';
 import 'package:mirchi_ott/view/splash/splashScreen.dart';
@@ -18,7 +19,8 @@ class _RootPageState extends State<RootPage> {
   @override
   void initState() {
     super.initState();
-    _isSplash = !RootPage.splashShown;
+    // ✅ Skip splash on Web or if already shown
+    _isSplash = !kIsWeb && !RootPage.splashShown;
     if (_isSplash) {
       Timer(const Duration(seconds: 3), () {
         if (mounted) {

@@ -1,7 +1,7 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../app/theme/app_colors.dart';
@@ -16,7 +16,6 @@ import '../auth_controller/auth_controller.dart';
 class PremiumController extends GetxController with WidgetsBindingObserver {
   late final PremiumRepository _repository;
   final AuthController _authController = Get.find<AuthController>();
-  late Razorpay _razorpay;
 
   var selectedPlanIndex = 0.obs;
   RxBool get isUserLoggedIn => _authController.isLoggedIn;
@@ -44,10 +43,6 @@ class PremiumController extends GetxController with WidgetsBindingObserver {
     super.onInit();
     WidgetsBinding.instance.addObserver(this);
     _repository = PremiumRepository(Get.find<BaseApiService>());
-    _razorpay = Razorpay();
-    _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
-    _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
-    _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
 
     fetchPlans();
 
@@ -72,7 +67,6 @@ class PremiumController extends GetxController with WidgetsBindingObserver {
   @override
   void onClose() {
     WidgetsBinding.instance.removeObserver(this);
-    _razorpay.clear();
     super.onClose();
   }
 
@@ -93,12 +87,28 @@ class PremiumController extends GetxController with WidgetsBindingObserver {
       if (response != null && response['success'] == true) {
         final List<dynamic> data = response['plans'];
         plans.assignAll(data.map((e) => PlanModel.fromJson(e)).toList());
+        
         if (plans.isNotEmpty) {
-          selectPlan(0);
+          // If on web, check if a plan is requested via URL parameters
+          String? targetPlanId = kIsWeb ? Get.parameters['planId'] : null;
+          int index = -1;
+          if (targetPlanId != null && targetPlanId.isNotEmpty) {
+            index = plans.indexWhere((p) => p.id == targetPlanId);
+          }
+
+          if (index != -1) {
+            selectPlan(index);
+            String? promo = Get.parameters['promoCode'];
+            if (promo != null && promo.isNotEmpty) {
+              applyPromoCode(promo);
+            }
+          } else {
+            selectPlan(0);
+          }
         }
       }
     } catch (e) {
-      print("Error fetching plans: $e");
+      debugPrint("Error fetching plans: $e");
     } finally {
       isLoading.value = false;
     }
@@ -135,68 +145,7 @@ class PremiumController extends GetxController with WidgetsBindingObserver {
       CustomSnackbar.show(title: "Info", message: "Already Purchased");
       return;
     }
-    try {
-      if (Get.isBottomSheetOpen == true) Get.back();
-      isSubscribing.value = true;
-      final apiService = Get.find<BaseApiService>();
-      Map<String, dynamic> body = {"planId": planId};
-      if (isPromoApplied.value) body["promoCode"] = appliedPromoCode.value;
-
-      final response = await apiService.postApi(AppConstants.createOrder, body);
-      if (response != null && response['success'] == true) {
-        var options = {
-          'key': response['key'],
-          'amount': response['order']['amount'],
-          'name': 'Mirchi OTT',
-          'order_id': response['order']['id'],
-          'description': 'Subscription Plan',
-          'prefill': {
-            'contact': _authController.userData.value?['phone'] ?? '',
-            'email': _authController.userData.value?['email'] ?? ''
-          },
-          'notes': {
-            'planId': planId,
-            'promoCode': isPromoApplied.value ? appliedPromoCode.value : "",
-          }
-        };
-        _razorpay.open(options);
-      }
-    } catch (e) {
-      CustomSnackbar.show(title: "Payment Failed", message: "Something went wrong", isError: true);
-    } finally {
-      isSubscribing.value = false;
-    }
-  }
-
-  void _handlePaymentSuccess(PaymentSuccessResponse response) async {
-    try {
-      isSubscribing.value = true;
-      final apiService = Get.find<BaseApiService>();
-      final String planId = plans[selectedPlanIndex.value].id;
-      final verifyResponse = await apiService.postApi(AppConstants.verifyPayment, {
-        "razorpay_order_id": response.orderId,
-        "razorpay_payment_id": response.paymentId,
-        "razorpay_signature": response.signature,
-        "planId": planId
-      });
-      if (verifyResponse != null && verifyResponse['success'] == true) {
-        CustomSnackbar.show(title: "Success", message: "Payment Success", isSuccess: true);
-        fetchSubscriptionStatus();
-      }
-    } catch (e) {
-       CustomSnackbar.show(title: "Payment Failed", message: "Something went wrong", isError: true);
-    } finally {
-      isSubscribing.value = false;
-    }
-  }
-
-  void _handlePaymentError(PaymentFailureResponse response) {
-    isSubscribing.value = false;
-    CustomSnackbar.show(title: "Payment Failed", message: "Payment Failed", isError: true);
-  }
-
-  void _handleExternalWallet(ExternalWalletResponse response) {
-    CustomSnackbar.show(title: "External Wallet", message: "Wallet: ${response.walletName}");
+    subscribeToPlan(planId);
   }
 
   Future<void> applyPromoCode(String promoCode) async {
@@ -249,7 +198,11 @@ class PremiumController extends GetxController with WidgetsBindingObserver {
           ElevatedButton(
             onPressed: () {
               Get.back();
-              startSabPaisaPayment(planId);
+              if (kIsWeb) {
+                initiateSabPaisaWebPayment(planId);
+              } else {
+                startSabPaisaPayment(planId);
+              }
             },
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.buttonColor),
             child: const Text("OK", style: TextStyle(color: Colors.white)),
@@ -259,65 +212,113 @@ class PremiumController extends GetxController with WidgetsBindingObserver {
     );
   }
 
+  Future<void> initiateSabPaisaWebPayment(String planId) async {
+    try {
+      if (planId.isEmpty) {
+        CustomSnackbar.show(title: "Error", message: "Plan ID is missing", isError: true);
+        return;
+      }
+      
+      isSubscribing.value = true;
+      final apiService = Get.find<BaseApiService>();
+
+      Map<String, dynamic> body = {"planId": planId};
+      if (isPromoApplied.value && appliedPromoCode.value.isNotEmpty) {
+        body["promoCode"] = appliedPromoCode.value;
+      }
+      body["paymentMethod"] = "sabpaisa";
+
+      debugPrint("🔗 Creating Order for Web: $body");
+      final response = await apiService.postApi(AppConstants.createOrder, body);
+
+      if (response != null && response['success'] == true) {
+        String? paymentUrl = response['checkoutUrl'] ?? response['paymentUrl'] ?? response['url'];
+
+        if (paymentUrl != null) {
+          debugPrint("🚀 Redirecting to SabPaisa: $paymentUrl");
+          
+          final Uri uri = Uri.parse(paymentUrl);
+          if (await canLaunchUrl(uri)) {
+            await launchUrl(uri, mode: LaunchMode.externalApplication);
+          } else {
+            // Fallback for some browsers
+            await launchUrl(uri, mode: LaunchMode.platformDefault);
+          }
+        } else {
+          CustomSnackbar.show(title: "Error", message: "Payment gateway URL not found in response", isError: true);
+        }
+      } else {
+        CustomSnackbar.show(title: "Error", message: response?['message'] ?? "Failed to create order", isError: true);
+      }
+    } catch (e) {
+      debugPrint("❌ SabPaisa Web Error: $e");
+      String errorMessage = "Something went wrong starting payment";
+      if (e.toString().contains("Unauthorized")) {
+        errorMessage = "Session expired or invalid. Please login again.";
+      } else if (e.toString().contains("FetchDataException")) {
+        errorMessage = "Network error. Please check your connection.";
+      }
+      CustomSnackbar.show(title: "Error", message: "$errorMessage: $e", isError: true);
+    } finally {
+      isSubscribing.value = false;
+    }
+  }
+
   Future<void> startSabPaisaPayment(String planId) async {
     try {
       final token = AppSession.getToken() ?? "";
       
-      // Points directly to the payment route of your web app.
-      // Since your local web app is at /GoPremiumPage, we use that.
-      final String baseUrl = "http://localhost:62518/payment";
+      // Using the real production web link
+      String baseUrl = "https://mirchiapp.in";
       
-      final Uri paymentUri = Uri.parse(baseUrl).replace(queryParameters: {
+      // Redirect to GoPremium page with token and plan details
+      final Uri uri = Uri.parse("$baseUrl/goPremium").replace(queryParameters: {
         'token': token,
         'planId': planId,
         'promoCode': isPromoApplied.value ? appliedPromoCode.value : "",
-        'source': 'app',
+        'source': 'app', // Tells web app this came from mobile
       });
 
-      debugPrint("🚀 Redirecting to Web App Payment: $paymentUri");
+      debugPrint("🚀 Redirecting to Web: $uri");
 
-      if (await canLaunchUrl(paymentUri)) {
-        await launchUrl(
-          paymentUri,
-          mode: LaunchMode.externalApplication,
-        );
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
       } else {
-        CustomSnackbar.show(title: "Error", message: "Could not open payment page", isError: true);
+        CustomSnackbar.show(title: "Error", message: "Could not open website", isError: true);
       }
     } catch (e) {
-      debugPrint("❌ Payment Redirection Error: $e");
-      CustomSnackbar.show(title: "Error", message: "Something went wrong starting payment", isError: true);
+      debugPrint("❌ Redirection Error: $e");
+      CustomSnackbar.show(title: "Error", message: "Something went wrong", isError: true);
     }
   }
 
-  Future<void> initiateSabPaisaWebPayment(String planId) async {
+  Future<void> verifyWebPayment({
+    required String merchantTxnId,
+    required String paymentId,
+    required String planId,
+    String? checksum,
+  }) async {
     try {
-      isSubscribing.value = true;
+      isLoading.value = true;
       final apiService = Get.find<BaseApiService>();
-      
-      Map<String, dynamic> body = {"planId": planId};
-      if (isPromoApplied.value) body["promoCode"] = appliedPromoCode.value;
-      body["paymentMethod"] = "sabpaisa";
+      final verifyResponse = await apiService.postApi(AppConstants.verifyPayment, {
+        "merchantTxnId": merchantTxnId,
+        "paymentId": paymentId,
+        "checksum": checksum ?? "",
+        "planId": planId,
+      });
 
-      // Assuming your backend create-order returns a payment URL for SabPaisa
-      final response = await apiService.postApi(AppConstants.createOrder, body);
-      
-      if (response != null && response['success'] == true) {
-        String? paymentUrl = response['paymentUrl'] ?? response['url'];
-        
-        if (paymentUrl != null && await canLaunchUrl(Uri.parse(paymentUrl))) {
-          await launchUrl(Uri.parse(paymentUrl), mode: LaunchMode.externalApplication);
-        } else {
-          CustomSnackbar.show(title: "Error", message: "Payment gateway unavailable", isError: true);
-        }
+      if (verifyResponse != null && verifyResponse['success'] == true) {
+        CustomSnackbar.show(title: "Success", message: "Payment Verified Successfully!", isSuccess: true);
+        fetchSubscriptionStatus();
       } else {
-        CustomSnackbar.show(title: "Error", message: response['message'] ?? "Failed to create order", isError: true);
+        CustomSnackbar.show(title: "Payment Failed", message: verifyResponse['message'] ?? "Verification failed", isError: true);
       }
     } catch (e) {
-      debugPrint("❌ SabPaisa Web Error: $e");
-      CustomSnackbar.show(title: "Error", message: "Something went wrong", isError: true);
+      debugPrint("❌ Verification Error: $e");
+      CustomSnackbar.show(title: "Error", message: "Failed to verify payment", isError: true);
     } finally {
-      isSubscribing.value = false;
+      isLoading.value = false;
     }
   }
 

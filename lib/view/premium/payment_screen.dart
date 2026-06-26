@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mirchi_ott/view_model/primium_controller/premium_controller.dart';
 import '../../app/theme/app_colors.dart';
+import '../../data/network/api_network_service.dart';
+import '../../data/network/base_api_service.dart';
 import '../../view_model/auth_controller/auth_controller.dart';
 import '../../utils/app_session.dart';
 
@@ -23,32 +25,48 @@ class _PaymentScreenState extends State<PaymentScreen> {
     premiumController = Get.isRegistered<PremiumController>() 
         ? Get.find<PremiumController>() 
         : Get.put(PremiumController());
-    _handleAutoLogin();
+    
+    if (kIsWeb) {
+      _handleParams();
+    }
   }
 
-  void _handleAutoLogin() async {
-    if (kIsWeb) {
-      final String? token = Get.parameters['token'];
-      final String? planId = Get.parameters['planId'];
-      final String? promoCode = Get.parameters['promoCode'];
+  void _handleParams() async {
+    String? token = Get.parameters['token'];
+    final String? planId = Get.parameters['planId'];
+    final String? promoCode = Get.parameters['promoCode'];
 
-      if (token != null && token.isNotEmpty) {
-        debugPrint("🌐 Web Auto-Login: Token found in URL");
-        await AppSession.setToken(token);
-        authController.setLoginStatus(true);
-        await authController.getProfile();
-        
-        // Wait for plans to be loaded if they are currently fetching
-        if (premiumController.plans.isEmpty) {
-          ever(premiumController.plans, (plans) {
-            if (plans.isNotEmpty && planId != null) {
-              _selectPlanFromParams(planId, promoCode);
-            }
-          });
-        } else if (planId != null) {
-          _selectPlanFromParams(planId, promoCode);
-        }
+    // Handle Auto-Login if token is present
+    if (token != null && token.isNotEmpty) {
+      // Clean token (handle URL encoding, spaces, and "Bearer" prefix)
+      token = Uri.decodeComponent(token).trim();
+      if (token.startsWith("Bearer ")) {
+        token = token.replaceFirst("Bearer ", "");
       }
+      
+      debugPrint("🌐 Web Auto-Login: Token found in URL");
+      await AppSession.setToken(token);
+      
+      // Update the token in the controller and network service immediately
+      authController.isLoggedIn.value = true;
+      await AppSession.setLogin(true);
+      
+      final apiService = Get.find<BaseApiService>();
+      if (apiService is NetworkApiService) {
+        apiService.setToken(token);
+      }
+
+      await authController.getProfile();
+    }
+
+    // Ensure plans are loaded
+    if (premiumController.plans.isEmpty) {
+      await premiumController.fetchPlans();
+    }
+
+    // Select the plan from parameters
+    if (planId != null) {
+      _selectPlanFromParams(planId, promoCode);
     }
   }
 
@@ -69,6 +87,10 @@ class _PaymentScreenState extends State<PaymentScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Get.back(),
+        ),
         title: const Text("Secure Payment", style: TextStyle(color: Colors.white)),
         centerTitle: true,
       ),
@@ -77,12 +99,16 @@ class _PaymentScreenState extends State<PaymentScreen> {
           return const Center(child: CircularProgressIndicator(color: AppColors.primary));
         }
 
-        final plan = premiumController.plans.isNotEmpty && premiumController.selectedPlanIndex.value < premiumController.plans.length
+        final plan = premiumController.plans.isNotEmpty && 
+                     premiumController.selectedPlanIndex.value < premiumController.plans.length
             ? premiumController.plans[premiumController.selectedPlanIndex.value]
             : null;
 
         if (plan == null) {
-          return const Center(child: Text("No plan selected", style: TextStyle(color: Colors.white)));
+          return const Center(
+            child: Text("No plan selected or available.\nPlease go back and select a plan.", 
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.white70, fontSize: 16)));
         }
 
         return Padding(
@@ -90,6 +116,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Plan Summary Card
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
@@ -100,16 +127,16 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(plan.name, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+                    Text(plan.name, style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 10),
                     Text("Duration: ${plan.duration} Days", style: const TextStyle(color: Colors.white70)),
                     const Divider(color: Colors.white24, height: 30),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text("Total Amount", style: TextStyle(color: Colors.white, fontSize: 16)),
+                        const Text("Total Amount", style: TextStyle(color: Colors.white, fontSize: 18)),
                         Text(premiumController.selectedPrice.value, 
-                            style: const TextStyle(color: AppColors.primary, fontSize: 22, fontWeight: FontWeight.bold)),
+                            style: const TextStyle(color: AppColors.primary, fontSize: 24, fontWeight: FontWeight.bold)),
                       ],
                     ),
                   ],
@@ -118,12 +145,35 @@ class _PaymentScreenState extends State<PaymentScreen> {
               const SizedBox(height: 40),
               const Text("Payment Method", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 15),
-              _buildPaymentOption(
-                title: "SabPaisa (UPI, Cards, NetBanking)",
-                icon: Icons.account_balance_wallet,
-                onTap: () => _processPayment(plan.id!),
+              
+              // SabPaisa Option
+              Container(
+                padding: const EdgeInsets.all(15),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.05),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.account_balance_wallet, color: AppColors.primary),
+                    const SizedBox(width: 15),
+                    const Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text("SabPaisa Gateway", style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
+                        Text("UPI, Cards, NetBanking", style: TextStyle(color: Colors.white54, fontSize: 12)),
+                      ],
+                    ),
+                    const Spacer(),
+                    const Icon(Icons.radio_button_checked, color: AppColors.primary),
+                  ],
+                ),
               ),
+              
               const Spacer(),
+              
+              // Pay Button
               SizedBox(
                 width: double.infinity,
                 height: 55,
@@ -131,12 +181,22 @@ class _PaymentScreenState extends State<PaymentScreen> {
                   onPressed: premiumController.isSubscribing.value ? null : () => _processPayment(plan.id!),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    elevation: 5,
                   ),
                   child: premiumController.isSubscribing.value
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text("PAY NOW", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                      ? const SizedBox(
+                          height: 25, 
+                          width: 25, 
+                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                      : const Text("PROCEED TO PAY", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 ),
+              ),
+              const SizedBox(height: 10),
+              const Center(
+                child: Text("Secure payment powered by SabPaisa", 
+                  style: TextStyle(color: Colors.white38, fontSize: 12)),
               ),
               const SizedBox(height: 20),
             ],
@@ -146,35 +206,12 @@ class _PaymentScreenState extends State<PaymentScreen> {
     );
   }
 
-  Widget _buildPaymentOption({required String title, required IconData icon, required VoidCallback onTap}) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(15),
-        decoration: BoxDecoration(
-          color: Colors.white10,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.white24),
-        ),
-        child: Row(
-          children: [
-            Icon(icon, color: AppColors.primary),
-            const SizedBox(width: 15),
-            Text(title, style: const TextStyle(color: Colors.white, fontSize: 16)),
-            const Spacer(),
-            const Icon(Icons.radio_button_checked, color: AppColors.primary),
-          ],
-        ),
-      ),
-    );
-  }
-
   void _processPayment(String planId) {
     if (kIsWeb) {
-      // In web app, we call the API to get SabPaisa payment URL
+      // In web app, call the API to get SabPaisa payment URL
       premiumController.initiateSabPaisaWebPayment(planId);
     } else {
-      // In mobile app, we usually redirect to web
+      // In mobile app, redirect to this web page (redundant here but kept for consistency)
       premiumController.startSabPaisaPayment(planId);
     }
   }

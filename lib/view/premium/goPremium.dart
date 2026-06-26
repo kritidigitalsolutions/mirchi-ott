@@ -3,67 +3,102 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mirchi_ott/utils/responsive.dart';
 import 'package:mirchi_ott/view_model/primium_controller/premium_controller.dart';
+import '../../app/routes/app_routes.dart';
 import '../../app/theme/app_colors.dart';
 import '../../utils/app_session.dart';
 import '../../view_model/auth_controller/auth_controller.dart';
-import '../../view_model/home_controller/home_controller.dart';
 import '../../widgets/expendable_plan_card.dart';
 import '../auth/signInPage.dart';
 import '../popUp/promo_code_popup.dart';
 import '../popUp/redeem_voucher_page.dart';
 import '../../utils/custom_snackbar.dart';
 
-class GoPremiumPage extends StatelessWidget {
+class GoPremiumPage extends StatefulWidget {
   const GoPremiumPage({super.key});
 
-  void _handleWebParams(PremiumController controller) async {
+  @override
+  State<GoPremiumPage> createState() => _GoPremiumPageState();
+}
+
+class _GoPremiumPageState extends State<GoPremiumPage> {
+  late final PremiumController controller;
+  bool _isProcessingParams = false;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = Get.isRegistered<PremiumController>()
+        ? Get.find<PremiumController>()
+        : Get.put(PremiumController());
+
+    if (kIsWeb) {
+      _handleWebParams();
+    }
+  }
+
+  void _handleWebParams() async {
+    if (_isProcessingParams) return;
+    _isProcessingParams = true;
+
     final String? token = Get.parameters['token'];
     final String? planId = Get.parameters['planId'];
     final String? promoCode = Get.parameters['promoCode'];
+    final String? source = Get.parameters['source'];
+
+    // SabPaisa return parameters
+    final String? merchantTxnId = Get.parameters['merchantTxnId'];
+    final String? paymentId = Get.parameters['paymentId'];
+    final String? checksum = Get.parameters['checksum'];
+
+    // Handle Payment Verification if coming back from SabPaisa
+    if (merchantTxnId != null && paymentId != null && planId != null) {
+      debugPrint("💳 Web Payment Return detected: $paymentId");
+      controller.verifyWebPayment(
+        merchantTxnId: merchantTxnId,
+        paymentId: paymentId,
+        checksum: checksum,
+        planId: planId,
+      );
+    }
 
     if (token != null && token.isNotEmpty) {
       debugPrint("🌐 Web Auto-Login: Token found in URL");
-      await AppSession.setToken(token);
-      final AuthController authController = Get.find<AuthController>();
-      authController.setLoginStatus(true);
-      await authController.getProfile();
       
-      if (planId != null) {
+      final AuthController authController = Get.find<AuthController>();
+      bool loginSuccess = await authController.websiteLogin(token);
+
+      if (loginSuccess && planId != null) {
         // Wait for plans to load if necessary
         if (controller.plans.isEmpty) {
-          ever(controller.plans, (plans) {
-            if (plans.isNotEmpty) {
-              _selectAndApply(controller, planId, promoCode);
-            }
-          });
-        } else {
-          _selectAndApply(controller, planId, promoCode);
+          await controller.fetchPlans();
         }
+        await _selectAndApply(planId, promoCode);
+
+        // Auto-initiate payment if redirected from mobile app
+        if (source == 'app' && merchantTxnId == null) {
+          debugPrint("🚀 Auto-initiating SabPaisa payment from GoPremiumPage");
+          Future.delayed(const Duration(milliseconds: 500), () {
+            controller.initiateSabPaisaWebPayment(planId);
+          });
+        }
+      } else if (!loginSuccess) {
+        CustomSnackbar.show(title: "Error", message: "Login failed or token expired", isError: true);
       }
     }
   }
 
-  void _selectAndApply(PremiumController controller, String planId, String? promoCode) {
+  Future<void> _selectAndApply(String planId, String? promoCode) async {
     int index = controller.plans.indexWhere((p) => p.id == planId);
     if (index != -1) {
       controller.selectPlan(index);
       if (promoCode != null && promoCode.isNotEmpty) {
-        controller.applyPromoCode(promoCode);
+        await controller.applyPromoCode(promoCode);
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final PremiumController controller = Get.isRegistered<PremiumController>()
-        ? Get.find<PremiumController>()
-        : Get.put(PremiumController());
-
-    // Trigger auto-login if running on Web and params are present
-    if (kIsWeb) {
-      _handleWebParams(controller);
-    }
-
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -87,7 +122,6 @@ class GoPremiumPage extends StatelessWidget {
               child: SingleChildScrollView(
                 child: Column(
                   children: [
-                    /// 🔹 Header Section with Icon
                     const SizedBox(height: 20),
                     const Icon(Icons.stars, color: Colors.amber, size: 60),
                     const SizedBox(height: 10),
@@ -105,13 +139,8 @@ class GoPremiumPage extends StatelessWidget {
                       style: TextStyle(color: AppColors.grey, fontSize: 14),
                     ),
                     const SizedBox(height: 30),
-
-                    /// 🔹 Common Features
                     _buildFeaturesList(),
-
                     const SizedBox(height: 30),
-
-                    /// 🔹 Plans List
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 15),
                       child: Obx(() {
@@ -136,7 +165,7 @@ class GoPremiumPage extends StatelessWidget {
                               onBuy: () {
                                 controller.selectPlan(index);
                                 if (!controller.isUserLoggedIn.value) {
-                                  Get.to(() => const SignInPage());
+                                  Get.toNamed(AppRoutes.signIn);
                                 } else if (controller.hasActiveSubscription) {
                                   CustomSnackbar.show(title: "Info", message: "Already Purchased");
                                 } else {
@@ -153,9 +182,7 @@ class GoPremiumPage extends StatelessWidget {
                 ),
               ),
             ),
-
-            /// 🔹 Bottom Actions
-            _buildBottomActions(controller),
+            _buildBottomActions(),
           ],
         );
       }),
@@ -195,7 +222,7 @@ class GoPremiumPage extends StatelessWidget {
     );
   }
 
-  Widget _buildBottomActions(PremiumController controller) {
+  Widget _buildBottomActions() {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 10),
       decoration: BoxDecoration(
@@ -222,7 +249,7 @@ class GoPremiumPage extends StatelessWidget {
             child: TextButton.icon(
               onPressed: () {
                 if (controller.isUserLoggedIn.value) {
-                  Get.to(() => RedeemVoucherPage());
+                  Get.toNamed(AppRoutes.redeemVoucher);
                 } else {
                   _showSignInPopup();
                 }
@@ -254,7 +281,7 @@ class GoPremiumPage extends StatelessWidget {
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
             onPressed: () {
               Get.back();
-              Get.to(() => const SignInPage());
+              Get.toNamed(AppRoutes.signIn);
             },
             child: const Text("Sign In", style: TextStyle(color: Colors.white)),
           ),

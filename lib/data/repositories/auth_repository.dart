@@ -46,6 +46,15 @@ class AuthRepository {
     }
   }
 
+  Future<VerifyOtpResponse?> websiteLogin() async {
+    try {
+      final response = await apiProvider.postApi(AppConstants.websiteLogin, {});
+      return VerifyOtpResponse.fromJson(response);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<dynamic> createProfile({
     required String phone,
     required String name,

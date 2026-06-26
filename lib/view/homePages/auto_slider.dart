@@ -5,6 +5,7 @@ import 'package:mirchi_ott/utils/app_images.dart';
 import 'package:mirchi_ott/utils/responsive.dart';
 import 'package:mirchi_ott/view_model/primium_controller/premium_controller.dart';
 import 'package:mirchi_ott/widgets/custom_network_image.dart';
+import '../../app/routes/app_routes.dart';
 import '../../data/models/response_model/content_response_model/content_model.dart';
 import '../auth/signInPage.dart';
 import '../dramaDetails/dramaDetailsPage.dart';
@@ -107,7 +108,7 @@ class _AutoSliderState extends State<AutoSlider> {
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   child: GestureDetector(
                     onTap: () {
-                      Get.to(() => DramaDetailsPage(isSignedIn: widget.isSignedIn, content: item));
+                      Get.toNamed(AppRoutes.dramaDetails, arguments: item);
                     },
                     child: Container(
                       decoration: BoxDecoration(

@@ -174,13 +174,13 @@ class MainHomePage extends StatelessWidget {
           _navItem("Profile", 2, controller),
           const Spacer(),
           IconButton(
-            onPressed: () => Get.to(() => const SearchPage()),
+            onPressed: () => Get.toNamed(AppRoutes.search),
             icon: const Icon(Icons.search, color: Colors.white, size: 28),
           ),
           _buildNotificationIcon(notificationService),
           const SizedBox(width: 20),
           ElevatedButton(
-            onPressed: () => Get.to(() => const GoPremiumPage()),
+            onPressed: () => Get.toNamed(AppRoutes.goPremium),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.buttonColor,
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
@@ -218,7 +218,7 @@ class MainHomePage extends StatelessWidget {
       return Stack(
         children: [
           IconButton(
-            onPressed: () => Get.to(() => const NotificationPage()),
+            onPressed: () => Get.toNamed(AppRoutes.notifications),
             icon: const Icon(Icons.notifications_outlined, color: Colors.white, size: 28),
           ),
           if (unreadCount > 0)
@@ -251,7 +251,7 @@ class MainHomePage extends StatelessWidget {
           Row(
             children: [
               IconButton(
-                onPressed: () => Get.to(() => const SearchPage()),
+                onPressed: () => Get.toNamed(AppRoutes.search),
                 icon: const Icon(Icons.search, color: Colors.white, size: 28),
               ),
               _buildNotificationIcon(notificationService),
@@ -260,7 +260,7 @@ class MainHomePage extends StatelessWidget {
                 width: 100,
                 height: 28,
                 child: ElevatedButton(
-                  onPressed: () => Get.to(() => const GoPremiumPage()),
+                  onPressed: () => Get.toNamed(AppRoutes.goPremium),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.buttonColor,
                     padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -504,7 +504,7 @@ class _WebSeriesHoverCardState extends State<_WebSeriesHoverCard> {
           : Matrix4.identity(),
         child: GestureDetector(
           onTap: () {
-            Get.to(() => DramaDetailsPage(isSignedIn: widget.isSignedIn, content: widget.item));
+            Get.toNamed(AppRoutes.dramaDetails, arguments: widget.item);
           },
           child: Container(
             decoration: BoxDecoration(

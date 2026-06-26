@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import '../../app/routes/app_routes.dart';
 import '../../data/network/base_api_service.dart';
 import '../../data/repositories/watchlist_repo.dart';
 import '../../utils/custom_snackbar.dart';
@@ -66,7 +67,7 @@ class WatchlistController extends GetxController {
   Future<void> addToWatchlist(String contentId) async {
     final authController = Get.find<AuthController>();
     if (!authController.isLoggedIn.value) {
-      Get.to(() => const SignInPage());
+      Get.toNamed(AppRoutes.signIn);
       return;
     }
 

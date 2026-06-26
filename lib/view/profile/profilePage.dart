@@ -8,6 +8,7 @@ import 'package:mirchi_ott/view_model/primium_controller/premium_controller.dart
 import 'package:mirchi_ott/utils/constants.dart';
 import 'package:mirchi_ott/view_model/home_controller/home_controller.dart';
 import 'package:mirchi_ott/widgets/custom_network_image.dart';
+import '../../app/routes/app_routes.dart';
 import '../../app/theme/app_colors.dart';
 import '../../view_model/auth_controller/auth_controller.dart';
 import '../auth/signInPage.dart';
@@ -103,7 +104,7 @@ class ProfilePage extends StatelessWidget {
                                     ),
                                   ),
                                   ElevatedButton(
-                                    onPressed: () => Get.to(() => const SignInPage()),
+                                    onPressed: () => Get.toNamed(AppRoutes.signIn),
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: AppColors.buttonColor,
                                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -245,7 +246,7 @@ class ProfilePage extends StatelessWidget {
                     ),
                     onPressed: authController.isLoggedIn.value 
                         ? onLogout 
-                        : () => Get.to(() => const SignInPage()),
+                        : () => Get.toNamed(AppRoutes.signIn),
                     child: Text(
                         authController.isLoggedIn.value ? "SIGN OUT" : "SIGN IN", 
                         style: const TextStyle(color: AppColors.white, fontWeight: FontWeight.bold)),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../app/routes/app_routes.dart';
 import '../data/models/response_model/content_response_model/content_model.dart';
 import '../utils/responsive.dart';
 import '../view/dramaDetails/dramaDetailsPage.dart';
@@ -70,10 +71,7 @@ class CategoryGridPage extends StatelessWidget {
                       return InkWell(
                         borderRadius: BorderRadius.circular(12),
                         onTap: () {
-                          Get.to(() => DramaDetailsPage(
-                                isSignedIn: isSignedIn,
-                                content: item,
-                              ));
+                          Get.toNamed(AppRoutes.dramaDetails, arguments: item);
                         },
                         child: CustomNetworkImage(
                           imageUrl: item.poster,

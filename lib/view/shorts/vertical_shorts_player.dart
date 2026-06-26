@@ -8,6 +8,8 @@ import 'package:mirchi_ott/view/premium/goPremium.dart';
 import 'package:mirchi_ott/view_model/auth_controller/auth_controller.dart';
 import 'package:mirchi_ott/view_model/primium_controller/premium_controller.dart';
 
+import '../../app/routes/app_routes.dart';
+
 class VerticalShortsPlayer extends StatefulWidget {
   final List<ShortEpisode> episodes;
   final int initialIndex;
@@ -244,9 +246,9 @@ class _ShortVideoItemState extends State<ShortVideoItem> {
             ),
             onPressed: () {
               if (loggedIn) {
-                Get.to(() => const GoPremiumPage());
+                Get.toNamed(AppRoutes.goPremium);
               } else {
-                Get.to(() => const SignInPage());
+                Get.toNamed(AppRoutes.signIn);
               }
             },
             child: Text(

@@ -6,6 +6,7 @@ import 'package:mirchi_ott/view_model/content_controller/content_controller.dart
 import 'package:mirchi_ott/view_model/search_controller/search_controller.dart';
 import 'package:mirchi_ott/widgets/custom_network_image.dart';
 
+import '../../app/routes/app_routes.dart';
 import '../../app/theme/app_colors.dart';
 import '../../data/models/response_model/content_response_model/content_model.dart';
 import '../dramaDetails/cast_crewPage.dart';
@@ -67,7 +68,7 @@ class SearchPage extends StatelessWidget {
                               IconButton(
                                 icon: const Icon(Icons.mic, color: Colors.white),
                                 onPressed: () async {
-                                  final result = await Get.to(() => const VoiceListeningPage());
+                                  final result = await Get.toNamed(AppRoutes.voiceSearch);
                                   if (result != null && result is String) {
                                     controller.searchController.text = result;
                                     controller.updateSearchQuery(result);
@@ -125,10 +126,7 @@ class SearchPage extends StatelessWidget {
         final item = controller.searchResults[index];
         return ListTile(
           onTap: () {
-            Get.to(() => DramaDetailsPage(
-                  isSignedIn: authController.isLoggedIn.value,
-                  content: item,
-                ));
+            Get.toNamed(AppRoutes.dramaDetails, arguments: item);
           },
           leading: CustomNetworkImage(
             imageUrl: item.poster,
@@ -196,10 +194,7 @@ class SearchPage extends StatelessWidget {
                   child: InkWell(
                     borderRadius: BorderRadius.circular(5),
                     onTap: () {
-                      Get.to(() => DramaDetailsPage(
-                            isSignedIn: authController.isLoggedIn.value,
-                            content: item,
-                          ));
+                      Get.toNamed(AppRoutes.dramaDetails, arguments: item);
                     },
                     child: CustomNetworkImage(
                       imageUrl: item.poster,
