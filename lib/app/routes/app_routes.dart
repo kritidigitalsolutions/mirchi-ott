@@ -30,6 +30,10 @@ abstract class AppRoutes {
   static const categoryGrid = '/category-grid';
   static const redeemVoucher = '/redeem-voucher';
   static const shortsPlayer = '/shorts-player';
+  static const purchasedPlans = '/purchased-plans';
+  static const rateApp = '/rate-app';
+  static const topArtists = '/top-artists';
+  static const shortsEpisodes = '/shorts-episodes';
   
   // Policies & Support
   static const privacy = '/privacy-policy';

@@ -3,6 +3,7 @@ import 'package:mirchi_ott/view/auth/otpPage.dart';
 import 'package:mirchi_ott/view/auth/signInPage.dart';
 import 'package:mirchi_ott/view/dramaDetails/cast_crewPage.dart';
 import 'package:mirchi_ott/view/dramaDetails/dramaDetailsPage.dart';
+import 'package:mirchi_ott/view/dramaDetails/topArtistpage.dart';
 import 'package:mirchi_ott/view/homePages/mainHomepage.dart';
 import 'package:mirchi_ott/view/notifications/notification_page.dart';
 import 'package:mirchi_ott/view/popUp/redeem_voucher_page.dart';
@@ -17,9 +18,15 @@ import 'package:mirchi_ott/view/profile/profilePage.dart';
 import 'package:mirchi_ott/view/profile/refund_policy_page.dart';
 import 'package:mirchi_ott/view/profile/terms_condition_page.dart';
 import 'package:mirchi_ott/view/profile/ticket_chat_page.dart';
+import 'package:mirchi_ott/view/profile/watchlist.dart';
+import 'package:mirchi_ott/view/profile/setting_page.dart';
+import 'package:mirchi_ott/view/profile/Rate_your_app.dart';
+import 'package:mirchi_ott/view/profile/purchased_plans_page.dart';
+import 'package:mirchi_ott/view/navbar/downloads.dart';
 import 'package:mirchi_ott/view/root_page.dart';
 import 'package:mirchi_ott/view/search_pages/searchPage.dart';
 import 'package:mirchi_ott/view/shorts/vertical_shorts_player.dart';
+import 'package:mirchi_ott/view/shorts/shorts_episodes_grid.dart';
 import 'package:mirchi_ott/view/videoPlayer/video_player.dart';
 import 'package:mirchi_ott/view_model/auth_controller/auth_controller.dart';
 import 'package:mirchi_ott/widgets/catagory_widget.dart';
@@ -45,6 +52,13 @@ class AppPages {
     GetPage(name: AppRoutes.notifications, page: () => const NotificationPage()),
     GetPage(name: AppRoutes.voiceSearch, page: () => const VoiceListeningPage()),
     GetPage(name: AppRoutes.redeemVoucher, page: () => RedeemVoucherPage()),
+    GetPage(name: AppRoutes.watchList, page: () => const WatchlistPage()),
+    GetPage(name: AppRoutes.setting, page: () => const SettingsPage()),
+    GetPage(name: AppRoutes.rateApp, page: () => const ReviewPage()),
+    GetPage(name: AppRoutes.purchasedPlans, page: () => const PurchasedPlansPage()),
+    GetPage(name: AppRoutes.downloads, page: () => const DownloadsPage()),
+    GetPage(name: AppRoutes.topArtists, page: () => TopArtistsPage()),
+    GetPage(name: AppRoutes.shortsEpisodes, page: () => ShortsEpisodesGrid(drama: Get.arguments)),
     GetPage(
       name: AppRoutes.shortsPlayer,
       page: () => VerticalShortsPlayer(

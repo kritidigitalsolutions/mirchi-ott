@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mirchi_ott/utils/responsive.dart';
+import '../../app/routes/app_routes.dart';
 import '../../app/theme/app_colors.dart';
 import '../../view_model/primium_controller/premium_controller.dart';
 import '../premium/goPremium.dart';
@@ -61,7 +62,7 @@ class PurchasedPlansPage extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 15),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
-                  onPressed: () => Get.to(() => const GoPremiumPage()),
+                  onPressed: () => Get.toNamed(AppRoutes.goPremium),
                   child: const Text(
                     "UPGRADE OR RENEW PLAN",
                     style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
@@ -193,7 +194,7 @@ class PurchasedPlansPage extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(vertical: 15),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-                onPressed: () => Get.to(() => const GoPremiumPage()),
+                onPressed: () => Get.toNamed(AppRoutes.goPremium),
                 child: const Text("VIEW PLANS", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
               ),
             ),

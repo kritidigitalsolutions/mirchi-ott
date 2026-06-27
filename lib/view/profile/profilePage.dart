@@ -2,8 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mirchi_ott/utils/responsive.dart';
-import 'package:mirchi_ott/view/profile/privacy_policy_page.dart';
-import 'package:mirchi_ott/view/profile/setting_page.dart';
 import 'package:mirchi_ott/view_model/primium_controller/premium_controller.dart';
 import 'package:mirchi_ott/utils/constants.dart';
 import 'package:mirchi_ott/view_model/home_controller/home_controller.dart';
@@ -11,15 +9,6 @@ import 'package:mirchi_ott/widgets/custom_network_image.dart';
 import '../../app/routes/app_routes.dart';
 import '../../app/theme/app_colors.dart';
 import '../../view_model/auth_controller/auth_controller.dart';
-import '../auth/signInPage.dart';
-import 'watchlist.dart';
-import '../navbar/downloads.dart';
-import '../premium/goPremium.dart';
-import 'purchased_plans_page.dart';
-import 'Rate_your_app.dart';
-import 'help_page.dart';
-import 'refund_policy_page.dart';
-import 'terms_condition_page.dart';
 
 class ProfilePage extends StatelessWidget {
   final VoidCallback onLogout;
@@ -178,9 +167,9 @@ class ProfilePage extends StatelessWidget {
                           return InkWell(
                             onTap: () {
                               if (hasActiveSub) {
-                                Get.to(() => const PurchasedPlansPage());
+                                Get.toNamed(AppRoutes.purchasedPlans);
                               } else {
-                                Get.to(() => const GoPremiumPage());
+                                Get.toNamed(AppRoutes.goPremium);
                               }
                             },
                             child: Padding(
@@ -227,14 +216,14 @@ class ProfilePage extends StatelessWidget {
 
                 const SizedBox(height: 10),
 
-                buildMenuItem(context, Icons.bookmark_border, "Watchlist", const WatchlistPage()),
-                if (!kIsWeb) buildMenuItem(context, Icons.download_for_offline_outlined, "Downloads", const DownloadsPage()),
-                buildMenuItem(context, Icons.settings_outlined, "Settings", const SettingsPage()),
-                buildMenuItem(context, Icons.rate_review, "Rate Our App", const ReviewPage()),
-                buildMenuItem(context, Icons.info_outline, "Terms & Conditions", const TermsAndConditionsPage()),
-                buildMenuItem(context, Icons.privacy_tip, "Privacy Policy", const PrivacyPolicyPage()),
-                buildMenuItem(context, Icons.currency_rupee, "Refund Policy", const RefundPolicyPage()),
-                // buildMenuItem(context, Icons.help_outline, "Help", const HelpSupportPage()),
+                buildMenuItem(context, Icons.bookmark_border, "Watchlist", AppRoutes.watchList),
+                if (!kIsWeb) buildMenuItem(context, Icons.download_for_offline_outlined, "Downloads", AppRoutes.downloads),
+                buildMenuItem(context, Icons.settings_outlined, "Settings", AppRoutes.setting),
+                buildMenuItem(context, Icons.rate_review, "Rate Our App", AppRoutes.rateApp),
+                buildMenuItem(context, Icons.info_outline, "Terms & Conditions", AppRoutes.terms),
+                buildMenuItem(context, Icons.privacy_tip, "Privacy Policy", AppRoutes.privacy),
+                buildMenuItem(context, Icons.currency_rupee, "Refund Policy", AppRoutes.refund),
+                // buildMenuItem(context, Icons.help_outline, "Help", AppRoutes.help),
 
                 const SizedBox(height: 20),
                 Center(
@@ -263,9 +252,9 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
-  Widget buildMenuItem(BuildContext context, IconData icon, String title, Widget page) {
+  Widget buildMenuItem(BuildContext context, IconData icon, String title, String routeName) {
     return InkWell(
-      onTap: () => Get.to(() => page),
+      onTap: () => Get.toNamed(routeName),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         child: Row(

@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:mirchi_ott/app/routes/app_routes.dart';
 import 'package:mirchi_ott/widgets/custom_network_image.dart';
 import 'package:video_player/video_player.dart';
 import 'package:mirchi_ott/app/theme/app_colors.dart';
 import 'package:mirchi_ott/data/models/shorts_model.dart';
-import 'package:mirchi_ott/view/shorts/vertical_shorts_player.dart';
-import 'package:mirchi_ott/view/shorts/shorts_episodes_grid.dart';
 import 'package:mirchi_ott/view_model/shorts_controller/shorts_controller.dart';
 import 'package:mirchi_ott/view_model/auth_controller/auth_controller.dart';
 
@@ -113,11 +112,11 @@ class _ShortDramaListItemState extends State<ShortDramaListItem> {
                    _episodes = await shortsController.fetchEpisodes(widget.drama.id);
                 }
                 if (_episodes != null && _episodes!.isNotEmpty) {
-                  Get.to(() => VerticalShortsPlayer(
-                    episodes: _episodes!,
-                    initialIndex: 0,
-                    dramaName: widget.drama.title,
-                  ));
+                  Get.toNamed(AppRoutes.shortsPlayer, arguments: {
+                    'episodes': _episodes!,
+                    'initialIndex': 0,
+                    'dramaName': widget.drama.title,
+                  });
                 }
               },
               child: Container(
@@ -205,7 +204,7 @@ class _ShortDramaListItemState extends State<ShortDramaListItem> {
                           /// View Episodes Button
                           GestureDetector(
                             onTap: () {
-                              Get.to(() => ShortsEpisodesGrid(drama: widget.drama));
+                              Get.toNamed(AppRoutes.shortsEpisodes, arguments: widget.drama);
                             },
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),

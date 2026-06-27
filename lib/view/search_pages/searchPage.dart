@@ -217,7 +217,7 @@ class SearchPage extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 15),
           child: InkWell(
             onTap: () {
-              Get.to(() =>  TopArtistsPage());
+              Get.toNamed(AppRoutes.topArtists);
             },
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -251,10 +251,10 @@ class SearchPage extends StatelessWidget {
             itemBuilder: (context, index) {
               return GestureDetector(
                 onTap: () {
-                  Get.to(() => CastDetailsPage(
-                        castName: cast[index]['name']!,
-                        castImage: cast[index]['image']!,
-                      ));
+                  Get.toNamed(AppRoutes.castDetails, arguments: {
+                        'name': cast[index]['name']!,
+                        'image': cast[index]['image']!,
+                      });
                 },
                 child: Padding(
                   padding: const EdgeInsets.only(left: 16),

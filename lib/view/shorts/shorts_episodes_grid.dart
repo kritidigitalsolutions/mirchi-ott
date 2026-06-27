@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:mirchi_ott/app/routes/app_routes.dart';
 import 'package:mirchi_ott/app/theme/app_colors.dart';
 import 'package:mirchi_ott/data/models/shorts_model.dart';
 import 'package:mirchi_ott/view/shorts/vertical_shorts_player.dart';
@@ -67,11 +68,11 @@ class ShortsEpisodesGrid extends StatelessWidget {
 
               return GestureDetector(
                 onTap: () {
-                  Get.to(() => VerticalShortsPlayer(
-                    episodes: episodes,
-                    initialIndex: index,
-                    dramaName: drama.title,
-                  ));
+                  Get.toNamed(AppRoutes.shortsPlayer, arguments: {
+                    'episodes': episodes,
+                    'initialIndex': index,
+                    'dramaName': drama.title,
+                  });
                 },
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

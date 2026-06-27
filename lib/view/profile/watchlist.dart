@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:mirchi_ott/app/routes/app_routes.dart';
 import 'package:mirchi_ott/utils/responsive.dart';
 import 'package:mirchi_ott/widgets/custom_network_image.dart';
 import '../../app/theme/app_colors.dart';
@@ -76,10 +77,7 @@ class WatchlistPage extends StatelessWidget {
               child: ListTile(
                 onTap: () {
                   if (contentItem != null) {
-                    Get.to(() => DramaDetailsPage(
-                          isSignedIn: authController.isLoggedIn.value,
-                          content: contentItem!,
-                        ));
+                    Get.toNamed(AppRoutes.dramaDetails, arguments: contentItem);
                   }
                 },
                 leading: poster.isNotEmpty
@@ -154,7 +152,7 @@ class WatchlistPage extends StatelessWidget {
                 onPressed: () {
                   final homeController = Get.find<HomeController>();
                   homeController.selectedIndex.value = 1;
-                  Get.offAll(() => const MainHomePage());
+                  Get.offAllNamed(AppRoutes.home);
                 },
                 child: const Text(
                   ""

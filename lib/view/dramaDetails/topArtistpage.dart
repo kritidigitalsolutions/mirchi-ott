@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:mirchi_ott/app/routes/app_routes.dart';
 import 'package:mirchi_ott/utils/responsive.dart';
-import 'cast_crewPage.dart';
 
 class TopArtistsPage extends StatelessWidget {
   TopArtistsPage({super.key});
@@ -24,7 +25,7 @@ class TopArtistsPage extends StatelessWidget {
       appBar: isDesktop ? AppBar(
         backgroundColor: Colors.black,
         elevation: 0,
-        leading: Responsive.backButton(context, onPressed: () => Navigator.pop(context)),
+        leading: Responsive.backButton(context, onPressed: () => Get.back()),
         title: const Text("Top Artists", style: TextStyle(color: Colors.white)),
       ) : null,
       body: SafeArea(
@@ -38,7 +39,7 @@ class TopArtistsPage extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
                   child: Row(
                     children: [
-                      Responsive.backButton(context, onPressed: () => Navigator.pop(context)),
+                      Responsive.backButton(context, onPressed: () => Get.back()),
                       const SizedBox(width: 10),
                       const Text(
                         "Top Artists",
@@ -68,15 +69,10 @@ class TopArtistsPage extends StatelessWidget {
 
                       return GestureDetector(
                         onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => CastDetailsPage(
-                                castName: artist["name"]!,
-                                castImage: artist["image"]!,
-                              ),
-                            ),
-                          );
+                          Get.toNamed(AppRoutes.castDetails, arguments: {
+                            "name": artist["name"]!,
+                            "image": artist["image"]!,
+                          });
                         },
                         child: Column(
                           children: [
