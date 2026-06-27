@@ -180,6 +180,12 @@ class AuthController extends GetxController {
         // ✅ Direct login for Google users (even if new)
         setLoginStatus(true);
 
+        CustomSnackbar.show(
+          title: 'Welcome!',
+          message: 'Signed in successfully with Google',
+          isSuccess: true,
+        );
+
         return response;
       } else {
         print("❌ Google Login Failed: ${response?.message}");

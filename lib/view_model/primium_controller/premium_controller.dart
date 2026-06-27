@@ -272,7 +272,7 @@ class PremiumController extends GetxController with WidgetsBindingObserver {
       String baseUrl = "https://mirchiapp.in";
       
       // Redirect to GoPremium page with token and plan details
-      final Uri uri = Uri.parse("$baseUrl/goPremium").replace(queryParameters: {
+      final Uri uri = Uri.parse("$baseUrl/go-premium").replace(queryParameters: {
         'token': token,
         'planId': planId,
         'promoCode': isPromoApplied.value ? appliedPromoCode.value : "",

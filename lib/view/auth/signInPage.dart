@@ -149,20 +149,19 @@ class _SignInPageState extends State<SignInPage> {
                                           }
                                         },
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: AppColors.buttonColor,
-                                    disabledBackgroundColor:
-                                        AppColors.buttonColor.withOpacity(0.6),
+                                    backgroundColor: Colors.white, // Google style
+                                    elevation: 2,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(12),
+                                      side: const BorderSide(color: Colors.white12),
                                     ),
-                                    elevation: 0,
                                   ),
                                   child: authController.isGoogleLoading.value
                                       ? const SizedBox(
                                           height: 24,
                                           width: 24,
                                           child: CircularProgressIndicator(
-                                            color: Colors.white,
+                                            color: AppColors.primary,
                                             strokeWidth: 2,
                                           ),
                                         )
@@ -170,16 +169,18 @@ class _SignInPageState extends State<SignInPage> {
                                           mainAxisAlignment:
                                               MainAxisAlignment.center,
                                           children: [
-                                            CustomNetworkImage(
-                                              imageUrl: 'https://auth.services.adobe.com/img/google_logo.svg',
+                                            Image.network(
+                                              'https://cdn-icons-png.flaticon.com/512/2991/2991148.png', // Standard Google G PNG
                                               height: 24,
-                                              errorWidget: const Icon(Icons.g_mobiledata, color: Colors.white, size: 30),
+                                              width: 24,
+                                              errorBuilder: (context, error, stackTrace) => 
+                                                const Icon(Icons.g_mobiledata, color: Colors.black, size: 30),
                                             ),
                                             const SizedBox(width: 12),
                                             const Text(
                                               "Continue with Google",
                                               style: TextStyle(
-                                                color: Colors.white,
+                                                color: Colors.black, // Dark text on white button
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.w600,
                                               ),

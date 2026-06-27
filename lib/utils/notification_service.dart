@@ -10,6 +10,8 @@ import '../utils/constants.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
+import '../view_model/auth_controller/auth_controller.dart';
+
 class NotificationService extends GetxController {
   static NotificationService get to => Get.find();
 
@@ -130,6 +132,12 @@ class NotificationService extends GetxController {
   Future<void> uploadToken() async {
     if (GetPlatform.isWeb) return;
     try {
+      final authController = Get.find<AuthController>();
+      if (!authController.isLoggedIn.value) {
+        print("⏭️ FCM Token upload skipped: User not logged in");
+        return;
+      }
+
       // 🔄 If token is not yet available, try to fetch it
       if (_currentToken == null) {
         print("🔍 Attempting to fetch FCM Token...");
