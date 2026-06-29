@@ -12,7 +12,7 @@ abstract class AppRoutes {
   static const videoPlayer = '/video-player';
   static const accountSetting = '/account-setting';
   static const otpPage = '/otp-page';
-  static const signIn = '/signin';
+  static const signIn = '/whitemultimedia/signin';
   static const createProfile = '/create-profile';
   static const manageProfile= '/manage-profile';
   static const manageDevice= '/manage-device';
