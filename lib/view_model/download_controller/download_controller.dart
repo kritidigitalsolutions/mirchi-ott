@@ -63,7 +63,7 @@ class DownloadController extends GetxController {
 
       CustomSnackbar.show(
         title: "Downloaded",
-        message: "${content.title} saved offline ✅",
+        message: "${content.title} downloaded offline ✅",
         isSuccess: true,
       );
     } catch (e) {

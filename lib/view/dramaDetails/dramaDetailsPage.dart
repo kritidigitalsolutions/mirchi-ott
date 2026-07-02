@@ -263,10 +263,11 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
       final bool userLoggedIn = authController.isLoggedIn.value;
       final bool isAlreadyDownloaded = downloadController.isDownloaded(widget.content.id);
       final bool downloading = downloadController.isDownloading[widget.content.id] ?? false;
+      final double progress = downloadController.downloadProgress[widget.content.id] ?? 0.0;
 
       return OutlinedButton.icon(
         style: OutlinedButton.styleFrom(
-          side: const BorderSide(color: Colors.white, width: 2),
+          side: BorderSide(color: isAlreadyDownloaded ? Colors.green : Colors.white, width: 2),
           padding: EdgeInsets.symmetric(vertical: isDesktop ? 22 : 15),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
@@ -275,16 +276,24 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
             Get.toNamed(AppRoutes.signIn);
           } else if (isAlreadyDownloaded) {
             CustomSnackbar.show(title: "Info", message: "Already downloaded");
-          } else {
+          } else if (!downloading) {
             downloadController.downloadVideo(widget.content);
           }
         },
         icon: downloading 
-          ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-          : Icon(isAlreadyDownloaded ? Icons.check_circle : Icons.download_for_offline, color: Colors.white),
+          ? SizedBox(
+              width: 20, 
+              height: 20, 
+              child: CircularProgressIndicator(
+                strokeWidth: 2, 
+                color: Colors.white,
+                value: progress > 0 ? progress : null,
+              )
+            )
+          : Icon(isAlreadyDownloaded ? Icons.check_circle : Icons.download_for_offline, color: isAlreadyDownloaded ? Colors.green : Colors.white),
         label: Text(
-          downloading ? "DOWNLOADING..." : (isAlreadyDownloaded ? "DOWNLOADED" : "DOWNLOAD"),
-          style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+          downloading ? "DOWNLOADING ${(progress * 100).toInt()}%" : (isAlreadyDownloaded ? "DOWNLOADED" : "DOWNLOAD"),
+          style: TextStyle(color: isAlreadyDownloaded ? Colors.green : Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
         ),
       );
     });
@@ -569,32 +578,62 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
             ),
 
             /// DOWNLOAD BUTTON (More integrated & attractive)
-            Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: () => _downloadEpisode(ep),
-                borderRadius: BorderRadius.circular(8),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.white10),
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(
-                        Icons.download_for_offline_outlined,
-                        color: AppColors.primary,
-                        size: 30,
-                      ),
-                      const SizedBox(height: 2),
-                      const Text("SAVE", style: TextStyle(color: AppColors.primary, fontSize: 8, fontWeight: FontWeight.bold)),
-                    ],
+            Obx(() {
+              final bool isAlreadyDownloaded = downloadController.isDownloaded(ep.id);
+              final bool downloading = downloadController.isDownloading[ep.id] ?? false;
+              final double progress = downloadController.downloadProgress[ep.id] ?? 0.0;
+
+              return Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () {
+                    if (isAlreadyDownloaded) {
+                      CustomSnackbar.show(title: "Info", message: "Already downloaded");
+                    } else if (!downloading) {
+                      _downloadEpisode(ep);
+                    }
+                  },
+                  borderRadius: BorderRadius.circular(8),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: isAlreadyDownloaded ? Colors.green.withOpacity(0.5) : Colors.white10),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        downloading
+                            ? SizedBox(
+                                width: 30,
+                                height: 30,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 3,
+                                  color: AppColors.primary,
+                                  value: progress > 0 ? progress : null,
+                                ),
+                              )
+                            : Icon(
+                                isAlreadyDownloaded ? Icons.check_circle : Icons.download_for_offline_outlined,
+                                color: isAlreadyDownloaded ? Colors.green : AppColors.primary,
+                                size: 30,
+                              ),
+                        const SizedBox(height: 2),
+                        Text(
+                          downloading
+                              ? "${(progress * 100).toInt()}%"
+                              : (isAlreadyDownloaded ? "DOWNLOADED" : "DOWNLOAD"),
+                          style: TextStyle(
+                              color: isAlreadyDownloaded ? Colors.green : AppColors.primary,
+                              fontSize: 8,
+                              fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ),
+              );
+            }),
           ],
         ),
       ),
