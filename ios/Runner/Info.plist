@@ -68,5 +68,11 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>FacebookAppID</key>
+	<string>1944672236921270</string>
+	<key>FacebookClientToken</key>
+	<string>f4910f08ad31813c174099b8588dae9e</string>
+	<key>FacebookDisplayName</key>
+	<string>Mirchi OTT</string>
 </dict>
 </plist>

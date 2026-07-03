@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:mirchi_ott/utils/ad_service.dart';
 import 'package:mirchi_ott/utils/responsive.dart';
 import 'package:video_player/video_player.dart';
 import 'package:share_plus/share_plus.dart';
@@ -27,7 +28,12 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
   @override
   void initState() {
     super.initState();
-    controller.initializeVideo(widget.url);
+    // Show Meta Ad before playing video
+    AdService.showInterstitialAd(onComplete: () {
+      if (mounted) {
+        controller.initializeVideo(widget.url);
+      }
+    });
   }
 
   @override

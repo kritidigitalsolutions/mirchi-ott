@@ -15,6 +15,7 @@ import 'package:mirchi_ott/view_model/watchlist_controller/watchlist_controller.
 import 'app/routes/app_routes.dart';
 import 'data/network/api_network_service.dart';
 import 'data/network/base_api_service.dart';
+import 'utils/ad_service.dart';
 import 'utils/app_session.dart';
 import 'utils/notification_service.dart';
 import 'view_model/auth_controller/auth_controller.dart';
@@ -42,6 +43,9 @@ Future<void> main() async {
       DeviceOrientation.portraitDown,
     ]);
   }
+
+  /// 🔥 Ad Service Init
+  await AdService.init();
 
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,

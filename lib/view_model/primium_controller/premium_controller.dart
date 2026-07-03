@@ -238,11 +238,15 @@ class PremiumController extends GetxController with WidgetsBindingObserver {
           debugPrint("🚀 Redirecting to SabPaisa: $paymentUrl");
           
           final Uri uri = Uri.parse(paymentUrl);
-          if (await canLaunchUrl(uri)) {
-            await launchUrl(uri, mode: LaunchMode.externalApplication);
-          } else {
+          bool launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+          
+          if (!launched) {
             // Fallback for some browsers
-            await launchUrl(uri, mode: LaunchMode.platformDefault);
+            launched = await launchUrl(uri, mode: LaunchMode.platformDefault);
+          }
+          
+          if (!launched) {
+            CustomSnackbar.show(title: "Error", message: "Could not open payment page", isError: true);
           }
         } else {
           CustomSnackbar.show(title: "Error", message: "Payment gateway URL not found in response", isError: true);
@@ -281,14 +285,18 @@ class PremiumController extends GetxController with WidgetsBindingObserver {
 
       debugPrint("🚀 Redirecting to Web: $uri");
 
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      } else {
+      // Attempt to launch the URL
+      final bool launched = await launchUrl(
+        uri, 
+        mode: LaunchMode.platformDefault,
+      );
+
+      if (!launched) {
         CustomSnackbar.show(title: "Error", message: "Could not open website", isError: true);
       }
     } catch (e) {
       debugPrint("❌ Redirection Error: $e");
-      CustomSnackbar.show(title: "Error", message: "Something went wrong", isError: true);
+      CustomSnackbar.show(title: "Error", message: "Something went wrong opening the web", isError: true);
     }
   }
 

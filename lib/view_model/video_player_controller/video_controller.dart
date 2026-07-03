@@ -35,6 +35,15 @@ class VideoController extends GetxController {
 
     videoPlayerController!.play();
 
+    // Reset preferred orientations to allow auto-rotate if it was previously locked
+    if (!kIsWeb) {
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+        DeviceOrientation.landscapeLeft,
+        DeviceOrientation.landscapeRight,
+      ]);
+    }
+
     /// 🔥 LISTENER (REAL-TIME UPDATE)
     videoPlayerController!.addListener(() {
       final value = videoPlayerController!.value;

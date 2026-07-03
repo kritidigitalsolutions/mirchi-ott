@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mirchi_ott/utils/responsive.dart';
+import '../../app/routes/app_routes.dart';
 import '../../app/theme/app_colors.dart';
 import '../../view_model/auth_controller/auth_controller.dart';
 import '../../view_model/primium_controller/premium_controller.dart';
@@ -79,6 +80,19 @@ class AccountSettingsPage extends StatelessWidget {
                 ),
               );
             }),
+
+            const SizedBox(height: 40),
+
+            /// DELETE ACCOUNT BUTTON
+            TextButton.icon(
+              onPressed: () => Get.toNamed(AppRoutes.deleteAccount),
+              icon: const Icon(Icons.delete_forever, color: Colors.redAccent, size: 20),
+              label: const Text(
+                "Delete My Account",
+                style: TextStyle(color: Colors.redAccent, fontSize: 14, fontWeight: FontWeight.w500),
+              ),
+            ),
+            const SizedBox(height: 20),
           ],
         ),
       ),

@@ -12,6 +12,7 @@ import 'package:mirchi_ott/view/premium/goPremium.dart';
 import 'package:mirchi_ott/view/premium/payment_screen.dart';
 import 'package:mirchi_ott/view/profile/create_profile_page.dart';
 import 'package:mirchi_ott/view/profile/create_ticket_page.dart';
+import 'package:mirchi_ott/view/profile/delete_account_page.dart';
 import 'package:mirchi_ott/view/profile/help_page.dart';
 import 'package:mirchi_ott/view/profile/privacy_policy_page.dart';
 import 'package:mirchi_ott/view/profile/profilePage.dart';
@@ -54,6 +55,7 @@ class AppPages {
     GetPage(name: AppRoutes.redeemVoucher, page: () => RedeemVoucherPage()),
     GetPage(name: AppRoutes.watchList, page: () => const WatchlistPage()),
     GetPage(name: AppRoutes.setting, page: () => const SettingsPage()),
+    GetPage(name: AppRoutes.deleteAccount, page: () => const DeleteAccountPage()),
     GetPage(name: AppRoutes.rateApp, page: () => const ReviewPage()),
     GetPage(name: AppRoutes.purchasedPlans, page: () => const PurchasedPlansPage()),
     GetPage(name: AppRoutes.downloads, page: () => const DownloadsPage()),

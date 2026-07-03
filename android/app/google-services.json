@@ -14,11 +14,19 @@
       },
       "oauth_client": [
         {
-          "client_id": "399081225701-d4a5767bm73ihbn0j42g4ieeo1vpoe5h.apps.googleusercontent.com",
+          "client_id": "399081225701-2ptv0ddb3e4a2tglbbb7h1sb0ligutto.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.mirchi_ott.app",
-            "certificate_hash": "6ba88512c9d7999113097ab310311ad632665492"
+            "certificate_hash": "d11285a512aa73926e1450017dfb5d6fdaa17601"
+          }
+        },
+        {
+          "client_id": "399081225701-nkia0qeia4bvttd38stj98headolhigv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.mirchi_ott.app",
+            "certificate_hash": "4343105a7e8f401b01c58f3500b632934d3812be"
           }
         },
         {

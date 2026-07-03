@@ -141,35 +141,41 @@ class AuthController extends GetxController {
   Future<VerifyOtpResponse?> signInWithGoogle() async {
     isGoogleLoading.value = true;
     try {
+      // ✅ Using the Web Client ID as serverClientId to get a valid idToken for the backend
       final GoogleSignIn googleSignIn = GoogleSignIn(
         serverClientId: '399081225701-gir0j3n161vkhk0dlrlkf9qccgv7e0gj.apps.googleusercontent.com',
       );
+      
+      // Attempt to sign in
       final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
       
       if (googleUser == null) {
+        // User cancelled the sign-in
         isGoogleLoading.value = false;
         return null;
       }
 
+      // Get authentication details
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
       final String? idToken = googleAuth.idToken;
 
       if (idToken == null) {
+        debugPrint("❌ Google Sign-In: idToken is NULL");
         CustomSnackbar.show(
-          title: 'Error',
-          message: 'Failed to get ID Token from Google',
+          title: 'Sign-in Failed',
+          message: 'Could not retrieve ID Token from Google. Please check SHA-1 configuration in Firebase.',
           isError: true,
         );
         return null;
       }
 
+      debugPrint("🚀 Sending idToken to backend...");
       final response = await repository.googleLogin(idToken);
+      
       if (response != null && response.success) {
         if (response.token != null && response.token!.isNotEmpty) {
           await AppSession.setToken(response.token!);
           _updateGlobalToken(response.token!);
-        } else {
-          print("⚠️ Google Login Success but NO TOKEN returned");
         }
 
         if (response.user != null) {
@@ -177,24 +183,36 @@ class AuthController extends GetxController {
           await storage.write('user_data', response.user);
         }
 
-        // ✅ Direct login for Google users (even if new)
         setLoginStatus(true);
-
         CustomSnackbar.show(
           title: 'Welcome!',
           message: 'Signed in successfully with Google',
           isSuccess: true,
         );
-
         return response;
       } else {
-        print("❌ Google Login Failed: ${response?.message}");
+        String errorMsg = response?.message ?? 'Backend authentication failed';
+        debugPrint("❌ Backend Google Login Failed: $errorMsg");
+        CustomSnackbar.show(
+          title: 'Login Error',
+          message: errorMsg,
+          isError: true,
+        );
       }
       return null;
     } catch (e) {
+      debugPrint("❌ Google Sign-In Exception: $e");
+      String message = e.toString();
+      
+      if (message.contains("PlatformException(10,")) {
+        message = "Google Sign-In Error (10): Please ensure the SHA-1 fingerprint is added to Firebase Console.";
+      } else if (message.contains("PlatformException(12500,")) {
+        message = "Google Sign-In Error (12500): Sign-in failed. Please check your Firebase configuration.";
+      }
+      
       CustomSnackbar.show(
         title: 'Error',
-        message: e.toString(),
+        message: message,
         isError: true,
       );
       return null;

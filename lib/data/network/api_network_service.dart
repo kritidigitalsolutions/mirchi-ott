@@ -176,17 +176,24 @@ class NetworkApiService extends BaseApiService {
 
       case DioExceptionType.badResponse:
         final statusCode = error.response?.statusCode ?? 0;
-        final message = error.response?.data.toString() ?? "Unknown error";
+        final dynamic errorData = error.response?.data;
+        String message = "Unknown error";
+        
+        if (errorData is Map && errorData.containsKey('message')) {
+          message = errorData['message'].toString();
+        } else {
+          message = errorData?.toString() ?? "Unknown error";
+        }
 
         if (statusCode == 400) {
           return BadRequestException(message);
         } else if (statusCode == 401 || statusCode == 403) {
           return UnauthorizedException(message);
         } else if (statusCode == 500) {
-          return FetchDataException("Server Error");
+          return FetchDataException("Server Error (500): $message");
         } else {
           return FetchDataException(
-            "Error occurred with status code : $statusCode",
+            "Error occurred with status code : $statusCode - $message",
           );
         }
 
@@ -195,6 +202,9 @@ class NetworkApiService extends BaseApiService {
 
       case DioExceptionType.unknown:
       default:
+        if (kIsWeb) {
+          return FetchDataException("Network error or CORS issue. Please check server configuration.");
+        }
         return FetchDataException("No Internet Connection");
     }
   }

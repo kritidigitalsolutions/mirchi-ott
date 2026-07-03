@@ -48,7 +48,10 @@ class SettingsPage extends StatelessWidget {
           _buildSectionHeader("Account"),
           _buildActionTile("Language", "English", () {}),
           _buildActionTile("Help & Support", "", () => Get.toNamed(AppRoutes.help)),
+          _buildActionTile("Account Settings", "", () => Get.toNamed(AppRoutes.accountSetting)),
           _buildActionTile("App Version", "1.0.0", null),
+          const SizedBox(height: 20),
+          _buildActionTile("Delete Account", "", () => Get.toNamed(AppRoutes.deleteAccount), textColor: Colors.redAccent),
         ],
       ),
     );
@@ -80,11 +83,11 @@ class SettingsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildActionTile(String title, String trailing, VoidCallback? onTap) {
+  Widget _buildActionTile(String title, String trailing, VoidCallback? onTap, {Color textColor = Colors.white}) {
     return ListTile(
       contentPadding: EdgeInsets.zero,
       onTap: onTap,
-      title: Text(title, style: const TextStyle(color: Colors.white, fontSize: 16)),
+      title: Text(title, style: TextStyle(color: textColor, fontSize: 16)),
       trailing: Text(trailing, style: const TextStyle(color: Colors.grey, fontSize: 14)),
     );
   }

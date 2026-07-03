@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:mirchi_ott/utils/ad_service.dart';
 import 'package:mirchi_ott/utils/app_images.dart';
 import 'package:mirchi_ott/utils/responsive.dart';
 import 'package:mirchi_ott/view_model/auth_controller/auth_controller.dart';
@@ -54,6 +55,9 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
     if (widget.content.contentType == 'series') {
       contentController.fetchEpisodes(widget.content.id);
     }
+    
+    // Show Meta Ad when entering content page
+    AdService.showInterstitialAd();
   }
 
   @override
@@ -274,10 +278,14 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
         onPressed: () {
           if (!userLoggedIn) {
             Get.toNamed(AppRoutes.signIn);
+          } else if (!_isUserSubscribed()) {
+            _showSubscriptionDialog(context);
           } else if (isAlreadyDownloaded) {
             CustomSnackbar.show(title: "Info", message: "Already downloaded");
           } else if (!downloading) {
-            downloadController.downloadVideo(widget.content);
+            _showDownloadConfirmation(context, () {
+              downloadController.downloadVideo(widget.content);
+            });
           }
         },
         icon: downloading 
@@ -587,10 +595,16 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
                 color: Colors.transparent,
                 child: InkWell(
                   onTap: () {
-                    if (isAlreadyDownloaded) {
+                    if (!authController.isLoggedIn.value) {
+                      Get.toNamed(AppRoutes.signIn);
+                    } else if (!_isUserSubscribed()) {
+                      _showSubscriptionDialog(context);
+                    } else if (isAlreadyDownloaded) {
                       CustomSnackbar.show(title: "Info", message: "Already downloaded");
                     } else if (!downloading) {
-                      _downloadEpisode(ep);
+                      _showDownloadConfirmation(context, () {
+                        _downloadEpisode(ep);
+                      });
                     }
                   },
                   borderRadius: BorderRadius.circular(8),
@@ -724,7 +738,44 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
       Get.toNamed(AppRoutes.signIn);
       return;
     }
+    if (!_isUserSubscribed()) {
+      _showSubscriptionDialog(context);
+      return;
+    }
     downloadController.downloadVideo(episode);
+  }
+
+  bool _isUserSubscribed() {
+    final sub = premiumController.subscriptionData.value;
+    return sub != null && sub['status'] == 'active';
+  }
+
+  void _showDownloadConfirmation(BuildContext context, VoidCallback onConfirm) {
+    Get.dialog(
+      AlertDialog(
+        backgroundColor: Colors.grey[900],
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        title: const Text("Download", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        content: const Text("Do you want to download this content?", style: TextStyle(color: Colors.white70)),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: const Text("No", style: TextStyle(color: Colors.white54)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            onPressed: () {
+              Get.back();
+              onConfirm();
+            },
+            child: const Text("Yes", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
   }
 
   String _formatReleaseDate(String? dateStr) {

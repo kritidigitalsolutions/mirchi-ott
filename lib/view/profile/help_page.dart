@@ -31,10 +31,12 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
       scheme: 'tel',
       path: phoneNumber,
     );
-    if (await canLaunchUrl(launchUri)) {
-      await launchUrl(launchUri);
-    } else {
-      Get.snackbar("Error", "Could not launch dialer", colorText: Colors.white);
+    try {
+      if (!await launchUrl(launchUri)) {
+        Get.snackbar("Error", "Could not launch dialer", colorText: Colors.white);
+      }
+    } catch (e) {
+      Get.snackbar("Error", "Something went wrong: $e", colorText: Colors.white);
     }
   }
 
@@ -80,6 +82,13 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
                       ),
                     ],
                   ),
+                  const SizedBox(height: 12),
+                  _buildActionCard(
+                    icon: Icons.delete_outline,
+                    label: "Request Account Deletion",
+                    onTap: () => Get.toNamed(AppRoutes.deleteAccount),
+                    color: Colors.redAccent,
+                  ),
                   const SizedBox(height: 20),
                   Container(
                     width: double.infinity,
@@ -97,7 +106,12 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
                         ),
                         const SizedBox(height: 12),
                         InkWell(
-                          onTap: () => launchUrl(Uri.parse("mailto:support@mirchiapp.in")),
+                          onTap: () async {
+                            final Uri emailUri = Uri.parse("mailto:support@mirchiapp.in");
+                            if (!await launchUrl(emailUri)) {
+                              Get.snackbar("Error", "Could not launch email app", colorText: Colors.white);
+                            }
+                          },
                           child: const Text(
                             "Mail - support@mirchiapp.in ",
                             style: TextStyle(color: AppColors.primary, fontSize: 14, fontWeight: FontWeight.w600),
