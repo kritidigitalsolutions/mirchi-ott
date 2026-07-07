@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mirchi_ott/utils/responsive.dart';
+import '../../app/routes/app_routes.dart';
 import '../../app/theme/app_colors.dart';
 import '../../view_model/auth_controller/auth_controller.dart';
 import '../../view_model/profile/create_profile_controller.dart';
@@ -17,13 +18,17 @@ class CreateProfilePage extends StatefulWidget {
 
 class _CreateProfilePageState extends State<CreateProfilePage> {
   late final TextEditingController nameController;
+  late final TextEditingController phoneController;
   late final AuthController authController;
   late final CreateProfileController createProfileController;
+  bool isEmailAccount = false;
 
   @override
   void initState() {
     super.initState();
     nameController = TextEditingController();
+    phoneController = TextEditingController(text: widget.phone.contains('@') ? "" : widget.phone);
+    isEmailAccount = widget.phone.contains('@');
     authController = Get.find<AuthController>();
     createProfileController = Get.put(CreateProfileController());
   }
@@ -31,6 +36,7 @@ class _CreateProfilePageState extends State<CreateProfilePage> {
   @override
   void dispose() {
     nameController.dispose();
+    phoneController.dispose();
     super.dispose();
   }
 
@@ -80,13 +86,17 @@ class _CreateProfilePageState extends State<CreateProfilePage> {
 
                   const SizedBox(height: 10),
 
-                  /// Show Email or Phone
-                  Text(
-                    widget.phone,
-                    style: const TextStyle(color: Colors.white70, fontSize: 16, fontWeight: FontWeight.w500),
-                  ),
+                  /// Show Email if it's an email account
+                  if (isEmailAccount)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: Text(
+                        widget.phone,
+                        style: const TextStyle(color: Colors.white70, fontSize: 16, fontWeight: FontWeight.w500),
+                      ),
+                    ),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 10),
 
                   /// Name Field
                   TextField(
@@ -94,6 +104,26 @@ class _CreateProfilePageState extends State<CreateProfilePage> {
                     style: const TextStyle(color: AppColors.white),
                     decoration: InputDecoration(
                       hintText: "Full Name",
+                      hintStyle: const TextStyle(color: Colors.grey),
+                      filled: true,
+                      fillColor: Colors.grey[900],
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  /// Phone Field (Editable if it was an email login)
+                  TextField(
+                    controller: phoneController,
+                    enabled: isEmailAccount,
+                    keyboardType: TextInputType.phone,
+                    style: TextStyle(color: isEmailAccount ? AppColors.white : Colors.white54),
+                    decoration: InputDecoration(
+                      hintText: "Phone Number",
                       hintStyle: const TextStyle(color: Colors.grey),
                       filled: true,
                       fillColor: Colors.grey[900],
@@ -124,18 +154,21 @@ class _CreateProfilePageState extends State<CreateProfilePage> {
                                     CustomSnackbar.show(title: "Error", message: "Name is required", isError: true);
                                     return;
                                   }
-
-                                  bool isEmail = widget.phone.contains('@');
+                                  
+                                  if (phoneController.text.trim().isEmpty || phoneController.text.trim().length < 10) {
+                                    CustomSnackbar.show(title: "Error", message: "Valid 10-digit Phone is required", isError: true);
+                                    return;
+                                  }
 
                                   bool success = await authController.updateAndSaveProfile(
                                     name: nameController.text.trim(),
-                                    email: isEmail ? widget.phone : "",
-                                    phone: isEmail ? "" : widget.phone,
+                                    email: isEmailAccount ? widget.phone : "",
+                                    phone: phoneController.text.trim(),
                                     imagePath: createProfileController.selectedImage.value?.path,
                                   );
 
                                   if (success) {
-                                    Get.offAllNamed('/'); // Navigate to home
+                                    Get.offAllNamed(AppRoutes.navbar); // Navigate to home
                                   }
                                 },
                           child: authController.isLoading.value

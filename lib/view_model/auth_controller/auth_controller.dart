@@ -183,12 +183,17 @@ class AuthController extends GetxController {
           await storage.write('user_data', response.user);
         }
 
-        setLoginStatus(true);
-        CustomSnackbar.show(
-          title: 'Welcome!',
-          message: 'Signed in successfully with Google',
-          isSuccess: true,
-        );
+        // ✅ Only set login status if not a new user and profile has a phone
+        bool isComplete = !response.isNewUser && (response.user != null && response.user!['phone'] != null);
+        
+        if (isComplete) {
+          setLoginStatus(true);
+          CustomSnackbar.show(
+            title: 'Welcome!',
+            message: 'Signed in successfully with Google',
+            isSuccess: true,
+          );
+        }
         return response;
       } else {
         String errorMsg = response?.message ?? 'Backend authentication failed';

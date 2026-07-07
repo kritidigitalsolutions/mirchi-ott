@@ -203,7 +203,10 @@ class NetworkApiService extends BaseApiService {
       case DioExceptionType.unknown:
       default:
         if (kIsWeb) {
-          return FetchDataException("Network error or CORS issue. Please check server configuration.");
+          if (error.message?.contains("XMLHttpRequest") == true) {
+            return FetchDataException("Server connection failed or CORS blocked. Please check backend configuration.");
+          }
+          return FetchDataException("Network error. Please check your internet or server status.");
         }
         return FetchDataException("No Internet Connection");
     }

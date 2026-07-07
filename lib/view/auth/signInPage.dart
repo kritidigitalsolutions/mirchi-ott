@@ -141,7 +141,16 @@ class _SignInPageState extends State<SignInPage> {
                                           final response = await authController
                                               .signInWithGoogle();
                                           if (response != null) {
-                                            Get.offAllNamed(AppRoutes.navbar);
+                                            bool isProfileIncomplete = response.isNewUser || 
+                                                                     (response.user != null && response.user!['phone'] == null);
+                                            
+                                            if (isProfileIncomplete) {
+                                              // Get email or phone from user object if available
+                                              String identifier = response.user?['email'] ?? response.user?['phone'] ?? "";
+                                              Get.offAllNamed(AppRoutes.createProfile, arguments: identifier);
+                                            } else {
+                                              Get.offAllNamed(AppRoutes.navbar);
+                                            }
                                           }
                                         },
                                   style: ElevatedButton.styleFrom(
