@@ -1,14 +1,14 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:mirchi_ott/utils/app_images.dart';
+import 'package:mirchi_ott/utils/google_sign_in_web_button.dart';
 import 'package:mirchi_ott/utils/responsive.dart';
-import 'package:mirchi_ott/widgets/custom_network_image.dart';
 import '../../app/routes/app_routes.dart';
 import '../../app/theme/app_colors.dart';
+import '../../data/models/response_model/auth_response_model/verify_otp_response.dart';
 import '../../view_model/auth_controller/auth_controller.dart';
-import '../profile/create_profile_page.dart';
-import 'otpPage.dart';
 
 class SignInPage extends StatefulWidget {
   const SignInPage({super.key});
@@ -20,6 +20,7 @@ class SignInPage extends StatefulWidget {
 class _SignInPageState extends State<SignInPage> {
   final _formKey = GlobalKey<FormState>();
   final AuthController authController = Get.find<AuthController>();
+  Worker? _googleLoginWorker;
 
   final isAgeConfirmed = false.obs;
   final showCodeField = false.obs;
@@ -28,7 +29,23 @@ class _SignInPageState extends State<SignInPage> {
   final TextEditingController codeController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    if (kIsWeb) {
+      authController.googleLoginResponse.value = null;
+      _googleLoginWorker =
+          ever<VerifyOtpResponse?>(authController.googleLoginResponse,
+              (response) {
+        if (response != null) {
+          _handleGoogleLoginResponse(response);
+        }
+      });
+    }
+  }
+
+  @override
   void dispose() {
+    _googleLoginWorker?.dispose();
     phoneController.dispose();
     codeController.dispose();
     super.dispose();
@@ -131,69 +148,7 @@ class _SignInPageState extends State<SignInPage> {
                           const SizedBox(height: 25),
 
                           /// LOGIN WITH GOOGLE
-                          SizedBox(
-                            width: double.infinity,
-                            height: 55,
-                            child: Obx(() => ElevatedButton(
-                                  onPressed: authController.isGoogleLoading.value
-                                      ? null
-                                      : () async {
-                                          final response = await authController
-                                              .signInWithGoogle();
-                                          if (response != null) {
-                                            bool isProfileIncomplete = response.isNewUser || 
-                                                                     (response.user != null && response.user!['phone'] == null);
-                                            
-                                            if (isProfileIncomplete) {
-                                              // Get email or phone from user object if available
-                                              String identifier = response.user?['email'] ?? response.user?['phone'] ?? "";
-                                              Get.offAllNamed(AppRoutes.createProfile, arguments: identifier);
-                                            } else {
-                                              Get.offAllNamed(AppRoutes.navbar);
-                                            }
-                                          }
-                                        },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.white, // Google style
-                                    elevation: 2,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                      side: const BorderSide(color: Colors.white12),
-                                    ),
-                                  ),
-                                  child: authController.isGoogleLoading.value
-                                      ? const SizedBox(
-                                          height: 24,
-                                          width: 24,
-                                          child: CircularProgressIndicator(
-                                            color: AppColors.primary,
-                                            strokeWidth: 2,
-                                          ),
-                                        )
-                                      : Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            Image.network(
-                                              'https://cdn-icons-png.flaticon.com/512/2991/2991148.png', // Standard Google G PNG
-                                              height: 24,
-                                              width: 24,
-                                              errorBuilder: (context, error, stackTrace) => 
-                                                const Icon(Icons.g_mobiledata, color: Colors.black, size: 30),
-                                            ),
-                                            const SizedBox(width: 12),
-                                            const Text(
-                                              "Continue with Google",
-                                              style: TextStyle(
-                                                color: Colors.black, // Dark text on white button
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                )),
-                          ),
+                          _buildGoogleSignInButton(),
                         ],
                       ),
                       const SizedBox(height: 40),
@@ -206,6 +161,108 @@ class _SignInPageState extends State<SignInPage> {
         ),
       ),
     );
+  }
+
+  Widget _buildGoogleSignInButton() {
+    if (kIsWeb) {
+      return SizedBox(
+        width: double.infinity,
+        height: 55,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            buildGoogleSignInWebButton(),
+            Obx(() {
+              if (!authController.isGoogleLoading.value) {
+                return const SizedBox.shrink();
+              }
+              return Container(
+                color: Colors.black.withValues(alpha: 0.45),
+                alignment: Alignment.center,
+                child: const SizedBox(
+                  height: 24,
+                  width: 24,
+                  child: CircularProgressIndicator(
+                    color: AppColors.primary,
+                    strokeWidth: 2,
+                  ),
+                ),
+              );
+            }),
+          ],
+        ),
+      );
+    }
+
+    return SizedBox(
+      width: double.infinity,
+      height: 55,
+      child: Obx(() => ElevatedButton(
+            onPressed: authController.isGoogleLoading.value
+                ? null
+                : () async {
+                    final response = await authController.signInWithGoogle();
+                    if (response != null) {
+                      _handleGoogleLoginResponse(response);
+                    }
+                  },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white,
+              elevation: 2,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: const BorderSide(color: Colors.white12),
+              ),
+            ),
+            child: authController.isGoogleLoading.value
+                ? const SizedBox(
+                    height: 24,
+                    width: 24,
+                    child: CircularProgressIndicator(
+                      color: AppColors.primary,
+                      strokeWidth: 2,
+                    ),
+                  )
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Image.network(
+                        'https://cdn-icons-png.flaticon.com/512/2991/2991148.png',
+                        height: 24,
+                        width: 24,
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Icon(
+                          Icons.g_mobiledata,
+                          color: Colors.black,
+                          size: 30,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      const Text(
+                        "Continue with Google",
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+          )),
+    );
+  }
+
+  void _handleGoogleLoginResponse(VerifyOtpResponse response) {
+    final bool isProfileIncomplete = response.isNewUser ||
+        (response.user != null && response.user!['phone'] == null);
+
+    if (isProfileIncomplete) {
+      final String identifier =
+          response.user?['email'] ?? response.user?['phone'] ?? "";
+      Get.offAllNamed(AppRoutes.createProfile, arguments: identifier);
+    } else {
+      Get.offAllNamed(AppRoutes.navbar);
+    }
   }
 
   void _showEmailPicker() {

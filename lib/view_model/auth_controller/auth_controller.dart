@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -11,12 +14,20 @@ import '../../utils/notification_service.dart';
 import '../../utils/custom_snackbar.dart';
 
 class AuthController extends GetxController {
+  static const String _googleWebClientId =
+      '399081225701-gir0j3n161vkhk0dlrlkf9qccgv7e0gj.apps.googleusercontent.com';
+
+  late final GoogleSignIn _googleSignIn;
+  StreamSubscription<GoogleSignInAccount?>? _googleSignInSubscription;
+  bool _isHandlingGoogleAccount = false;
+
   // ✅ FIX: Use late and initialize in onInit to ensure we get the global instance
   late AuthRepository repository;
 
   var isLoading = false.obs;
   var isGoogleLoading = false.obs;
   var isLoggedIn = false.obs;
+  var googleLoginResponse = Rxn<VerifyOtpResponse>();
   final storage = GetStorage();
   var userData = Rxn<Map<String, dynamic>>();
 
@@ -27,6 +38,7 @@ class AuthController extends GetxController {
     // ✅ Always use the global instance registered in main.dart
     final globalApiService = Get.find<BaseApiService>();
     repository = AuthRepository(globalApiService);
+    _configureGoogleSignIn();
     
     isLoggedIn.value = AppSession.getLogin();
     var saved = storage.read('user_data');
@@ -46,6 +58,91 @@ class AuthController extends GetxController {
     final apiService = Get.find<BaseApiService>();
     if (apiService is NetworkApiService) {
       apiService.setToken(token);
+    }
+  }
+
+  void _configureGoogleSignIn() {
+    _googleSignIn = GoogleSignIn(
+      clientId: kIsWeb ? _googleWebClientId : null,
+      serverClientId: kIsWeb ? null : _googleWebClientId,
+    );
+
+    if (kIsWeb) {
+      _googleSignInSubscription =
+          _googleSignIn.onCurrentUserChanged.listen((googleUser) async {
+        if (googleUser == null) return;
+        final response = await _completeGoogleLogin(googleUser);
+        if (response != null) {
+          googleLoginResponse.value = response;
+        }
+      });
+    }
+  }
+
+  Future<VerifyOtpResponse?> _completeGoogleLogin(
+    GoogleSignInAccount googleUser,
+  ) async {
+    if (_isHandlingGoogleAccount) return null;
+
+    _isHandlingGoogleAccount = true;
+    isGoogleLoading.value = true;
+    try {
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+      final String? idToken = googleAuth.idToken;
+
+      if (idToken == null || idToken.isEmpty) {
+        debugPrint('Google Sign-In: idToken is null on ${kIsWeb ? 'Web' : 'mobile'}.');
+        CustomSnackbar.show(
+          title: 'Sign-in Failed',
+          message: kIsWeb
+              ? 'Google did not return an ID token. Please use the Google sign-in button and verify the Web OAuth Client ID configuration.'
+              : 'Google did not return an ID token. Please verify the Android/iOS Google Sign-In configuration.',
+          isError: true,
+        );
+        return null;
+      }
+
+      debugPrint("🚀 Sending idToken to backend...");
+      final response = await repository.googleLogin(idToken);
+
+      if (response != null && response.success) {
+        if (response.token != null && response.token!.isNotEmpty) {
+          await AppSession.setToken(response.token!);
+          _updateGlobalToken(response.token!);
+        }
+
+        if (response.user != null) {
+          userData.value = response.user;
+          await storage.write('user_data', response.user);
+        }
+
+        final bool isComplete = !response.isNewUser &&
+            (response.user != null && response.user!['phone'] != null);
+
+        if (isComplete) {
+          setLoginStatus(true);
+          CustomSnackbar.show(
+            title: 'Welcome!',
+            message: 'Signed in successfully with Google',
+            isSuccess: true,
+          );
+        }
+
+        return response;
+      }
+
+      final String errorMsg = response?.message ?? 'Backend authentication failed';
+      debugPrint("❌ Backend Google Login Failed: $errorMsg");
+      CustomSnackbar.show(
+        title: 'Login Error',
+        message: errorMsg,
+        isError: true,
+      );
+      return null;
+    } finally {
+      _isHandlingGoogleAccount = false;
+      isGoogleLoading.value = false;
     }
   }
 
@@ -139,78 +236,30 @@ class AuthController extends GetxController {
   }
 
   Future<VerifyOtpResponse?> signInWithGoogle() async {
-    isGoogleLoading.value = true;
     try {
-      // ✅ Using the Web Client ID as serverClientId to get a valid idToken for the backend
-      final GoogleSignIn googleSignIn = GoogleSignIn(
-        serverClientId: '399081225701-gir0j3n161vkhk0dlrlkf9qccgv7e0gj.apps.googleusercontent.com',
-      );
-      
-      // Attempt to sign in
-      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
-      
+      if (kIsWeb) {
+        CustomSnackbar.show(
+          title: 'Google Sign-In',
+          message: 'Please use the Google sign-in button to continue.',
+          isError: true,
+        );
+        return null;
+      }
+
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+
       if (googleUser == null) {
-        // User cancelled the sign-in
-        isGoogleLoading.value = false;
         return null;
       }
 
-      // Get authentication details
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-      final String? idToken = googleAuth.idToken;
-
-      if (idToken == null) {
-        debugPrint("❌ Google Sign-In: idToken is NULL");
-        CustomSnackbar.show(
-          title: 'Sign-in Failed',
-          message: 'Could not retrieve ID Token from Google. Please check SHA-1 configuration in Firebase.',
-          isError: true,
-        );
-        return null;
-      }
-
-      debugPrint("🚀 Sending idToken to backend...");
-      final response = await repository.googleLogin(idToken);
-      
-      if (response != null && response.success) {
-        if (response.token != null && response.token!.isNotEmpty) {
-          await AppSession.setToken(response.token!);
-          _updateGlobalToken(response.token!);
-        }
-
-        if (response.user != null) {
-          userData.value = response.user;
-          await storage.write('user_data', response.user);
-        }
-
-        // ✅ Only set login status if not a new user and profile has a phone
-        bool isComplete = !response.isNewUser && (response.user != null && response.user!['phone'] != null);
-        
-        if (isComplete) {
-          setLoginStatus(true);
-          CustomSnackbar.show(
-            title: 'Welcome!',
-            message: 'Signed in successfully with Google',
-            isSuccess: true,
-          );
-        }
-        return response;
-      } else {
-        String errorMsg = response?.message ?? 'Backend authentication failed';
-        debugPrint("❌ Backend Google Login Failed: $errorMsg");
-        CustomSnackbar.show(
-          title: 'Login Error',
-          message: errorMsg,
-          isError: true,
-        );
-      }
-      return null;
+      return _completeGoogleLogin(googleUser);
     } catch (e) {
       debugPrint("❌ Google Sign-In Exception: $e");
       String message = e.toString();
-      
+
       if (message.contains("PlatformException(10,")) {
-        message = "Google Sign-In Error (10): Please ensure the SHA-1 fingerprint is added to Firebase Console.";
+        message =
+            "Google Sign-In Error (10): Please verify the Android OAuth client and SHA-1 configuration.";
       } else if (message.contains("PlatformException(12500,")) {
         message = "Google Sign-In Error (12500): Sign-in failed. Please check your Firebase configuration.";
       }
@@ -221,9 +270,13 @@ class AuthController extends GetxController {
         isError: true,
       );
       return null;
-    } finally {
-      isGoogleLoading.value = false;
     }
+  }
+
+  @override
+  void onClose() {
+    _googleSignInSubscription?.cancel();
+    super.onClose();
   }
 
   Future<bool> websiteLogin(String token) async {
@@ -303,9 +356,16 @@ class AuthController extends GetxController {
   }
 
   Future<void> logout() async {
+    try {
+      await _googleSignIn.signOut();
+    } catch (e) {
+      debugPrint("Google Sign-Out Error: $e");
+    }
+
     await AppSession.clearSession();
     await storage.remove('user_data');
     userData.value = null;
+    googleLoginResponse.value = null;
     isLoggedIn.value = false;
     _updateGlobalToken(""); // Clear token in network service
     
