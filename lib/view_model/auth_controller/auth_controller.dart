@@ -140,6 +140,14 @@ class AuthController extends GetxController {
         isError: true,
       );
       return null;
+    } catch (e) {
+      debugPrint("❌ Google Auth Error: $e");
+      CustomSnackbar.show(
+        title: 'Sign-in Failed',
+        message: 'Google Sign-in failed. Please verify that this domain is added to your Google Cloud Console (OAuth Web Client ID Authorized Origins) and Firebase Console.',
+        isError: true,
+      );
+      return null;
     } finally {
       _isHandlingGoogleAccount = false;
       isGoogleLoading.value = false;
