@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:mirchi_ott/utils/responsive.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../utils/notification_service.dart';
 import '../../app/theme/app_colors.dart';
 
@@ -85,6 +86,7 @@ class NotificationPage extends StatelessWidget {
     final DateTime time = DateTime.parse(notification['time']);
     final String formattedTime = DateFormat('dd MMM, hh:mm a').format(time);
     final bool isRead = notification['isRead'] ?? false;
+    final String? imageUrl = notification['image'];
 
     return GestureDetector(
       onTap: () {
@@ -104,10 +106,33 @@ class NotificationPage extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            CircleAvatar(
-              backgroundColor: isRead ? Colors.grey.withOpacity(0.2) : AppColors.buttonColor,
-              child: const Icon(Icons.notifications, color: Colors.white, size: 20),
-            ),
+            if (imageUrl != null && imageUrl.isNotEmpty)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: CachedNetworkImage(
+                  imageUrl: imageUrl,
+                  width: 50,
+                  height: 50,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) => Container(
+                    width: 50,
+                    height: 50,
+                    color: Colors.grey[800],
+                    child: const Icon(Icons.image, color: Colors.white24, size: 20),
+                  ),
+                  errorWidget: (context, url, error) => Container(
+                    width: 50,
+                    height: 50,
+                    color: Colors.grey[800],
+                    child: const Icon(Icons.error, color: Colors.white24, size: 20),
+                  ),
+                ),
+              )
+            else
+              CircleAvatar(
+                backgroundColor: isRead ? Colors.grey.withOpacity(0.2) : AppColors.buttonColor,
+                child: const Icon(Icons.notifications, color: Colors.white, size: 20),
+              ),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -187,6 +212,25 @@ class NotificationPage extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 10),
+            if (notification['image'] != null && notification['image'].toString().isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 15),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: CachedNetworkImage(
+                    imageUrl: notification['image'],
+                    width: double.infinity,
+                    height: 200,
+                    fit: BoxFit.cover,
+                    placeholder: (context, url) => Container(
+                      height: 200,
+                      color: Colors.grey[800],
+                      child: const Center(child: CircularProgressIndicator(color: AppColors.buttonColor)),
+                    ),
+                    errorWidget: (context, url, error) => const SizedBox.shrink(),
+                  ),
+                ),
+              ),
             Text(
               notification['title'] ?? '',
               style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),

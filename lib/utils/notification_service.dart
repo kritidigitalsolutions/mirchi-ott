@@ -1,9 +1,12 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:http/http.dart' as http;
 import '../data/network/base_api_service.dart';
 import '../utils/constants.dart';
 
@@ -175,6 +178,7 @@ class NotificationService extends GetxController {
             'id': e['_id'],
             'title': e['title'],
             'body': e['message'],
+            'image': e['image'] ?? e['imageUrl'], // Added image support
             'time': e['sentAt'] ?? e['createdAt'] ?? DateTime.now().toString(),
             'isRead': e['isRead'] ?? false,
             'type': e['type'],
@@ -278,19 +282,48 @@ class NotificationService extends GetxController {
   Future<void> _showLocalNotification(RemoteMessage message) async {
     if (message.notification == null) return;
 
-    const AndroidNotificationDetails androidDetails =
-        AndroidNotificationDetails(
-      'mirchi_ott_channel', // Channel ID
-      'Mirchi OTT Notifications', // Channel Name
+    String? imageUrl = message.notification?.android?.imageUrl ?? 
+                      message.notification?.apple?.imageUrl ?? 
+                      message.data['image'] ?? 
+                      message.data['imageUrl'];
+
+    BigPictureStyleInformation? bigPictureStyleInformation;
+    String? largeIconPath;
+
+    if (imageUrl != null && imageUrl.isNotEmpty) {
+      try {
+        final String fileName = 'notification_${message.hashCode}.jpg';
+        final String imagePath = await _downloadAndSaveFile(imageUrl, fileName);
+        largeIconPath = imagePath;
+        bigPictureStyleInformation = BigPictureStyleInformation(
+          FilePathAndroidBitmap(imagePath),
+          largeIcon: FilePathAndroidBitmap(imagePath),
+          contentTitle: message.notification?.title,
+          summaryText: message.notification?.body,
+        );
+      } catch (e) {
+        print("⚠️ Error downloading notification image: $e");
+      }
+    }
+
+    AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+      'mirchi_ott_channel',
+      'Mirchi OTT Notifications',
       channelDescription: 'Important notifications from Mirchi OTT',
       importance: Importance.max,
       priority: Priority.high,
       showWhen: true,
       icon: '@mipmap/ic_launcher',
+      largeIcon: largeIconPath != null ? FilePathAndroidBitmap(largeIconPath) : null,
+      styleInformation: bigPictureStyleInformation,
     );
-    
-    const NotificationDetails platformDetails =
-        NotificationDetails(android: androidDetails);
+
+    NotificationDetails platformDetails = NotificationDetails(
+      android: androidDetails,
+      iOS: DarwinNotificationDetails(
+        attachments: largeIconPath != null ? [DarwinNotificationAttachment(largeIconPath)] : null,
+      ),
+    );
 
     await _localNotificationsPlugin.show(
       message.hashCode,
@@ -299,6 +332,15 @@ class NotificationService extends GetxController {
       platformDetails,
       payload: message.data.toString(),
     );
+  }
+
+  Future<String> _downloadAndSaveFile(String url, String fileName) async {
+    final Directory directory = await getApplicationDocumentsDirectory();
+    final String filePath = '${directory.path}/$fileName';
+    final http.Response response = await http.get(Uri.parse(url));
+    final File file = File(filePath);
+    await file.writeAsBytes(response.bodyBytes);
+    return filePath;
   }
 
   void _loadNotifications() {

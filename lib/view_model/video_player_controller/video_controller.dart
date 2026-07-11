@@ -20,43 +20,108 @@ class VideoController extends GetxController {
 
   Timer? _hideTimer;
 
+  // --- Quality Features ---
+  var availableQualities = <String, String>{}.obs;
+  var selectedQuality = "Auto".obs;
+  String? _mainUrl;
+
   /// 🔥 INIT
-  Future<void> initializeVideo(String url) async {
+  Future<void> initializeVideo(String url, {Map<String, String>? qualities}) async {
     isInitialized.value = false;
+    _mainUrl = url;
 
-    videoPlayerController =
-        VideoPlayerController.networkUrl(Uri.parse(url));
-
-    await videoPlayerController!.initialize();
-
-    isInitialized.value = true;
-    totalDuration.value =
-        videoPlayerController!.value.duration;
-
-    videoPlayerController!.play();
-
-    // Reset preferred orientations to allow auto-rotate if it was previously locked
-    if (!kIsWeb) {
-      SystemChrome.setPreferredOrientations([
-        DeviceOrientation.portraitUp,
-        DeviceOrientation.landscapeLeft,
-        DeviceOrientation.landscapeRight,
-      ]);
+    // Setup available qualities. 
+    // In a real scenario, these come from your API.
+    if (qualities != null && qualities.isNotEmpty) {
+      availableQualities.value = qualities;
+      if (!availableQualities.containsKey("Auto")) {
+        availableQualities["Auto"] = url;
+      }
+    } else {
+      // Mocking qualities if none provided, using the same URL 
+      // In HLS (m3u8), "Auto" is handled by the player natively for adaptive bitrate.
+      availableQualities.value = {
+        "Auto": url,
+        "1080p": url,
+        "720p": url,
+        "480p": url,
+        "360p": url,
+      };
     }
 
-    /// 🔥 LISTENER (REAL-TIME UPDATE)
-    videoPlayerController!.addListener(() {
-      final value = videoPlayerController!.value;
+    await _setupController(availableQualities[selectedQuality.value] ?? url);
+  }
 
-      currentPosition.value = value.position;
-      isPlaying.value = value.isPlaying;
+  /// 🛠 Internal setup for Controller
+  Future<void> _setupController(String url) async {
+    final oldController = videoPlayerController;
+    
+    // Pre-initialize new one
+    videoPlayerController = VideoPlayerController.networkUrl(Uri.parse(url));
 
-      if (value.duration != null) {
-        totalDuration.value = value.duration;
+    try {
+      await videoPlayerController!.initialize();
+      
+      // Dispose old one after new one is ready to avoid black screen flicker if possible
+      if (oldController != null) {
+        await oldController.dispose();
       }
-    });
 
-    _startHideTimer();
+      isInitialized.value = true;
+      totalDuration.value = videoPlayerController!.value.duration;
+
+      videoPlayerController!.play();
+      videoPlayerController!.setPlaybackSpeed(playbackSpeed.value);
+      videoPlayerController!.setVolume(volume.value);
+
+      // Preferred orientations
+      if (!kIsWeb) {
+        SystemChrome.setPreferredOrientations([
+          DeviceOrientation.portraitUp,
+          DeviceOrientation.landscapeLeft,
+          DeviceOrientation.landscapeRight,
+        ]);
+      }
+
+      /// 🔥 LISTENER
+      videoPlayerController!.addListener(_videoListener);
+      _startHideTimer();
+    } catch (e) {
+      debugPrint("Video Player Error: $e");
+    }
+  }
+
+  void _videoListener() {
+    if (videoPlayerController == null) return;
+    final value = videoPlayerController!.value;
+    currentPosition.value = value.position;
+    isPlaying.value = value.isPlaying;
+    if (value.duration != Duration.zero) {
+      totalDuration.value = value.duration;
+    }
+  }
+
+  /// 🎬 CHANGE QUALITY
+  Future<void> setQuality(String quality) async {
+    if (selectedQuality.value == quality) return;
+    if (!availableQualities.containsKey(quality)) return;
+
+    final currentPos = videoPlayerController?.value.position ?? Duration.zero;
+    final wasPlaying = videoPlayerController?.value.isPlaying ?? false;
+
+    selectedQuality.value = quality;
+    isInitialized.value = false; // Show loader during switch
+
+    await _setupController(availableQualities[quality]!);
+    
+    if (videoPlayerController != null) {
+      await videoPlayerController!.seekTo(currentPos);
+      if (wasPlaying) {
+        videoPlayerController!.play();
+      } else {
+        videoPlayerController!.pause();
+      }
+    }
   }
 
   /// 📺 FULLSCREEN TOGGLE
@@ -141,6 +206,7 @@ class VideoController extends GetxController {
   @override
   void onClose() {
     _hideTimer?.cancel();
+    videoPlayerController?.removeListener(_videoListener);
     videoPlayerController?.dispose();
     if (!kIsWeb) {
       SystemChrome.setPreferredOrientations([

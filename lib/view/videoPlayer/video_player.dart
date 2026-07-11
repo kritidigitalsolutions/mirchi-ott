@@ -23,7 +23,6 @@ class AdvancedVideoPlayer extends StatefulWidget {
 class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
   final VideoController controller = Get.put(VideoController());
   final RxBool isLocked = false.obs;
-  final RxString quality = "Auto".obs;
 
   @override
   void initState() {
@@ -241,6 +240,7 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
                             IconButton(
                               icon: const Icon(Icons.hd, color: Colors.white),
                               onPressed: () => _showQualityDialog(context),
+                              tooltip: "Quality: ${controller.selectedQuality.value}",
                             ),
 
                             /// 📺 FULLSCREEN
@@ -291,19 +291,26 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
     );
   }
 
-  /// 🎬 QUALITY DIALOG (UI only)
+  /// 🎬 QUALITY DIALOG
   void _showQualityDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (_) => SimpleDialog(
-        title: const Text("Quality"),
-        children: ["Auto", "1080p", "720p", "480p"].map((q) {
+        title: const Text("Select Quality"),
+        children: controller.availableQualities.keys.map((q) {
           return SimpleDialogOption(
             onPressed: () {
-              quality.value = q;
+              controller.setQuality(q);
               Navigator.pop(context);
             },
-            child: Text(q),
+            child: Obx(() => Row(
+                  children: [
+                    Text(q),
+                    const Spacer(),
+                    if (controller.selectedQuality.value == q)
+                      const Icon(Icons.check, color: Colors.red, size: 20),
+                  ],
+                )),
           );
         }).toList(),
       ),
