@@ -8,6 +8,8 @@ import 'package:mirchi_ott/data/models/shorts_model.dart';
 import 'package:mirchi_ott/view_model/shorts_controller/shorts_controller.dart';
 import 'package:mirchi_ott/view_model/auth_controller/auth_controller.dart';
 
+import '../popUp/age_popup.dart';
+
 class ShortsPage extends StatelessWidget {
   const ShortsPage({super.key});
 
@@ -109,9 +111,15 @@ class _ShortDramaListItemState extends State<ShortDramaListItem> {
             GestureDetector(
               onTap: () async {
                 if (_episodes == null || _episodes!.isEmpty) {
-                   _episodes = await shortsController.fetchEpisodes(widget.drama.id);
+                  _episodes =
+                      await shortsController.fetchEpisodes(widget.drama.id);
                 }
                 if (_episodes != null && _episodes!.isNotEmpty) {
+                  if (widget.drama.is18Plus) {
+                    final bool? isOver18 = await Get.dialog<bool>(
+                        const AgeRestrictionPopup());
+                    if (isOver18 != true) return;
+                  }
                   Get.toNamed(AppRoutes.shortsPlayer, arguments: {
                     'episodes': _episodes!,
                     'initialIndex': 0,

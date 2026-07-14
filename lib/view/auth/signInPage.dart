@@ -22,7 +22,6 @@ class _SignInPageState extends State<SignInPage> {
   final AuthController authController = Get.find<AuthController>();
   Worker? _googleLoginWorker;
 
-  final isAgeConfirmed = false.obs;
   final showCodeField = false.obs;
 
   final TextEditingController phoneController = TextEditingController();
@@ -122,11 +121,6 @@ class _SignInPageState extends State<SignInPage> {
                                       borderSide: BorderSide.none),
                                 ),
                               ),
-                              const SizedBox(height: 20),
-
-                              /// AGE CHECKBOX
-                              _buildAgeCheckbox(),
-
                               const SizedBox(height: 20),
 
                               /// GET OTP BUTTON
@@ -326,27 +320,12 @@ class _SignInPageState extends State<SignInPage> {
     );
   }
 
-  Widget _buildAgeCheckbox() {
-    return Row(
-      children: [
-        Obx(() => Checkbox(
-              value: isAgeConfirmed.value,
-              activeColor: AppColors.primary,
-              onChanged: (value) => isAgeConfirmed.value = value!,
-            )),
-        const Expanded(
-          child: Text("I confirm that I am 18+ years old", style: TextStyle(color: Colors.white70, fontSize: 13)),
-        ),
-      ],
-    );
-  }
-
   Widget _buildGetOtpButton() {
     return SizedBox(
       width: double.infinity,
       height: 55,
       child: Obx(() => ElevatedButton(
-            onPressed: (isAgeConfirmed.value && !authController.isLoading.value)
+            onPressed: (!authController.isLoading.value)
                 ? () async {
                     if (_formKey.currentState!.validate()) {
                       String valueToSend = "+91${phoneController.text.trim()}";

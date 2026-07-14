@@ -22,6 +22,8 @@ class ContentModel {
   final bool isTrending;
   final String? releaseDate;
   final int? priority;
+  final bool is18Plus;
+  final bool isHide;
   
   // Series/Episode specific fields
   final int? totalSeasons;
@@ -50,6 +52,8 @@ class ContentModel {
     required this.contentType,
     this.isComingSoon = false,
     this.isTrending = false,
+    this.is18Plus = false,
+    this.isHide = false,
     this.releaseDate,
     this.priority,
     this.totalSeasons,
@@ -99,6 +103,8 @@ class ContentModel {
       contentType: type,
       isComingSoon: json['isComingSoon'] ?? false,
       isTrending: json['isTrending'] ?? false,
+      is18Plus: json['is18+'] ?? json['is18'] ?? json['is18plus'] ?? false,
+      isHide: json['isHide'] ?? false,
       releaseDate: json['releaseDate'],
       priority: json['priority'],
       totalSeasons: json['totalSeasons'],
@@ -130,6 +136,8 @@ class ContentModel {
       'type': contentType,
       'isComingSoon': isComingSoon,
       'isTrending': isTrending,
+      'is18+': is18Plus,
+      'isHide': isHide,
       'releaseDate': releaseDate,
       'priority': priority,
       'totalSeasons': totalSeasons,

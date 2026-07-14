@@ -9,6 +9,8 @@ import 'package:mirchi_ott/view_model/auth_controller/auth_controller.dart';
 import 'package:mirchi_ott/view_model/primium_controller/premium_controller.dart';
 import 'package:mirchi_ott/widgets/custom_network_image.dart';
 
+import '../popUp/age_popup.dart';
+
 class ShortsEpisodesGrid extends StatelessWidget {
   final ShortDrama drama;
   const ShortsEpisodesGrid({super.key, required this.drama});
@@ -67,7 +69,12 @@ class ShortsEpisodesGrid extends StatelessWidget {
               }
 
               return GestureDetector(
-                onTap: () {
+                onTap: () async {
+                  if (drama.is18Plus || episode.is18Plus) {
+                    final bool? isOver18 =
+                        await Get.dialog<bool>(const AgeRestrictionPopup());
+                    if (isOver18 != true) return;
+                  }
                   Get.toNamed(AppRoutes.shortsPlayer, arguments: {
                     'episodes': episodes,
                     'initialIndex': index,

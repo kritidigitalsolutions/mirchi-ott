@@ -335,7 +335,8 @@ class PremiumController extends GetxController with WidgetsBindingObserver {
       'status': 'active',
       'planId': planId,
       'plan': plans.firstWhere((p) => p.id == planId).toJson(),
-      'expiryDate': DateTime.now().add(const Duration(days: 30)).toString(),
+      'endDate': DateTime.now().add(const Duration(days: 30)).toIso8601String(),
+      'expiryDate': DateTime.now().add(const Duration(days: 30)).toString(), // Keep for fallback
     };
     GetStorage().write('demo_subscription', subscriptionData.value);
     CustomSnackbar.show(title: "Success", message: "Plan purchased successfully (Demo Mode)", isSuccess: true);

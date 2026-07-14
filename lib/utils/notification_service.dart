@@ -273,8 +273,22 @@ class NotificationService extends GetxController {
   }
 
   void _handleMessage(RemoteMessage message) {
+    print("--- FULL NOTIFICATION CONTENT ---");
+    print("Message ID: ${message.messageId}");
+    print("From: ${message.from}");
+    print("Sent Time: ${message.sentTime}");
+    
     if (message.notification != null) {
-      print("📩 Processing Message: ${message.notification?.title}");
+      print("Notification Title: ${message.notification?.title}");
+      print("Notification Body: ${message.notification?.body}");
+      print("Notification Android Image: ${message.notification?.android?.imageUrl}");
+      print("Notification Apple Image: ${message.notification?.apple?.imageUrl}");
+    }
+    
+    print("Data Payload: ${message.data}");
+    print("----------------------------------");
+
+    if (message.notification != null) {
       fetchNotifications(); // Refresh list from server
     }
   }
@@ -292,14 +306,15 @@ class NotificationService extends GetxController {
 
     if (imageUrl != null && imageUrl.isNotEmpty) {
       try {
-        final String fileName = 'notification_${message.hashCode}.jpg';
+        final String fileName = 'notification_${DateTime.now().millisecondsSinceEpoch}.jpg';
         final String imagePath = await _downloadAndSaveFile(imageUrl, fileName);
         largeIconPath = imagePath;
         bigPictureStyleInformation = BigPictureStyleInformation(
           FilePathAndroidBitmap(imagePath),
-          largeIcon: FilePathAndroidBitmap(imagePath),
           contentTitle: message.notification?.title,
           summaryText: message.notification?.body,
+          htmlFormatContentTitle: true,
+          htmlFormatSummaryText: true,
         );
       } catch (e) {
         print("⚠️ Error downloading notification image: $e");

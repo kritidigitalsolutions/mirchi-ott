@@ -11,10 +11,11 @@ import '../auth/signInPage.dart';
 import '../dramaDetails/dramaDetailsPage.dart';
 
 class Top10List extends StatelessWidget {
+  final String title;
   final List<ContentModel> content;
   final bool isSignedIn;
 
-  const Top10List({super.key, required this.content, required this.isSignedIn});
+  const Top10List({super.key, required this.title, required this.content, required this.isSignedIn});
 
   @override
   Widget build(BuildContext context) {
@@ -24,24 +25,29 @@ class Top10List extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        /// 🔥 Trending on Mirchi TITLE
+        /// 🔥 Dynamic TITLE
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: InkWell(
-            onTap: () {},
-            child: const Row(
+            onTap: () {
+              Get.toNamed(AppRoutes.categoryGrid, arguments: {
+                'title': title,
+                'content': content,
+              });
+            },
+            child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  "Trending on Mirchi",
-                  style: TextStyle(
+                  title,
+                  style: const TextStyle(
                     color: AppColors.white,
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                SizedBox(width: 8),
-                Icon(Icons.arrow_forward_ios, color: Colors.white, size: 16),
+                const SizedBox(width: 8),
+                const Icon(Icons.arrow_forward_ios, color: Colors.white, size: 16),
               ],
             ),
           ),

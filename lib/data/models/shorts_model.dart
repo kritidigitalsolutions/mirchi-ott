@@ -13,6 +13,8 @@ class ShortDrama {
   final List<ShortCast>? cast;
   final List<String> category;
   final String slug;
+  final bool is18Plus;
+  final bool isHide;
 
   ShortDrama({
     required this.id,
@@ -27,6 +29,8 @@ class ShortDrama {
     this.cast,
     required this.category,
     required this.slug,
+    this.is18Plus = false,
+    this.isHide = false,
   });
 
   factory ShortDrama.fromJson(Map<String, dynamic> json) {
@@ -52,6 +56,8 @@ class ShortDrama {
           : null,
       category: List<String>.from(json['category'] ?? []),
       slug: json['slug'] ?? '',
+      is18Plus: json['is18+'] ?? json['is18'] ?? json['is18plus'] ?? false,
+      isHide: json['isHide'] ?? false,
     );
   }
 }
@@ -94,6 +100,8 @@ class ShortEpisode {
   final String duration;
   final bool isLocked;
   final bool isVertical;
+  final bool is18Plus;
+  final bool isHide;
 
   ShortEpisode({
     required this.id,
@@ -106,6 +114,8 @@ class ShortEpisode {
     required this.duration,
     required this.isLocked,
     required this.isVertical,
+    this.is18Plus = false,
+    this.isHide = false,
   });
 
   factory ShortEpisode.fromJson(Map<String, dynamic> json) {
@@ -127,6 +137,8 @@ class ShortEpisode {
       duration: json['duration'] ?? '',
       isLocked: json['isLocked'] ?? false,
       isVertical: json['isVertical'] ?? true,
+      is18Plus: json['is18+'] ?? json['is18'] ?? json['is18plus'] ?? false,
+      isHide: json['isHide'] ?? false,
     );
   }
 }

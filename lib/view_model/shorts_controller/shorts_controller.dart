@@ -23,7 +23,9 @@ class ShortsController extends GetxController {
       final response = await apiService.getApi(AppConstants.getShortDramas);
       if (response != null && response['success'] == true) {
         final List<dynamic> dramasJson = response['dramas'];
-        shortDramas.value = dramasJson.map((json) => ShortDrama.fromJson(json)).toList();
+        final List<ShortDrama> dramas = dramasJson.map((json) => ShortDrama.fromJson(json)).toList();
+        // Filter: Hide content if isHide is true
+        shortDramas.value = dramas.where((d) => d.isHide == false).toList();
       }
     } catch (e) {
       print("❌ Error fetching short dramas: $e");
@@ -42,9 +44,11 @@ class ShortsController extends GetxController {
       final response = await apiService.getApi(AppConstants.getShortEpisodes(dramaId));
       if (response != null && response['success'] == true) {
         final List<dynamic> episodesJson = response['episodes'];
-        final episodes = episodesJson.map((json) => ShortEpisode.fromJson(json)).toList();
-        episodesMap[dramaId] = episodes;
-        return episodes;
+        final List<ShortEpisode> episodes = episodesJson.map((json) => ShortEpisode.fromJson(json)).toList();
+        // Filter: Hide episodes if isHide is true
+        final filteredEpisodes = episodes.where((e) => e.isHide == false).toList();
+        episodesMap[dramaId] = filteredEpisodes;
+        return filteredEpisodes;
       }
       return [];
     } catch (e) {

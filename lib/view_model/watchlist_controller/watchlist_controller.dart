@@ -42,8 +42,20 @@ class WatchlistController extends GetxController {
       
       if (response != null) {
         final List<dynamic> data = response['data'] ?? [];
-        watchlist.assignAll(data.map((e) => e as Map<String, dynamic>).toList());
-        print("✅ WATCHLIST FETCHED: ${watchlist.length} items");
+        final List<Map<String, dynamic>> list = data.map((e) => e as Map<String, dynamic>).toList();
+        
+        // Filter: Hide content if isHide is true
+        final filteredList = list.where((item) {
+          final contentItem = item['item'];
+          if (contentItem != null && contentItem is Map) {
+            final isHide = contentItem['isHide'] ?? false;
+            return isHide == false;
+          }
+          return true;
+        }).toList();
+
+        watchlist.assignAll(filteredList);
+        print("✅ WATCHLIST FETCHED: ${watchlist.length} items (Filtered isHide)");
       }
     } catch (e) {
       print("❌ Error fetching watchlist: $e");

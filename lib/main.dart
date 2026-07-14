@@ -25,11 +25,20 @@ import 'view_model/auth_controller/auth_controller.dart';
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
 
-  print("🌙 BACKGROUND MESSAGE RECEIVED");
-  print("➡️ Message ID: ${message.messageId}");
-  print("➡️ Title: ${message.notification?.title}");
-  print("➡️ Body: ${message.notification?.body}");
-  print("➡️ Data: ${message.data}");
+  print("--- 🌙 FULL BACKGROUND NOTIFICATION ---");
+  print("Message ID: ${message.messageId}");
+  print("From: ${message.from}");
+  print("Sent Time: ${message.sentTime}");
+  
+  if (message.notification != null) {
+    print("Notification Title: ${message.notification?.title}");
+    print("Notification Body: ${message.notification?.body}");
+    print("Notification Android Image: ${message.notification?.android?.imageUrl}");
+    print("Notification Apple Image: ${message.notification?.apple?.imageUrl}");
+  }
+  
+  print("Data Payload: ${message.data}");
+  print("---------------------------------------");
 }
 
 Future<void> main() async {

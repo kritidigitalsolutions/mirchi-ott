@@ -295,7 +295,7 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
   void _showQualityDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (_) => SimpleDialog(
+      builder: (_) => Obx(() => SimpleDialog(
         title: const Text("Select Quality"),
         children: controller.availableQualities.keys.map((q) {
           return SimpleDialogOption(
@@ -303,17 +303,17 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
               controller.setQuality(q);
               Navigator.pop(context);
             },
-            child: Obx(() => Row(
-                  children: [
-                    Text(q),
-                    const Spacer(),
-                    if (controller.selectedQuality.value == q)
-                      const Icon(Icons.check, color: Colors.red, size: 20),
-                  ],
-                )),
+            child: Row(
+              children: [
+                Text(q),
+                const Spacer(),
+                if (controller.selectedQuality.value == q)
+                  const Icon(Icons.check, color: Colors.red, size: 20),
+              ],
+            ),
           );
         }).toList(),
-      ),
+      )),
     );
   }
 }

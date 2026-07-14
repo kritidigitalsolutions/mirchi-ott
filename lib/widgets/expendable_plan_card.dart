@@ -7,6 +7,7 @@ class ExpandablePlanCard extends StatefulWidget {
   final String duration;
   final List<String> features;
   final bool isHighlighted;
+  final bool isPurchased;
   final VoidCallback? onBuy;
   final VoidCallback? onSelect;
 
@@ -17,6 +18,7 @@ class ExpandablePlanCard extends StatefulWidget {
     required this.duration,
     this.features = const [],
     this.isHighlighted = false,
+    this.isPurchased = false,
     this.onBuy,
     this.onSelect,
   }) : super(key: key);
@@ -124,14 +126,14 @@ class _ExpandablePlanCardState extends State<ExpandablePlanCard> {
                       width: double.infinity,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
+                          backgroundColor: widget.isPurchased ? Colors.grey : AppColors.primary,
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         ),
-                        onPressed: widget.onBuy,
-                        child: const Text(
-                          "SELECT PLAN",
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                        onPressed: widget.isPurchased ? null : widget.onBuy,
+                        child: Text(
+                          widget.isPurchased ? "ALREADY PURCHASED" : "SELECT PLAN",
+                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                         ),
                       ),
                     ),

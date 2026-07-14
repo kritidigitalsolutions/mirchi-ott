@@ -92,7 +92,7 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 0),
 
                       /// WATCH & DOWNLOAD BUTTONS (Moved here from Banner)
                       if (widget.content.contentType != 'series') ...[
@@ -105,7 +105,7 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
                             ],
                           ],
                         ),
-                        const SizedBox(height: 25),
+                        const SizedBox(height: 15),
                       ],
 
                       /// DESCRIPTION & INFO (Mobile Only or additional)
@@ -147,7 +147,7 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
   Widget _buildHeroSection(bool isDesktop) {
     return Container(
       width: double.infinity,
-      height: isDesktop ? 750 : 350,
+      height: isDesktop ? 650 : 320,
       color: Colors.black,
       child: Stack(
         children: [
@@ -155,8 +155,8 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
           CustomNetworkImage(
             imageUrl: widget.content.banner,
             width: double.infinity,
-            height: isDesktop ? 750 : 350,
-            fit: BoxFit.fill, // Shows full banner without cropping or black bars
+            height: isDesktop ? 650 : 320,
+            fit: BoxFit.fill,
           ),
           /// SUBTLE GRADIENT OVERLAY
           Container(
@@ -166,87 +166,86 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
                 end: Alignment.bottomCenter,
                 colors: [
                   Colors.transparent,
-                  Colors.black.withOpacity(0.2),
+                  Colors.black.withOpacity(0.4),
                   Colors.black,
                 ],
-                stops: const [0.7, 0.9, 1.0],
+                stops: const [0.6, 0.8, 1.0],
               ),
             ),
           ),
 
           /// INFO OVERLAY
-          Padding(
-            padding:
-                EdgeInsets.symmetric(horizontal: isDesktop ? 60 : 20, vertical: 30),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  widget.content.title,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: isDesktop ? 42 : 24,
-                    fontWeight: FontWeight.w900,
-                    shadows: [
-                      Shadow(
-                          color: Colors.black.withOpacity(0.8),
-                          blurRadius: 10,
-                          offset: const Offset(2, 2))
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    Text(
-                      "${widget.content.releaseYear} • ${widget.content.language}",
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: isDesktop ? 16 : 13,
-                          fontWeight: FontWeight.bold),
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Padding(
+              padding:
+                  EdgeInsets.only(left: isDesktop ? 60 : 20, right: isDesktop ? 60 : 20, bottom: 10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    widget.content.title,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: isDesktop ? 42 : 26,
+                      fontWeight: FontWeight.w900,
+                      shadows: [
+                        Shadow(
+                            color: Colors.black.withOpacity(0.8),
+                            blurRadius: 10,
+                            offset: const Offset(2, 2))
+                      ],
                     ),
-                    if (widget.content.duration != null) ...[
-                      const SizedBox(width: 15),
-                      Container(
-                        padding:
-                            const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(4)),
-                        child: Text(widget.content.duration!,
-                            style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold)),
+                  ),
+                  const SizedBox(height: 5),
+                  Row(
+                    children: [
+                      Text(
+                        "${widget.content.releaseYear} • ${widget.content.language}",
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: isDesktop ? 16 : 13,
+                            fontWeight: FontWeight.bold),
                       ),
+                      if (widget.content.duration != null) ...[
+                        const SizedBox(width: 15),
+                        Container(
+                          padding:
+                              const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(4)),
+                          child: Text(widget.content.duration!,
+                              style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold)),
+                        ),
+                      ],
                     ],
-                  ],
-                ),
-                const SizedBox(height: 20),
-                if (isDesktop)
-                  SizedBox(
-                    width: 700,
-                    child: Text(
-                      widget.content.description,
-                      style: const TextStyle(
-                          color: Colors.white70,
-                          fontSize: 16,
-                          height: 1.5),
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
-                    ),
                   ),
-                const SizedBox(height: 5),
-
-                /// TRAILER & SMALL ACTIONS (Watch Now removed from here)
-                Row(
-                  children: [
-                    if (isDesktop) 
-                      _buildSmallActionsRow(),
+                  const SizedBox(height: 5),
+                  if (isDesktop) ...[
+                    SizedBox(
+                      width: 700,
+                      child: Text(
+                        widget.content.description,
+                        style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 16,
+                            height: 1.5),
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const SizedBox(height: 15),
+                    _buildSmallActionsRow(),
                   ],
-                ),
-              ],
+                ],
+              ),
             ),
           ),
 
@@ -254,7 +253,7 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
           if (widget.content.trailerUrl != null && widget.content.trailerUrl!.isNotEmpty)
             Positioned(
               bottom: 10,
-              right: 10,
+              right: 15,
               child: _buildTrailerButton(isDesktop: isDesktop),
             ),
         ],
@@ -330,14 +329,21 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
     });
   }
 
-  void _handlePlay(dynamic item, bool isPurchased, bool userLoggedIn) {
+  void _handlePlay(dynamic item, bool isPurchased, bool userLoggedIn) async {
     if (!userLoggedIn) {
       Get.toNamed(AppRoutes.signIn);
     } else if (isPurchased || !item.isPremium) {
       if (item.videoUrl != null && item.videoUrl!.isNotEmpty) {
-        Get.toNamed(AppRoutes.videoPlayer, arguments: {'url': item.videoUrl!, 'title': item.title});
+        if (item is ContentModel && item.is18Plus) {
+          final bool? isOver18 =
+              await Get.dialog<bool>(const AgeRestrictionPopup());
+          if (isOver18 != true) return;
+        }
+        Get.toNamed(AppRoutes.videoPlayer,
+            arguments: {'url': item.videoUrl!, 'title': item.title});
       } else {
-        CustomSnackbar.show(title: "Error", message: "Video URL not found", isError: true);
+        CustomSnackbar.show(
+            title: "Error", message: "Video URL not found", isError: true);
       }
     } else {
       Get.toNamed(AppRoutes.goPremium);
@@ -351,10 +357,15 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
           Get.toNamed(AppRoutes.signIn);
           return;
         }
-        final bool? isOver18 = await Get.dialog<bool>(const AgeRestrictionPopup());
-        if (isOver18 == true) {
-          Get.toNamed(AppRoutes.videoPlayer, arguments: {'url': widget.content.trailerUrl!, 'title': '${widget.content.title} - Trailer'});
+        if (widget.content.is18Plus) {
+          final bool? isOver18 =
+              await Get.dialog<bool>(const AgeRestrictionPopup());
+          if (isOver18 != true) return;
         }
+        Get.toNamed(AppRoutes.videoPlayer, arguments: {
+          'url': widget.content.trailerUrl!,
+          'title': '${widget.content.title} - Trailer'
+        });
       },
       icon: const Icon(Icons.play_circle_outline, size: 18, color: Colors.white),
       label: const Text("TRAILER", style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold)),
@@ -533,8 +544,8 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
               children: [
                 CustomNetworkImage(
                   imageUrl: ep.poster,
-                  width: isDesktop ? 200 : 120,
-                  height: isDesktop ? 110 : 70,
+                  width: isDesktop ? 260 : 120,
+                  height: isDesktop ? 145 : 70,
                   fit: BoxFit.cover,
                   borderRadius: 8,
                 ),
@@ -701,7 +712,7 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
         const Text("More Like This", style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
         const SizedBox(height: 30),
         SizedBox(
-          height: isDesktop ? 300 : 200,
+          height: isDesktop ? 400 : 200,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: related.length,
@@ -710,7 +721,7 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
               return GestureDetector(
                 onTap: () => Get.toNamed(AppRoutes.dramaDetails, arguments: item, preventDuplicates: false),
                 child: Container(
-                  width: isDesktop ? 200 : 135,
+                  width: isDesktop ? 260 : 135,
                   margin: const EdgeInsets.only(right: 20),
                   child: CustomNetworkImage(
                     imageUrl: item.poster,

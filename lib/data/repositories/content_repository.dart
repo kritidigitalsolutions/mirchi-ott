@@ -1,3 +1,4 @@
+import '../models/category_model.dart';
 import '../models/response_model/content_response_model/content_model.dart';
 import '../network/base_api_service.dart';
 import '../../utils/constants.dart';
@@ -18,6 +19,20 @@ class ContentRepository {
       return [];
     } catch (e) {
       print("Error fetching content: $e");
+      rethrow;
+    }
+  }
+
+  Future<List<CategoryModel>> getCategories() async {
+    try {
+      final response = await apiProvider.getApi(AppConstants.getCategories);
+      if (response['success'] == true) {
+        List<dynamic> data = response['data'] ?? [];
+        return data.map((item) => CategoryModel.fromJson(item)).toList();
+      }
+      return [];
+    } catch (e) {
+      print("Error fetching categories: $e");
       rethrow;
     }
   }

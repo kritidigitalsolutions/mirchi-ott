@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import '../../data/models/category_model.dart';
 import '../../data/models/response_model/content_response_model/content_model.dart';
 import '../../data/repositories/content_repository.dart';
 import '../../data/repositories/interaction_repository.dart';
@@ -11,6 +12,7 @@ class ContentController extends GetxController {
   var isLoading = true.obs;
   var allContent = <ContentModel>[].obs;
   var trendingContent = <ContentModel>[].obs;
+  var categories = <CategoryModel>[].obs;
   var seriesEpisodes = <ContentModel>[].obs;
   var isEpisodesLoading = false.obs;
   
@@ -26,15 +28,24 @@ class ContentController extends GetxController {
   Future<void> fetchContent() async {
     try {
       isLoading.value = true;
+      
+      // Fetch categories first or in parallel
+      final cats = await _repository.getCategories();
+      cats.sort((a, b) => a.priority.compareTo(b.priority));
+      categories.assignAll(cats);
+
       final content = await _repository.getAllContent();
       
-      // Sort content by priority (lower number = higher priority, e.g. 1 is top)
-      content.sort((a, b) => (a.priority ?? 999).compareTo(b.priority ?? 999));
+      // Filter: Hide content if isHide is true
+      final filteredContent = content.where((c) => c.isHide == false).toList();
       
-      allContent.assignAll(content);
+      // Sort content by priority (lower number = higher priority, e.g. 1 is top)
+      filteredContent.sort((a, b) => (a.priority ?? 999).compareTo(b.priority ?? 999));
+      
+      allContent.assignAll(filteredContent);
       
       // Filter trending for slider
-      trendingContent.assignAll(content.where((c) => c.category.contains('trending') && c.isComingSoon == false).toList());
+      trendingContent.assignAll(filteredContent.where((c) => c.category.contains('trending') && c.isComingSoon == false).toList());
       
       // Fetch stats for each item to enable sorting by likes
       _fetchAllStats();
@@ -51,7 +62,9 @@ class ContentController extends GetxController {
       isEpisodesLoading.value = true;
       seriesEpisodes.clear();
       final episodes = await _repository.getEpisodes(seriesId);
-      seriesEpisodes.assignAll(episodes);
+      // Filter: Hide episodes if isHide is true
+      final filteredEpisodes = episodes.where((e) => e.isHide == false).toList();
+      seriesEpisodes.assignAll(filteredEpisodes);
     } catch (e) {
       print("Error fetching episodes: $e");
     } finally {

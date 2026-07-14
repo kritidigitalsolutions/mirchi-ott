@@ -113,7 +113,7 @@ class NotificationPage extends StatelessWidget {
                   imageUrl: imageUrl,
                   width: 50,
                   height: 50,
-                  fit: BoxFit.cover,
+                  fit: BoxFit.contain, // Changed to contain to show more of the image
                   placeholder: (context, url) => Container(
                     width: 50,
                     height: 50,
@@ -220,8 +220,7 @@ class NotificationPage extends StatelessWidget {
                   child: CachedNetworkImage(
                     imageUrl: notification['image'],
                     width: double.infinity,
-                    height: 200,
-                    fit: BoxFit.cover,
+                    fit: BoxFit.contain, // Changed to contain for full image view
                     placeholder: (context, url) => Container(
                       height: 200,
                       color: Colors.grey[800],

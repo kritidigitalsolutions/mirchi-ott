@@ -321,64 +321,45 @@ class MainHomePage extends StatelessWidget {
                   
                   SizedBox(height: isDesktop ? 30 : 0),
 
-                  _buildAnimatedSection(
-                    isDesktop: isDesktop,
-                    delay: 200,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 16),
-                          child: Text(
-                            "Web Series",
-                            style: TextStyle(color: AppColors.white, fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: 1.2),
+                  // Dynamic Categories
+                  ...contentController.categories.map((category) {
+                    final categoryContent = contentController.allContent
+                        .where((c) => c.category.contains(category.slug) && c.isComingSoon == false)
+                        .toList();
+                    
+                    if (categoryContent.isEmpty) return const SizedBox.shrink();
+
+                    // Special UI for Top 10 category
+                    if (category.slug.toLowerCase().contains('top10')) {
+                      return _buildAnimatedSection(
+                        isDesktop: isDesktop,
+                        delay: 200,
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 30),
+                          child: Top10List(
+                            title: category.name.toUpperCase(),
+                            content: categoryContent,
+                            isSignedIn: authController.isLoggedIn.value,
                           ),
                         ),
-                        // const SizedBox(height: 20),
-                        Obx(() {
-                          final seriesContent = contentController.allContent
-                              .where((c) => c.contentType == 'series' && c.isComingSoon == false)
-                              .toList();
+                      );
+                    }
 
-                          return SizedBox(
-                            height: isDesktop ? 340 : 170,
-                            child: ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                              itemCount: seriesContent.length,
-                              itemBuilder: (context, index) {
-                                final item = seriesContent[index];
-                                return _WebSeriesHoverCard(item: item, isSignedIn: authController.isLoggedIn.value, isDesktop: isDesktop);
-                              },
-                            ),
-                          );
-                        }),
-                      ],
-                    ),
-                  ),
+                    return _buildAnimatedSection(
+                      isDesktop: isDesktop,
+                      delay: 200,
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 30),
+                        child: HomeSliderSection(
+                          title: category.name.toUpperCase(),
+                          content: categoryContent,
+                          isSignedIn: authController.isLoggedIn.value,
+                        ),
+                      ),
+                    );
+                  }).toList(),
 
                   const SizedBox(height: 30),
-
-                  _buildAnimatedSection(
-                    isDesktop: isDesktop,
-                    delay: 400,
-                    child: Top10List(
-                      content: contentController.allContent.where((c) => c.category.contains('top10') && c.isComingSoon == false).toList(),
-                      isSignedIn: authController.isLoggedIn.value,
-                    ),
-                  ),
-
-                  const SizedBox(height: 30),
-
-                  _buildAnimatedSection(
-                    isDesktop: isDesktop,
-                    delay: 600,
-                    child: HomeSliderSection(
-                      title: "Mirchi Exclusives",
-                      content: contentController.allContent.where((c) => c.contentType == 'movie' && c.isComingSoon == false).toList(),
-                      isSignedIn: authController.isLoggedIn.value,
-                    ),
-                  ),
                   
                   _buildFooter(),
                   const SizedBox(height: 100),
@@ -471,66 +452,6 @@ class MainHomePage extends StatelessWidget {
       child: Text(
         title,
         style: const TextStyle(color: AppColors.primary, fontSize: 16, fontWeight: FontWeight.w600),
-      ),
-    );
-  }
-}
-
-class _WebSeriesHoverCard extends StatefulWidget {
-  final dynamic item;
-  final bool isSignedIn;
-  final bool isDesktop;
-
-  const _WebSeriesHoverCard({required this.item, required this.isSignedIn, required this.isDesktop});
-
-  @override
-  State<_WebSeriesHoverCard> createState() => _WebSeriesHoverCardState();
-}
-
-class _WebSeriesHoverCardState extends State<_WebSeriesHoverCard> {
-  bool isHovered = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) => setState(() => isHovered = true),
-      onExit: (_) => setState(() => isHovered = false),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
-        width: widget.isDesktop ? (isHovered ? 230 : 200) : 130,
-        margin: const EdgeInsets.only(right: 32),
-        transform: isHovered 
-          ? (Matrix4.identity()..translate(0, -15, 0)..scale(1.05)) 
-          : Matrix4.identity(),
-        child: GestureDetector(
-          onTap: () {
-            Get.toNamed(AppRoutes.dramaDetails, arguments: widget.item);
-          },
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(15),
-              boxShadow: isHovered ? [
-                BoxShadow(
-                  color: AppColors.primary.withOpacity(0.5),
-                  blurRadius: 25,
-                  spreadRadius: 3,
-                  offset: const Offset(0, 10),
-                )
-              ] : [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.3),
-                  blurRadius: 10,
-                  offset: const Offset(0, 5),
-                )
-              ],
-            ),
-            child: CustomNetworkImage(
-              imageUrl: widget.item.poster,
-              fit: BoxFit.fill,
-              borderRadius: 15,
-            ),
-          ),
-        ),
       ),
     );
   }

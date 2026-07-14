@@ -123,7 +123,7 @@ class PurchasedPlansPage extends StatelessWidget {
               const Icon(Icons.calendar_today, color: Colors.white70, size: 16),
               const SizedBox(width: 8),
               Text(
-                "Expires on: ${Get.find<PremiumController>().formatDate(sub['expiryDate'])}",
+                "Expires on: ${Get.find<PremiumController>().formatDate(sub['endDate'] ?? sub['expiryDate'])}",
                 style: const TextStyle(color: Colors.white, fontSize: 14),
               ),
             ],
@@ -135,6 +135,7 @@ class PurchasedPlansPage extends StatelessWidget {
 
   Widget _buildDetailsSection(Map<String, dynamic> sub) {
     final plan = sub['plan'] ?? {};
+    final controller = Get.find<PremiumController>();
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -148,9 +149,11 @@ class PurchasedPlansPage extends StatelessWidget {
           const Divider(color: Colors.white10, height: 30),
           _detailRow("Duration", "${plan['duration'] ?? '0'} Days"),
           const Divider(color: Colors.white10, height: 30),
-          _detailRow("Payment Status", "Success"),
+          _detailRow("Purchase Date", controller.formatDate(sub['startDate'] ?? sub['createdAt'])),
           const Divider(color: Colors.white10, height: 30),
-          _detailRow("Auto Renewal", "Off"),
+          _detailRow("Expiry Date", controller.formatDate(sub['endDate'] ?? sub['expiryDate'])),
+          const Divider(color: Colors.white10, height: 30),
+          _detailRow("Payment Status", "Success"),
         ],
       ),
     );

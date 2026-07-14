@@ -155,24 +155,32 @@ class _GoPremiumPageState extends State<GoPremiumPage> {
                           itemCount: controller.plans.length,
                           itemBuilder: (context, index) {
                             final plan = controller.plans[index];
-                            return Obx(() => ExpandablePlanCard(
-                              title: plan.name,
-                              price: "₹${plan.price}",
-                              duration: "/ ${plan.duration} Days",
-                              features: plan.features,
-                              isHighlighted: controller.selectedPlanIndex.value == index,
-                              onSelect: () => controller.selectPlan(index),
-                              onBuy: () {
-                                controller.selectPlan(index);
-                                if (!controller.isUserLoggedIn.value) {
-                                  Get.toNamed(AppRoutes.signIn);
-                                } else if (controller.hasActiveSubscription) {
-                                  CustomSnackbar.show(title: "Info", message: "Already Purchased");
-                                } else {
-                                  controller.subscribeToPlan(plan.id!);
-                                }
-                              },
-                            ));
+                            return Obx(() {
+                              // Check if this specific plan is the one purchased
+                              final bool isThisPlanPurchased = controller.hasActiveSubscription && 
+                                  (controller.subscriptionData.value?['planId'] == plan.id || 
+                                   controller.subscriptionData.value?['plan']?['_id'] == plan.id);
+                              
+                              return ExpandablePlanCard(
+                                title: plan.name,
+                                price: "₹${plan.price}",
+                                duration: "/ ${plan.duration} Days",
+                                features: plan.features,
+                                isHighlighted: controller.selectedPlanIndex.value == index,
+                                isPurchased: isThisPlanPurchased,
+                                onSelect: () => controller.selectPlan(index),
+                                onBuy: () {
+                                  controller.selectPlan(index);
+                                  if (!controller.isUserLoggedIn.value) {
+                                    Get.toNamed(AppRoutes.signIn);
+                                  } else if (controller.hasActiveSubscription) {
+                                    CustomSnackbar.show(title: "Info", message: "Already Purchased");
+                                  } else {
+                                    controller.subscribeToPlan(plan.id!);
+                                  }
+                                },
+                              );
+                            });
                           },
                         );
                       }),
