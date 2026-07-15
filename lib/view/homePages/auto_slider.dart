@@ -35,7 +35,7 @@ class _AutoSliderState extends State<AutoSlider> {
   void initState() {
     super.initState();
     _pageController = PageController(
-      viewportFraction: Responsive.isDesktop(Get.context!) ? 0.9 : 0.85,
+      viewportFraction: Responsive.isDesktop(Get.context!) ? 0.92 : 0.85,
       initialPage: 1000,
     );
     currentPage = 1000;
@@ -95,7 +95,7 @@ class _AutoSliderState extends State<AutoSlider> {
       child: Column(
         children: [
           SizedBox(
-            height: isDesktop ? 750 : MediaQuery.of(context).size.height * 0.40,
+            height: isDesktop ? MediaQuery.of(context).size.height * 0.8 : MediaQuery.of(context).size.height * 0.40,
             child: PageView.builder(
               controller: _pageController,
               itemCount: null,
@@ -105,7 +105,7 @@ class _AutoSliderState extends State<AutoSlider> {
                 bool isSelected = currentPage == index;
 
                 return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  padding: EdgeInsets.symmetric(horizontal: isDesktop ? 0 : 8),
                   child: GestureDetector(
                     onTap: () {
                       Get.toNamed(AppRoutes.dramaDetails, arguments: item);
@@ -113,18 +113,18 @@ class _AutoSliderState extends State<AutoSlider> {
                     child: Container(
                       decoration: BoxDecoration(
                         color: Colors.black,
-                        borderRadius: BorderRadius.circular(15),
+                        borderRadius: BorderRadius.circular(isDesktop ? 0 : 15),
                       ),
                       child: ClipRRect(
-                        borderRadius: BorderRadius.circular(15),
+                        borderRadius: BorderRadius.circular(isDesktop ? 0 : 15),
                         child: Stack(
                           fit: StackFit.expand,
                           children: [
                             /// CINEMATIC IMAGE
                             CustomNetworkImage(
                               imageUrl: isDesktop ? item.banner : item.poster,
-                              fit: BoxFit.fill,
-                              borderRadius: 15,
+                              fit: isDesktop ? BoxFit.cover : BoxFit.fill,
+                              borderRadius: isDesktop ? 0 : 15,
                             ),
                             /// TOP GRADIENT
                             Container(
