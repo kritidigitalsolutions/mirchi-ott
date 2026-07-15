@@ -123,7 +123,7 @@ class _AutoSliderState extends State<AutoSlider> {
                             /// CINEMATIC IMAGE
                             CustomNetworkImage(
                               imageUrl: isDesktop ? item.banner : item.poster,
-                              fit: isDesktop ? BoxFit.cover : BoxFit.fill,
+                              fit: isDesktop ? BoxFit.fill : BoxFit.fill,
                               borderRadius: isDesktop ? 0 : 15,
                             ),
                             /// TOP GRADIENT
