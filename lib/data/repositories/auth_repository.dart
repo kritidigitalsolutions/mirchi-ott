@@ -83,6 +83,17 @@ class AuthRepository {
     }
   }
 
+  Future<dynamic> updateProfile({required String phone}) async {
+    try {
+      final response = await apiProvider.pacthApi(AppConstants.updateProfile, {
+        'phone': phone,
+      });
+      return response;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<dynamic> getProfile() async {
     try {
       final response = await apiProvider.getApi(AppConstants.getProfile);

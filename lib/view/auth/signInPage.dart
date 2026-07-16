@@ -143,6 +143,18 @@ class _SignInPageState extends State<SignInPage> {
 
                           /// LOGIN WITH GOOGLE
                           _buildGoogleSignInButton(),
+
+                          const SizedBox(height: 15),
+                          // TextButton(
+                          //   onPressed: _showEmailPicker,
+                          //   child: const Text(
+                          //     "Login with Email",
+                          //     style: TextStyle(
+                          //       color: Colors.white70,
+                          //       decoration: TextDecoration.underline,
+                          //     ),
+                          //   ),
+                          // ),
                         ],
                       ),
                       const SizedBox(height: 40),
@@ -247,13 +259,9 @@ class _SignInPageState extends State<SignInPage> {
   }
 
   void _handleGoogleLoginResponse(VerifyOtpResponse response) {
-    final bool isProfileIncomplete = response.isNewUser ||
-        (response.user != null && response.user!['phone'] == null);
-
-    if (isProfileIncomplete) {
-      final String identifier =
-          response.user?['email'] ?? response.user?['phone'] ?? "";
-      Get.offAllNamed(AppRoutes.createProfile, arguments: identifier);
+    if (response.isNewUser) {
+      Get.offAllNamed(AppRoutes.createProfile,
+          arguments: response.user?['email'] ?? "");
     } else {
       Get.offAllNamed(AppRoutes.navbar);
     }
@@ -272,7 +280,7 @@ class _SignInPageState extends State<SignInPage> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text("Login with Email", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+            // const Text("Login with Email", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 20),
             AutofillGroup(
               child: TextFormField(

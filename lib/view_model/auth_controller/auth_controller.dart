@@ -117,17 +117,17 @@ class AuthController extends GetxController {
           await storage.write('user_data', response.user);
         }
 
-        final bool isComplete = !response.isNewUser &&
-            (response.user != null && response.user!['phone'] != null);
+        // ✅ Silently sync numeric phone if it's a google_ ID or empty BEFORE setting login status
+        await _syncNumericPhoneIfNeeded(response.user);
 
-        if (isComplete) {
-          setLoginStatus(true);
-          CustomSnackbar.show(
-            title: 'Welcome!',
-            message: 'Signed in successfully with Google',
-            isSuccess: true,
-          );
-        }
+        // ✅ Always set login status to true for Google Login
+        setLoginStatus(true);
+
+        CustomSnackbar.show(
+          title: 'Welcome!',
+          message: 'Signed in successfully with Google',
+          isSuccess: true,
+        );
 
         return response;
       }
@@ -226,6 +226,11 @@ class AuthController extends GetxController {
         // ✅ Fix: Set login status if NOT a new user (Existing user is now logged in)
         if (!response.isNewUser) {
           setLoginStatus(true);
+        }
+
+        // ✅ If logging in with Email, ensure we have a numeric dummy phone for payments
+        if (phoneNumber.contains('@')) {
+          await _syncNumericPhoneIfNeeded(response.user);
         }
         
         return response;
@@ -342,12 +347,30 @@ class AuthController extends GetxController {
       return false;
     } catch (e) {
       if (e.toString().contains("Profile already completed")) {
+        // If profile exists, at least update the phone number if provided
+        await updatePhoneNumber(phone);
         setLoginStatus(true);
         return true;
       }
+      debugPrint("❌ Create Profile Error: $e");
       return false;
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  Future<bool> updatePhoneNumber(String phone) async {
+    try {
+      // Use a local loading state if needed, but don't block the global one if it's a silent sync
+      final response = await repository.updateProfile(phone: phone);
+      if (response != null) {
+        await getProfile(); // Refresh user data to get updated phone
+        return true;
+      }
+      return false;
+    } catch (e) {
+      debugPrint("❌ Update Phone Error: $e");
+      return false;
     }
   }
 
@@ -380,6 +403,25 @@ class AuthController extends GetxController {
     // Clear notifications locally on logout
     if (Get.isRegistered<NotificationService>()) {
       NotificationService.to.clearNotifications();
+    }
+  }
+
+  Future<void> _syncNumericPhoneIfNeeded(Map<String, dynamic>? user) async {
+    try {
+      String currentPhone = user?['phone']?.toString() ?? "";
+
+      // If phone is missing, or contains letters (like google_... or email_...), or isn't 10 digits
+      bool isInvalid = currentPhone.isEmpty ||
+          currentPhone.contains(RegExp(r'[a-zA-Z]')) ||
+          currentPhone.length != 10;
+
+      if (isInvalid) {
+        debugPrint("🛠 Syncing numeric dummy phone for numeric-only API requirements...");
+        String uniqueDummy = "9${DateTime.now().millisecondsSinceEpoch.toString().substring(4, 13)}";
+        await updatePhoneNumber(uniqueDummy);
+      }
+    } catch (e) {
+      debugPrint("⚠️ Failed to sync numeric phone: $e");
     }
   }
 }

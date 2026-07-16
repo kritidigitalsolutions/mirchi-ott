@@ -26,11 +26,23 @@ class _CreateProfilePageState extends State<CreateProfilePage> {
   @override
   void initState() {
     super.initState();
-    nameController = TextEditingController();
-    phoneController = TextEditingController(text: widget.phone.contains('@') ? "" : widget.phone);
-    isEmailAccount = widget.phone.contains('@');
     authController = Get.find<AuthController>();
     createProfileController = Get.put(CreateProfileController());
+    
+    final user = authController.userData.value;
+    nameController = TextEditingController(text: user?['name'] ?? "");
+    
+    // Check if the argument is a valid phone number
+    bool isPhoneNumber = RegExp(r'^\+?[0-9]{10,15}$').hasMatch(widget.phone);
+    isEmailAccount = !isPhoneNumber;
+    
+    String initialPhone = isPhoneNumber ? widget.phone : (user?['phone'] ?? "");
+    // If phone in userData is dummy, clear it
+    if (initialPhone.startsWith("google_") || initialPhone.length < 10) {
+      initialPhone = "";
+    }
+    
+    phoneController = TextEditingController(text: initialPhone);
   }
 
   @override
@@ -160,9 +172,16 @@ class _CreateProfilePageState extends State<CreateProfilePage> {
                                     return;
                                   }
 
+                                  String userEmail = "";
+                                  if (widget.phone.contains('@')) {
+                                    userEmail = widget.phone;
+                                  } else {
+                                    userEmail = authController.userData.value?['email'] ?? "";
+                                  }
+
                                   bool success = await authController.updateAndSaveProfile(
                                     name: nameController.text.trim(),
-                                    email: isEmailAccount ? widget.phone : "",
+                                    email: userEmail,
                                     phone: phoneController.text.trim(),
                                     imagePath: createProfileController.selectedImage.value?.path,
                                   );

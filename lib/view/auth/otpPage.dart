@@ -61,12 +61,10 @@ class _OtpPageState extends State<OtpPage> {
       // ✅ Unfocus before navigating
       FocusManager.instance.primaryFocus?.unfocus();
 
-      Future.delayed(const Duration(milliseconds: 100), () {
+      Future.delayed(const Duration(milliseconds: 100), () async {
         if (!mounted) return;
         
-        bool isEmail = widget.phoneNumber.contains('@');
-        
-        if (!isEmail && isNew) {
+        if (isNew) {
           Get.offAllNamed(AppRoutes.createProfile, arguments: widget.phoneNumber);
         } else {
           // Check if we came from a content page

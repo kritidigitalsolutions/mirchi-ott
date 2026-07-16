@@ -12,6 +12,7 @@ class AppConstants {
   /// user proflie
   static const String getProfile = '$baseUrl/user/profile';
   static const String createProfile = '$baseUrl/user/complete-profile';
+  static const String updateProfile = '$baseUrl/user/update-profile';
 
   /// fcm
   static const String updateFcmToken = '$baseUrl/notifications/fcm-token';
