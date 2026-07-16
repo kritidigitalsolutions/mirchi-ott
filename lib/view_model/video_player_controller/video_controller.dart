@@ -36,17 +36,28 @@ class VideoController extends GetxController {
     'Connection': 'keep-alive',
   };
 
+  @override
+  void onInit() {
+    super.onInit();
+    if (!kIsWeb) {
+      SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+    }
+  }
+
   /// 🔥 INIT
   Future<void> initializeVideo(String url, {Map<String, String>? qualities}) async {
     isInitialized.value = false;
     _mainUrl = url;
     selectedQuality.value = "Auto";
     availableQualities.clear();
-    availableQualities["Auto"] = url;
+    
+    Map<String, String> qualitiesMap = {"Auto": url};
 
     if (qualities != null && qualities.isNotEmpty) {
-      availableQualities.addAll(qualities);
+      qualitiesMap.addAll(qualities);
+      _sortAndAssignQualities(qualitiesMap);
     } else {
+      availableQualities["Auto"] = url;
       // If it's HLS, try to parse qualities from master playlist
       if (url.toLowerCase().contains(".m3u8")) {
         await _parseHlsQualities(url);
@@ -94,14 +105,6 @@ class VideoController extends GetxController {
       videoPlayerController!.play();
       videoPlayerController!.setPlaybackSpeed(playbackSpeed.value);
       videoPlayerController!.setVolume(volume.value);
-
-      if (!kIsWeb) {
-        SystemChrome.setPreferredOrientations([
-          DeviceOrientation.portraitUp,
-          DeviceOrientation.landscapeLeft,
-          DeviceOrientation.landscapeRight,
-        ]);
-      }
 
       videoPlayerController!.addListener(_videoListener);
       _startHideTimer();
@@ -183,7 +186,7 @@ class VideoController extends GetxController {
         debugPrint("Found Qualities: ${qualities.keys.toList()}");
 
         if (qualities.length > 1) {
-          availableQualities.assignAll(qualities);
+          _sortAndAssignQualities(qualities);
         }
       } else {
         debugPrint("Failed to fetch master playlist: ${response.statusCode}");
@@ -191,6 +194,25 @@ class VideoController extends GetxController {
     } catch (e) {
       debugPrint("Error parsing HLS: $e");
     }
+  }
+
+  void _sortAndAssignQualities(Map<String, String> qualities) {
+    final List<String> priorityOrder = ["Auto", "1080p", "720p", "480p", "360p", "240p"];
+    final Map<String, String> sorted = {};
+
+    for (var q in priorityOrder) {
+      if (qualities.containsKey(q)) {
+        sorted[q] = qualities[q]!;
+      }
+    }
+
+    qualities.forEach((key, value) {
+      if (!sorted.containsKey(key)) {
+        sorted[key] = value;
+      }
+    });
+
+    availableQualities.assignAll(sorted);
   }
 
   void _videoListener() {

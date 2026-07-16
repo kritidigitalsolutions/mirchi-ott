@@ -37,9 +37,19 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: Obx(() {
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        if (controller.isFullscreen.value) {
+          controller.toggleFullscreen();
+        } else {
+          Get.back();
+        }
+      },
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        body: Obx(() {
         if (!controller.isInitialized.value) {
           return const Center(
             child: CircularProgressIndicator(),
@@ -103,8 +113,9 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
           ],
         );
       }),
-    );
-  }
+    ),
+  );
+}
 
   /// 🎮 CONTROLS
   Widget _controls(BuildContext context) {
@@ -205,51 +216,51 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
                           children: [
                             Text(
                               "${_format(controller.currentPosition.value)} / ${_format(controller.totalDuration.value)}",
-                              style: const TextStyle(color: Colors.white, fontSize: 13),
+                              style: const TextStyle(color: Colors.white, fontSize: 12),
                             ),
-                            const SizedBox(width: 20),
-
-                            /// 🔊 VOLUME
-                            const Icon(Icons.volume_up, color: Colors.white, size: 20),
-                            SizedBox(
-                              width: 100,
-                              child: SliderTheme(
-                                data: SliderTheme.of(context).copyWith(
-                                  trackHeight: 2,
-                                  thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
-                                  overlayShape: const RoundSliderOverlayShape(overlayRadius: 10),
-                                ),
-                                child: Slider(
-                                  value: controller.volume.value,
-                                  onChanged: controller.setVolume,
-                                  activeColor: Colors.white,
-                                  inactiveColor: Colors.white24,
-                                ),
-                              ),
-                            ),
-
+                            
                             const Spacer(),
 
                             /// ⚡ SPEED
                             IconButton(
-                              icon: const Icon(Icons.speed, color: Colors.white),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                              icon: const Icon(Icons.speed, color: Colors.white, size: 24),
                               onPressed: () => _showSpeedDialog(context),
                             ),
+                            const SizedBox(width: 15),
 
                             /// 🎬 QUALITY
-                            IconButton(
-                              icon: const Icon(Icons.hd, color: Colors.white),
-                              onPressed: () => _showQualityDialog(context),
-                              tooltip: "Quality: ${controller.selectedQuality.value}",
+                            InkWell(
+                              onTap: () => _showQualityDialog(context),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: Colors.white, width: 1),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  controller.selectedQuality.value,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
                             ),
+                            const SizedBox(width: 15),
 
                             /// 📺 FULLSCREEN
                             IconButton(
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
                               icon: Icon(
                                 controller.isFullscreen.value
                                     ? Icons.fullscreen_exit
                                     : Icons.fullscreen,
                                 color: Colors.white,
+                                size: 28,
                               ),
                               onPressed: controller.toggleFullscreen,
                             ),

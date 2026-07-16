@@ -12,6 +12,7 @@ import '../../utils/constants.dart';
 import '../../utils/app_session.dart';
 import '../../utils/custom_snackbar.dart';
 import '../auth_controller/auth_controller.dart';
+import '../content_controller/content_controller.dart';
 
 class PremiumController extends GetxController with WidgetsBindingObserver {
   late final PremiumRepository _repository;
@@ -76,6 +77,13 @@ class PremiumController extends GetxController with WidgetsBindingObserver {
       // Refresh subscription status when user returns to app after payment
       if (isUserLoggedIn.value) {
         fetchSubscriptionStatus();
+        try {
+          if (Get.isRegistered<ContentController>()) {
+            Get.find<ContentController>().fetchContent();
+          }
+        } catch (e) {
+          debugPrint("Error refreshing content: $e");
+        }
       }
     }
   }
@@ -343,6 +351,13 @@ class PremiumController extends GetxController with WidgetsBindingObserver {
       if (verifyResponse != null && verifyResponse['success'] == true) {
         CustomSnackbar.show(title: "Success", message: "Payment Verified Successfully!", isSuccess: true);
         fetchSubscriptionStatus();
+        try {
+          if (Get.isRegistered<ContentController>()) {
+            Get.find<ContentController>().fetchContent();
+          }
+        } catch (e) {
+          debugPrint("Error refreshing content: $e");
+        }
       } else {
         CustomSnackbar.show(title: "Payment Failed", message: verifyResponse['message'] ?? "Verification failed", isError: true);
       }
@@ -373,6 +388,13 @@ class PremiumController extends GetxController with WidgetsBindingObserver {
       if (response != null && response['success'] == true) {
         CustomSnackbar.show(title: "Success", message: "Redeemed successfully", isSuccess: true);
         fetchSubscriptionStatus();
+        try {
+          if (Get.isRegistered<ContentController>()) {
+            Get.find<ContentController>().fetchContent();
+          }
+        } catch (e) {
+          debugPrint("Error refreshing content: $e");
+        }
       }
     } catch (e) {
       CustomSnackbar.show(title: "Error", message: "Something went wrong", isError: true);

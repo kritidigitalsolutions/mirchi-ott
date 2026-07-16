@@ -33,7 +33,7 @@ class MainHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ContentController contentController = Get.put(ContentController());
+    final ContentController contentController = Get.find<ContentController>();
     final HomeController controller = Get.put(HomeController());
     final AuthController authController = Get.find<AuthController>();
     final notificationService = NotificationService.to;
@@ -307,17 +307,24 @@ class MainHomePage extends StatelessWidget {
               );
             }
 
-            return SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 10),
-                  AutoSlider(
-                    content: contentController.allContent
-                        .where((c) => c.category.contains('trending') && c.isComingSoon == false)
-                        .toList(),
-                    isSignedIn: authController.isLoggedIn.value,
-                  ),
+            return RefreshIndicator(
+              onRefresh: () async {
+                await contentController.fetchContent();
+              },
+              color: AppColors.primary,
+              backgroundColor: Colors.black,
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 10),
+                    AutoSlider(
+                      content: contentController.allContent
+                          .where((c) => c.category.contains('trending') && c.isComingSoon == false)
+                          .toList(),
+                      isSignedIn: authController.isLoggedIn.value,
+                    ),
                   
                   SizedBox(height: isDesktop ? 30 : 0),
 
@@ -365,7 +372,7 @@ class MainHomePage extends StatelessWidget {
                   const SizedBox(height: 100),
                 ],
               ),
-            );
+            ));
           }),
         ),
       ],

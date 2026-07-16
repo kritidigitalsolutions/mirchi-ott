@@ -9,6 +9,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 
 import 'package:mirchi_ott/app/routes/app_pages.dart';
+import 'package:mirchi_ott/view_model/content_controller/content_controller.dart';
 import 'package:mirchi_ott/view_model/like_dislike_controller/like_dislike_controller.dart';
 import 'package:mirchi_ott/view_model/watchlist_controller/watchlist_controller.dart';
 
@@ -122,6 +123,7 @@ Future<void> main() async {
 
   /// 📦 Controllers
   Get.put(AuthController(), permanent: true);
+  Get.put(ContentController(), permanent: true);
   Get.put(InteractionController(), permanent: true);
   Get.put(WatchlistController(), permanent: true);
 
