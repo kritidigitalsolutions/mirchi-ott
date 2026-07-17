@@ -2,7 +2,7 @@ name: mirchi_ott
 description: "A new Flutter project."
 publish_to: 'none'
 
-version: 1.0.0+1
+version: 1.0.0+2
 
 environment:
   sdk: ^3.11.0
@@ -48,6 +48,7 @@ dependencies:
 
   cupertino_icons: ^1.0.8
   file_picker: ^11.0.2
+  device_info_plus: ^12.4.0
 
 dev_dependencies:
   flutter_test:
