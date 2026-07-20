@@ -229,10 +229,10 @@ class ProfilePage extends StatelessWidget {
                 if (!kIsWeb) buildMenuItem(context, Icons.download_for_offline_outlined, "Downloads", AppRoutes.downloads),
                 buildMenuItem(context, Icons.settings_outlined, "Settings", AppRoutes.setting),
                 buildMenuItem(context, Icons.rate_review, "Rate Our App", AppRoutes.rateApp),
+                buildMenuItem(context, Icons.help_outline, "Help & Support", AppRoutes.help),
                 buildMenuItem(context, Icons.info_outline, "Terms & Conditions", AppRoutes.terms),
                 buildMenuItem(context, Icons.privacy_tip, "Privacy Policy", AppRoutes.privacy),
                 buildMenuItem(context, Icons.currency_rupee, "Refund Policy", AppRoutes.refund),
-                // buildMenuItem(context, Icons.help_outline, "Help", AppRoutes.help),
 
                 const SizedBox(height: 20),
                 Center(

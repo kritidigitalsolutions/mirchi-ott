@@ -47,7 +47,6 @@ class SettingsPage extends StatelessWidget {
           const SizedBox(height: 20),
           _buildSectionHeader("Account"),
           _buildActionTile("Language", "English", () {}),
-          _buildActionTile("Help & Support", "", () => Get.toNamed(AppRoutes.help)),
           _buildActionTile("Account Settings", "", () => Get.toNamed(AppRoutes.accountSetting)),
           _buildActionTile("App Version", "1.0.0", null),
           const SizedBox(height: 20),
