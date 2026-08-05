@@ -21,7 +21,9 @@ class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final AuthController authController = Get.find<AuthController>();
-    final PremiumController premiumController = Get.put(PremiumController());
+    final PremiumController premiumController = Get.isRegistered<PremiumController>()
+        ? Get.find<PremiumController>()
+        : Get.put(PremiumController());
     final HomeController homeController = Get.find<HomeController>();
     bool isDesktop = Responsive.isDesktop(context);
 
@@ -154,14 +156,14 @@ class ProfilePage extends StatelessWidget {
                                   ),
                                 ),
                                 // Only show edit button for non-email accounts or if user wants to set a real phone
-                                if (user?['email'] == null || user!['email'].toString().isEmpty)
+                                /* if (user?['email'] == null || user!['email'].toString().isEmpty)
                                   IconButton(
                                     onPressed: () {
                                       final currentPhone = user?['phone']?.toString() ?? "";
                                       Get.toNamed(AppRoutes.createProfile, arguments: currentPhone);
                                     },
                                     icon: const Icon(Icons.edit, color: Colors.white70, size: 20),
-                                  ),
+                                  ), */
                               ],
                             );
                           }),

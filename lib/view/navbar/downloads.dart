@@ -20,7 +20,9 @@ class DownloadsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final AuthController authController = Get.find<AuthController>();
     final HomeController homeController = Get.find<HomeController>();
-    final DownloadController downloadController = Get.put(DownloadController());
+    final DownloadController downloadController = Get.isRegistered<DownloadController>()
+        ? Get.find<DownloadController>()
+        : Get.put(DownloadController());
 
     return Scaffold(
       backgroundColor: Colors.black,

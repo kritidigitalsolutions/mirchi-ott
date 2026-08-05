@@ -22,6 +22,8 @@ import '../../view_model/home_controller/home_controller.dart';
 import '../../view_model/auth_controller/auth_controller.dart';
 import '../../utils/notification_service.dart';
 import '../notifications/notification_page.dart';
+import '../popUp/confirmation_popup.dart';
+import 'package:flutter/services.dart';
 
 import '../profile/privacy_policy_page.dart';
 import '../profile/terms_condition_page.dart';
@@ -34,18 +36,32 @@ class MainHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ContentController contentController = Get.find<ContentController>();
-    final HomeController controller = Get.put(HomeController());
+    final HomeController controller = Get.find<HomeController>();
     final AuthController authController = Get.find<AuthController>();
     final notificationService = NotificationService.to;
 
     return PopScope(
-      canPop: kIsWeb, 
-      onPopInvoked: (didPop) {
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
+
         if (controller.selectedIndex.value != 1) {
-          controller.selectedIndex.value = 1; 
+          // If not on Home tab, switch to Home tab
+          controller.selectedIndex.value = 1;
         } else {
-          Navigator.of(context).pop(); 
+          // If on Home tab, show exit confirmation dialog
+          showDialog(
+            context: context,
+            barrierDismissible: false, // Prevent dismissing by tapping outside
+            builder: (context) => ConfirmationPopup(
+              title: "Exit App",
+              message: "Are you sure you want to exit the app?",
+              confirmText: "EXIT",
+              onConfirm: () {
+                SystemNavigator.pop();
+              },
+            ),
+          );
         }
       },
       child: Scaffold(
@@ -82,8 +98,18 @@ class MainHomePage extends StatelessWidget {
                 ),
                 ProfilePage(
                   onLogout: () {
-                    controller.logout();
-                    authController.setLoginStatus(false);
+                    showDialog(
+                      context: context,
+                      builder: (context) => ConfirmationPopup(
+                        title: "Sign Out",
+                        message: "Are you sure you want to sign out?",
+                        confirmText: "SIGN OUT",
+                        onConfirm: () {
+                          controller.logout();
+                          authController.setLoginStatus(false);
+                        },
+                      ),
+                    );
                   },
                 ),
               ],
@@ -143,8 +169,18 @@ class MainHomePage extends StatelessWidget {
                 ),
                 ProfilePage(
                   onLogout: () {
-                    controller.logout();
-                    authController.setLoginStatus(false);
+                    showDialog(
+                      context: context,
+                      builder: (context) => ConfirmationPopup(
+                        title: "Sign Out",
+                        message: "Are you sure you want to sign out?",
+                        confirmText: "SIGN OUT",
+                        onConfirm: () {
+                          controller.logout();
+                          authController.setLoginStatus(false);
+                        },
+                      ),
+                    );
                   },
                 ),
               ],

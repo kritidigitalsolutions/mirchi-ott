@@ -16,7 +16,7 @@ class WatchlistPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final WatchlistController controller = Get.put(WatchlistController());
+    final WatchlistController controller = Get.find<WatchlistController>();
     final AuthController authController = Get.find<AuthController>();
 
     return Scaffold(

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -14,6 +15,9 @@ import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
 import '../view_model/auth_controller/auth_controller.dart';
+import '../view_model/content_controller/content_controller.dart';
+import '../app/routes/app_routes.dart';
+import '../data/models/response_model/content_response_model/content_model.dart';
 
 class NotificationService extends GetxController {
   static NotificationService get to => Get.find();
@@ -73,6 +77,14 @@ class NotificationService extends GetxController {
       onDidReceiveNotificationResponse: (NotificationResponse response) {
         // Handle notification click here
         print("Notification clicked: ${response.payload}");
+        if (response.payload != null) {
+          try {
+            final Map<String, dynamic> data = jsonDecode(response.payload!);
+            _handleNotificationClick(data);
+          } catch (e) {
+            print("Error parsing notification payload: $e");
+          }
+        }
       },
     );
 
@@ -87,7 +99,15 @@ class NotificationService extends GetxController {
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
       print("📲 Notification Clicked (Background): ${message.notification?.title}");
       _handleMessage(message);
+      _handleNotificationClick(message.data);
     });
+
+    /// 🚀 Check if app was opened from a notification (App was terminated)
+    RemoteMessage? initialMessage = await _firebaseMessaging.getInitialMessage();
+    if (initialMessage != null) {
+      print("🚀 App opened from terminated state via notification");
+      _handleNotificationClick(initialMessage.data);
+    }
 
     _loadNotifications();
     fetchNotifications(); // Initial fetch from server
@@ -293,6 +313,60 @@ class NotificationService extends GetxController {
     }
   }
 
+  void _handleNotificationClick(Map<String, dynamic> data) {
+    print("🎯 Handling Notification Click with data: $data");
+
+    String? contentType = data['contentType']?.toString().toLowerCase();
+    String? contentId = data['contentId']?.toString();
+    String? actionUrl = data['actionUrl']?.toString();
+
+    // If data fields are missing, try parsing from actionUrl
+    if (contentType == null || contentId == null) {
+      if (actionUrl != null && actionUrl.startsWith("mirchiapp://")) {
+        final parts = actionUrl.replaceFirst("mirchiapp://", "").split("/");
+        if (parts.length >= 3 && parts[1] == "id") {
+          contentType = parts[0].toLowerCase();
+          contentId = parts[2];
+        }
+      }
+    }
+
+    if (contentType == 'plan' || contentType == 'plans') {
+      print("🚀 Navigating to Plans page");
+      Get.toNamed(AppRoutes.goPremium);
+      return;
+    }
+
+    if (contentId != null && (contentType == 'series' || contentType == 'movie')) {
+      print("🚀 Navigating to Content Details: $contentId ($contentType)");
+      
+      final contentController = Get.find<ContentController>();
+      
+      // Try to find the content in the current list
+      ContentModel? content = contentController.allContent.firstWhereOrNull(
+        (c) => c.id == contentId
+      );
+
+      if (content != null) {
+        Get.toNamed(AppRoutes.dramaDetails, arguments: content);
+      } else {
+        print("⚠️ Content with ID $contentId not found in local list. Refreshing and retrying...");
+        // If not found, we could try to fetch all content and search again, 
+        // but for now, we'll just show a message or wait.
+        // Better: maybe content controller can fetch a single item?
+        // Since we don't have that, we'll try to fetch all.
+        contentController.fetchContent().then((_) {
+          content = contentController.allContent.firstWhereOrNull((c) => c.id == contentId);
+          if (content != null) {
+            Get.toNamed(AppRoutes.dramaDetails, arguments: content);
+          } else {
+            print("❌ Content with ID $contentId still not found after refresh.");
+          }
+        });
+      }
+    }
+  }
+
   Future<void> _showLocalNotification(RemoteMessage message) async {
     if (message.notification == null) return;
 
@@ -345,7 +419,7 @@ class NotificationService extends GetxController {
       message.notification?.title,
       message.notification?.body,
       platformDetails,
-      payload: message.data.toString(),
+      payload: jsonEncode(message.data),
     );
   }
 

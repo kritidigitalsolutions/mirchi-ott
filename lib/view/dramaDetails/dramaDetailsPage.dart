@@ -39,11 +39,11 @@ class DramaDetailsPage extends StatefulWidget {
 class _DramaDetailsPageState extends State<DramaDetailsPage> {
   final DramaDetailsController controller = Get.put(DramaDetailsController());
   final AuthController authController = Get.find<AuthController>();
-  final WatchlistController watchlistController = Get.put(WatchlistController());
+  final WatchlistController watchlistController = Get.find<WatchlistController>();
   final ContentController contentController = Get.find<ContentController>();
-  final PremiumController premiumController = Get.put(PremiumController());
-  final InteractionController interactionController = Get.put(InteractionController());
-  final DownloadController downloadController = Get.put(DownloadController());
+  final PremiumController premiumController = Get.isRegistered<PremiumController>() ? Get.find<PremiumController>() : Get.put(PremiumController());
+  final InteractionController interactionController = Get.find<InteractionController>();
+  final DownloadController downloadController = Get.isRegistered<DownloadController>() ? Get.find<DownloadController>() : Get.put(DownloadController());
 
   @override
   void initState() {
@@ -55,7 +55,7 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
     if (widget.content.contentType == 'series') {
       contentController.fetchEpisodes(widget.content.id);
     }
-    
+
     // Show Meta Ad when entering content page
     AdService.showInterstitialAd();
   }
@@ -287,12 +287,12 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
             });
           }
         },
-        icon: downloading 
+        icon: downloading
           ? SizedBox(
-              width: 20, 
-              height: 20, 
+              width: 20,
+              height: 20,
               child: CircularProgressIndicator(
-                strokeWidth: 2, 
+                strokeWidth: 2,
                 color: Colors.white,
                 value: progress > 0 ? progress : null,
               )
@@ -329,10 +329,11 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
     });
   }
 
-  void _handlePlay(dynamic item, bool isPurchased, bool userLoggedIn) async {
+  void _handlePlay(dynamic item, bool isPurchased, bool userLoggedIn, {bool? isPremiumOverride}) async {
+    final bool isPremium = isPremiumOverride ?? item.isPremium;
     if (!userLoggedIn) {
       Get.toNamed(AppRoutes.signIn);
-    } else if (isPurchased || !item.isPremium) {
+    } else if (isPurchased || !isPremium) {
       if (item.videoUrl != null && item.videoUrl!.isNotEmpty) {
         if (item is ContentModel && item.is18Plus) {
           final bool? isOver18 =
@@ -741,7 +742,12 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
     final userLoggedIn = authController.isLoggedIn.value;
     final sub = premiumController.subscriptionData.value;
     final bool isPurchased = sub != null && sub['status'] == 'active';
-    _handlePlay(episode, isPurchased, userLoggedIn);
+
+    // An episode is considered premium if it is individually marked as premium
+    // OR if the series it belongs to is marked as premium.
+    final bool effectivePremium = episode.isPremium || widget.content.isPremium;
+
+    _handlePlay(episode, isPurchased, userLoggedIn, isPremiumOverride: effectivePremium);
   }
 
   void _downloadEpisode(ContentModel episode) {
@@ -800,6 +806,7 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
   }
 
   void _showSubscriptionDialog(BuildContext context) {
+    bool isDesktop = Responsive.isDesktop(context);
     Get.dialog(
       Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
@@ -815,12 +822,37 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
               const SizedBox(height: 15),
               const Text("Unlock premium content and offline downloads with our subscription plans.", textAlign: TextAlign.center, style: TextStyle(color: Colors.white70, fontSize: 16)),
               const SizedBox(height: 35),
-              Row(
-                children: [
-                  Expanded(child: TextButton(onPressed: () => Get.back(), child: const Text("CANCEL", style: TextStyle(color: Colors.white54)))),
-                  const SizedBox(width: 15),
-                  Expanded(child: ElevatedButton(style: ElevatedButton.styleFrom(backgroundColor: AppColors.buttonColor), onPressed: () { Get.back(); Get.toNamed(AppRoutes.goPremium); }, child: const Text("EXPLORE PLANS", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)))),
-                ],
+              SizedBox(
+                width: double.infinity,
+                child: Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: 15,
+                  runSpacing: 10,
+                  children: [
+                    SizedBox(
+                      width: isDesktop ? 150 : double.infinity,
+                      child: TextButton(
+                        onPressed: () => Get.back(),
+                        child: const Text("CANCEL", style: TextStyle(color: Colors.white54)),
+                      ),
+                    ),
+                    SizedBox(
+                      width: isDesktop ? 200 : double.infinity,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.buttonColor,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        ),
+                        onPressed: () {
+                          Get.back();
+                          Get.toNamed(AppRoutes.goPremium);
+                        },
+                        child: const Text("EXPLORE PLANS", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),

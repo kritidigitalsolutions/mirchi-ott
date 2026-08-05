@@ -20,6 +20,7 @@ import 'utils/ad_service.dart';
 import 'utils/app_session.dart';
 import 'utils/notification_service.dart';
 import 'view_model/auth_controller/auth_controller.dart';
+import 'view_model/home_controller/home_controller.dart';
 
 /// 🌙 Background Handler
 @pragma('vm:entry-point')
@@ -123,6 +124,7 @@ Future<void> main() async {
 
   /// 📦 Controllers
   Get.put(AuthController(), permanent: true);
+  Get.put(HomeController(), permanent: true);
   Get.put(ContentController(), permanent: true);
   Get.put(InteractionController(), permanent: true);
   Get.put(WatchlistController(), permanent: true);

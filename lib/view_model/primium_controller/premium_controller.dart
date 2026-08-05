@@ -196,28 +196,13 @@ class PremiumController extends GetxController with WidgetsBindingObserver {
       CustomSnackbar.show(title: "Info", message: "Already Purchased");
       return;
     }
-    Get.dialog(
-      AlertDialog(
-        backgroundColor: Colors.grey[900],
-        title: const Text("Purchase Plan", style: TextStyle(color: Colors.white)),
-        content: const Text("Do you want to purchase this plan?", style: TextStyle(color: Colors.white70)),
-        actions: [
-          TextButton(onPressed: () => Get.back(), child: const Text("Cancel")),
-          ElevatedButton(
-            onPressed: () {
-              Get.back();
-              if (kIsWeb) {
-                initiateSabPaisaWebPayment(planId);
-              } else {
-                startSabPaisaPayment(planId);
-              }
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.buttonColor),
-            child: const Text("OK", style: TextStyle(color: Colors.white)),
-          ),
-        ],
-      ),
-    );
+    
+    // Redirect immediately to payment without confirmation popup
+    if (kIsWeb) {
+      initiateSabPaisaWebPayment(planId);
+    } else {
+      startSabPaisaPayment(planId);
+    }
   }
 
   Future<void> initiateSabPaisaWebPayment(String planId) async {
