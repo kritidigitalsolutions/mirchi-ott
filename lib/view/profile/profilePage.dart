@@ -255,6 +255,7 @@ class ProfilePage extends StatelessWidget {
                 const SizedBox(height: 30),
                 const Text("App Version 1.0.0", style: TextStyle(color: Colors.grey, fontSize: 12)),
                 const SizedBox(height: 30),
+                if (!isDesktop) const SizedBox(height: 100),
               ],
             ),
           ),
