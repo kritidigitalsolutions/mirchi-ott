@@ -93,7 +93,12 @@ class _ComingSoonSectionState extends State<ComingSoonSection> {
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 1200),
             child: ListView.builder(
-              padding: const EdgeInsets.all(20),
+              padding: EdgeInsets.only(
+                left: 20,
+                right: 20,
+                top: 20,
+                bottom: isDesktop ? 20 : 120,
+              ),
               itemCount: displayContent.length,
               itemBuilder: (context, index) {
                 final item = displayContent[index];
