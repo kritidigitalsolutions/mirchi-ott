@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import '../../data/models/category_model.dart';
 import '../../data/models/response_model/content_response_model/content_model.dart';
@@ -36,8 +37,12 @@ class ContentController extends GetxController {
 
       final content = await _repository.getAllContent();
       
-      // Filter: Hide content if isHide is true
-      final filteredContent = content.where((c) => c.isHide == false).toList();
+      // Filter: Hide content if isHide is true, and filter 18+ content on web
+      final filteredContent = content.where((c) {
+        if (c.isHide) return false;
+        if (kIsWeb && (c.is18Plus)) return false;
+        return true;
+      }).toList();
       
       // Sort content by priority (lower number = higher priority, e.g. 1 is top)
       filteredContent.sort((a, b) => (a.priority ?? 999).compareTo(b.priority ?? 999));
@@ -62,8 +67,12 @@ class ContentController extends GetxController {
       isEpisodesLoading.value = true;
       seriesEpisodes.clear();
       final episodes = await _repository.getEpisodes(seriesId);
-      // Filter: Hide episodes if isHide is true
-      final filteredEpisodes = episodes.where((e) => e.isHide == false).toList();
+      // Filter: Hide episodes if isHide is true, and filter 18+ content on web
+      final filteredEpisodes = episodes.where((e) {
+        if (e.isHide) return false;
+        if (kIsWeb && (e.is18Plus)) return false;
+        return true;
+      }).toList();
       seriesEpisodes.assignAll(filteredEpisodes);
     } catch (e) {
       print("Error fetching episodes: $e");

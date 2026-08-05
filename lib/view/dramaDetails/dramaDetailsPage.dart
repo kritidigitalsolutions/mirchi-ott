@@ -23,6 +23,7 @@ import '../videoPlayer/video_player.dart';
 import 'cast_crewPage.dart';
 import '../premium/goPremium.dart';
 import '../../utils/share_service.dart';
+import '../../utils/facebook_events_service.dart';
 import '../../view_model/drama_detail_controller/drama_details_controller.dart';
 import '../../utils/custom_snackbar.dart';
 
@@ -55,6 +56,13 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
     if (widget.content.contentType == 'series') {
       contentController.fetchEpisodes(widget.content.id);
     }
+
+    // Log Meta ViewContent Event
+    FacebookEventsService.logViewContent(
+      id: widget.content.id,
+      type: widget.content.contentType,
+      title: widget.content.title,
+    );
 
     // Show Meta Ad when entering content page
     AdService.showInterstitialAd();

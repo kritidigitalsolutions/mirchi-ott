@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:mirchi_ott/data/models/shorts_model.dart';
 import 'package:mirchi_ott/data/network/base_api_service.dart';
@@ -24,8 +25,12 @@ class ShortsController extends GetxController {
       if (response != null && response['success'] == true) {
         final List<dynamic> dramasJson = response['dramas'];
         final List<ShortDrama> dramas = dramasJson.map((json) => ShortDrama.fromJson(json)).toList();
-        // Filter: Hide content if isHide is true
-        shortDramas.value = dramas.where((d) => d.isHide == false).toList();
+        // Filter: Hide content if isHide is true, and filter 18+ content on web
+        shortDramas.value = dramas.where((d) {
+          if (d.isHide) return false;
+          if (kIsWeb && d.is18Plus) return false;
+          return true;
+        }).toList();
       }
     } catch (e) {
       print("❌ Error fetching short dramas: $e");
@@ -45,8 +50,12 @@ class ShortsController extends GetxController {
       if (response != null && response['success'] == true) {
         final List<dynamic> episodesJson = response['episodes'];
         final List<ShortEpisode> episodes = episodesJson.map((json) => ShortEpisode.fromJson(json)).toList();
-        // Filter: Hide episodes if isHide is true
-        final filteredEpisodes = episodes.where((e) => e.isHide == false).toList();
+        // Filter: Hide episodes if isHide is true, and filter 18+ content on web
+        final filteredEpisodes = episodes.where((e) {
+          if (e.isHide) return false;
+          if (kIsWeb && e.is18Plus) return false;
+          return true;
+        }).toList();
         episodesMap[dramaId] = filteredEpisodes;
         return filteredEpisodes;
       }

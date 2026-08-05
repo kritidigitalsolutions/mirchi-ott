@@ -11,6 +11,7 @@ import '../../data/repositories/premium_repository.dart';
 import '../../utils/constants.dart';
 import '../../utils/app_session.dart';
 import '../../utils/custom_snackbar.dart';
+import '../../utils/facebook_events_service.dart';
 import '../auth_controller/auth_controller.dart';
 import '../content_controller/content_controller.dart';
 
@@ -335,6 +336,17 @@ class PremiumController extends GetxController with WidgetsBindingObserver {
 
       if (verifyResponse != null && verifyResponse['success'] == true) {
         CustomSnackbar.show(title: "Success", message: "Payment Verified Successfully!", isSuccess: true);
+        
+        // Log Meta Purchase Event
+        final selectedPlan = plans.firstWhereOrNull((p) => p.id == planId);
+        if (selectedPlan != null) {
+          FacebookEventsService.logPurchase(
+            amount: discountedPrice.value > 0 ? discountedPrice.value : originalPrice.value,
+            currency: "INR",
+            contentId: planId,
+          );
+        }
+
         fetchSubscriptionStatus();
         try {
           if (Get.isRegistered<ContentController>()) {
@@ -372,6 +384,11 @@ class PremiumController extends GetxController with WidgetsBindingObserver {
       final response = await _repository.redeemVoucher(code);
       if (response != null && response['success'] == true) {
         CustomSnackbar.show(title: "Success", message: "Redeemed successfully", isSuccess: true);
+        
+        FacebookEventsService.logEvent(name: "fb_mobile_achievement_unlocked", parameters: {
+          "fb_description": "Voucher Redeemed: $code"
+        });
+
         fetchSubscriptionStatus();
         try {
           if (Get.isRegistered<ContentController>()) {

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import '../../app/routes/app_routes.dart';
 import '../../data/network/base_api_service.dart';
@@ -44,12 +45,21 @@ class WatchlistController extends GetxController {
         final List<dynamic> data = response['data'] ?? [];
         final List<Map<String, dynamic>> list = data.map((e) => e as Map<String, dynamic>).toList();
         
-        // Filter: Hide content if isHide is true
+        // Filter: Hide content if isHide is true, and filter 18+ content on web
         final filteredList = list.where((item) {
           final contentItem = item['item'];
           if (contentItem != null && contentItem is Map) {
             final isHide = contentItem['isHide'] ?? false;
-            return isHide == false;
+            if (isHide) return false;
+
+            if (kIsWeb) {
+              final is18Plus = contentItem['is18+'] ??
+                  contentItem['is18'] ??
+                  contentItem['is18plus'] ??
+                  false;
+              if (is18Plus) return false;
+            }
+            return true;
           }
           return true;
         }).toList();

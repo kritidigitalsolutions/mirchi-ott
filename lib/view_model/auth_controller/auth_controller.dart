@@ -12,6 +12,7 @@ import '../../data/models/response_model/auth_response_model/verify_otp_response
 import '../../utils/app_session.dart';
 import '../../utils/notification_service.dart';
 import '../../utils/custom_snackbar.dart';
+import '../../utils/facebook_events_service.dart';
 
 class AuthController extends GetxController {
   static const String _googleWebClientId =
@@ -122,6 +123,7 @@ class AuthController extends GetxController {
 
         // ✅ Always set login status to true for Google Login
         setLoginStatus(true);
+        FacebookEventsService.logLogin(method: "google");
 
         CustomSnackbar.show(
           title: 'Welcome!',
@@ -226,6 +228,7 @@ class AuthController extends GetxController {
         // ✅ Fix: Set login status if NOT a new user (Existing user is now logged in)
         if (!response.isNewUser) {
           setLoginStatus(true);
+          FacebookEventsService.logLogin(method: "otp");
         }
 
         // ✅ If logging in with Email, ensure we have a numeric dummy phone for payments
@@ -342,6 +345,7 @@ class AuthController extends GetxController {
         
         // ✅ User is fully registered and logged in now
         setLoginStatus(true);
+        FacebookEventsService.logRegistration(method: "profile_completion");
         return true;
       }
       return false;
