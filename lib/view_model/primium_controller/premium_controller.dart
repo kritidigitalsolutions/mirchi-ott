@@ -250,6 +250,13 @@ class PremiumController extends GetxController with WidgetsBindingObserver {
       final response = await apiService.postApi(AppConstants.createOrder, body);
 
       if (response != null && response['success'] == true) {
+        // Log Initiate Checkout
+        FacebookEventsService.logInitiateCheckout(
+          amount: discountedPrice.value > 0 ? discountedPrice.value : originalPrice.value,
+          currency: "INR",
+          contentId: planId,
+        );
+
         String? paymentUrl = response['checkoutUrl'] ?? response['paymentUrl'] ?? response['url'];
 
         if (paymentUrl != null) {

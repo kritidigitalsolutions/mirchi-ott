@@ -308,6 +308,7 @@ class AuthController extends GetxController {
           await storage.write('user_data', response.user);
         }
         setLoginStatus(true);
+        FacebookEventsService.logLogin(method: "website");
         return true;
       }
       return false;

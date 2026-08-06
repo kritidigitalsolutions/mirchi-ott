@@ -46,10 +46,13 @@ class FacebookEventsService {
 
   static void logViewContent({required String id, required String type, required String title}) {
     if (kIsWeb) return;
-    _facebookAppEvents.logViewContent(
-      id: id,
-      type: type,
-      content: title,
+    _facebookAppEvents.logEvent(
+      name: "fb_mobile_content_view",
+      parameters: {
+        "fb_content_id": id,
+        "fb_content_type": type,
+        "fb_description": title,
+      },
     );
     debugPrint("📊 Meta Event: ViewContent | $title ($id)");
   }
@@ -63,5 +66,24 @@ class FacebookEventsService {
       },
     );
     debugPrint("📊 Meta Event: Search | Query: $query");
+  }
+
+  static void logActivatedApp() {
+    if (kIsWeb) return;
+    _facebookAppEvents.logEvent(name: "fb_mobile_activate_app");
+    debugPrint("📊 Meta Event: App Activated");
+  }
+
+  static void logInitiateCheckout({required double amount, required String currency, String? contentId}) {
+    if (kIsWeb) return;
+    _facebookAppEvents.logEvent(
+      name: "fb_mobile_initiated_checkout",
+      parameters: {
+        "fb_content_id": contentId ?? "",
+        "fb_currency": currency,
+        "fb_value": amount.toString(),
+      },
+    );
+    debugPrint("📊 Meta Event: Initiate Checkout | Amount: $amount $currency");
   }
 }

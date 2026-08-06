@@ -18,6 +18,7 @@ import 'data/network/api_network_service.dart';
 import 'data/network/base_api_service.dart';
 import 'utils/ad_service.dart';
 import 'utils/app_session.dart';
+import 'utils/facebook_events_service.dart';
 import 'utils/notification_service.dart';
 import 'view_model/auth_controller/auth_controller.dart';
 import 'view_model/home_controller/home_controller.dart';
@@ -57,6 +58,9 @@ Future<void> main() async {
 
   /// 🔥 Ad Service Init
   await AdService.init();
+
+  /// 🔥 Meta Ads SDK Init
+  FacebookEventsService.logActivatedApp();
 
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
