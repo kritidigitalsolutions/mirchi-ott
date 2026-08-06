@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'dart:async';
 import 'package:flutter/services.dart';
@@ -58,8 +59,8 @@ class VideoController extends GetxController {
       _sortAndAssignQualities(qualitiesMap);
     } else {
       availableQualities["Auto"] = url;
-      // If it's HLS, try to parse qualities from master playlist
-      if (url.toLowerCase().contains(".m3u8")) {
+      // If it's HLS and a remote URL, try to parse qualities from master playlist
+      if (url.toLowerCase().contains(".m3u8") && url.startsWith('http')) {
         await _parseHlsQualities(url);
       }
     }
@@ -72,26 +73,40 @@ class VideoController extends GetxController {
     try {
       final oldController = videoPlayerController;
       
-      VideoFormat? format;
-      if (url.toLowerCase().contains(".m3u8")) {
-        format = VideoFormat.hls;
-      } else if (url.toLowerCase().contains(".mp4")) {
-        format = VideoFormat.other;
+      if (!kIsWeb && !url.startsWith('http')) {
+        // It's a local file path
+        final file = File(url);
+        if (url.toLowerCase().contains('.m3u8')) {
+          // For local HLS, use networkUrl with file scheme and HLS hint
+          videoPlayerController = VideoPlayerController.networkUrl(
+            Uri.file(file.path),
+            formatHint: VideoFormat.hls,
+          );
+        } else {
+          videoPlayerController = VideoPlayerController.file(file);
+        }
+      } else {
+        VideoFormat? format;
+        if (url.toLowerCase().contains(".m3u8")) {
+          format = VideoFormat.hls;
+        } else if (url.toLowerCase().contains(".mp4")) {
+          format = VideoFormat.other;
+        }
+
+        // Create headers map and add Referer/Origin if possible
+        final uri = Uri.parse(url);
+        final headers = Map<String, String>.from(_headers);
+        try {
+          headers['Referer'] = "${uri.scheme}://${uri.host}/";
+          headers['Origin'] = "${uri.scheme}://${uri.host}";
+        } catch (_) {}
+
+        videoPlayerController = VideoPlayerController.networkUrl(
+          uri,
+          formatHint: format,
+          httpHeaders: headers,
+        );
       }
-
-      // Create headers map and add Referer/Origin if possible
-      final uri = Uri.parse(url);
-      final headers = Map<String, String>.from(_headers);
-      try {
-        headers['Referer'] = "${uri.scheme}://${uri.host}/";
-        headers['Origin'] = "${uri.scheme}://${uri.host}";
-      } catch (_) {}
-
-      videoPlayerController = VideoPlayerController.networkUrl(
-        uri,
-        formatHint: format,
-        httpHeaders: headers,
-      );
 
       await videoPlayerController!.initialize();
       

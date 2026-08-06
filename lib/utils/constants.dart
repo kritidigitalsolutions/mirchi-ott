@@ -72,5 +72,5 @@ class AppConstants {
   static const String metaAppId = '1944672236921270';
   static const String metaAppSecret = 'f560eda8d016c34a0f06712be0ac8b74';
   static const String metaClientToken = 'f4910f08ad31813c174099b8588dae9e';
-  static const String metaInterstitialPlacementId = 'YOUR_PLACEMENT_ID';
+  // static const String metaInterstitialPlacementId = 'YOUR_PLACEMENT_ID';
 }

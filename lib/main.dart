@@ -19,6 +19,7 @@ import 'data/network/base_api_service.dart';
 import 'utils/ad_service.dart';
 import 'utils/app_session.dart';
 import 'utils/facebook_events_service.dart';
+import 'utils/firebase_analytics_service.dart';
 import 'utils/notification_service.dart';
 import 'view_model/auth_controller/auth_controller.dart';
 import 'view_model/home_controller/home_controller.dart';
@@ -88,6 +89,9 @@ Future<void> main() async {
       await Firebase.initializeApp();
     }
     print("✅ Firebase Initialized");
+    
+    // 🔥 Firebase Analytics: Log App Open
+    FirebaseAnalyticsService.logAppOpen();
   } catch (e) {
     print("⚠️ Firebase Initialization Failed: $e");
     print("💡 Tip: For Web, make sure you have configured Firebase correctly (flutterfire configure)");

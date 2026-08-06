@@ -65,7 +65,7 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
     );
 
     // Show Meta Ad when entering content page
-    AdService.showInterstitialAd();
+    // AdService.showInterstitialAd();
   }
 
   @override
@@ -289,6 +289,12 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
             _showSubscriptionDialog(context);
           } else if (isAlreadyDownloaded) {
             CustomSnackbar.show(title: "Info", message: "Already downloaded");
+          } else if (widget.content.videoUrl == null || widget.content.videoUrl!.isEmpty) {
+            CustomSnackbar.show(
+              title: "Unavailable",
+              message: "This content is not available for download",
+              isError: true,
+            );
           } else if (!downloading) {
             _showDownloadConfirmation(context, () {
               downloadController.downloadVideo(widget.content);
@@ -767,6 +773,16 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
       _showSubscriptionDialog(context);
       return;
     }
+    
+    if (episode.videoUrl == null || episode.videoUrl!.isEmpty) {
+      CustomSnackbar.show(
+        title: "Unavailable",
+        message: "This episode is not available for download",
+        isError: true,
+      );
+      return;
+    }
+    
     downloadController.downloadVideo(episode);
   }
 

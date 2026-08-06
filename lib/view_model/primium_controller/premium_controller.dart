@@ -12,6 +12,7 @@ import '../../utils/constants.dart';
 import '../../utils/app_session.dart';
 import '../../utils/custom_snackbar.dart';
 import '../../utils/facebook_events_service.dart';
+import '../../utils/firebase_analytics_service.dart';
 import '../auth_controller/auth_controller.dart';
 import '../content_controller/content_controller.dart';
 
@@ -256,6 +257,11 @@ class PremiumController extends GetxController with WidgetsBindingObserver {
           currency: "INR",
           contentId: planId,
         );
+        FirebaseAnalyticsService.logInitiateCheckout(
+          amount: discountedPrice.value > 0 ? discountedPrice.value : originalPrice.value,
+          currency: "INR",
+          contentId: planId,
+        );
 
         String? paymentUrl = response['checkoutUrl'] ?? response['paymentUrl'] ?? response['url'];
 
@@ -348,6 +354,11 @@ class PremiumController extends GetxController with WidgetsBindingObserver {
         final selectedPlan = plans.firstWhereOrNull((p) => p.id == planId);
         if (selectedPlan != null) {
           FacebookEventsService.logPurchase(
+            amount: discountedPrice.value > 0 ? discountedPrice.value : originalPrice.value,
+            currency: "INR",
+            contentId: planId,
+          );
+          FirebaseAnalyticsService.logPurchase(
             amount: discountedPrice.value > 0 ? discountedPrice.value : originalPrice.value,
             currency: "INR",
             contentId: planId,

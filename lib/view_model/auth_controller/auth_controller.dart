@@ -13,6 +13,7 @@ import '../../utils/app_session.dart';
 import '../../utils/notification_service.dart';
 import '../../utils/custom_snackbar.dart';
 import '../../utils/facebook_events_service.dart';
+import '../../utils/firebase_analytics_service.dart';
 
 class AuthController extends GetxController {
   static const String _googleWebClientId =
@@ -124,6 +125,7 @@ class AuthController extends GetxController {
         // ✅ Always set login status to true for Google Login
         setLoginStatus(true);
         FacebookEventsService.logLogin(method: "google");
+        FirebaseAnalyticsService.logLogin(method: "google");
 
         CustomSnackbar.show(
           title: 'Welcome!',
@@ -229,6 +231,7 @@ class AuthController extends GetxController {
         if (!response.isNewUser) {
           setLoginStatus(true);
           FacebookEventsService.logLogin(method: "otp");
+          FirebaseAnalyticsService.logLogin(method: "otp");
         }
 
         // ✅ If logging in with Email, ensure we have a numeric dummy phone for payments
@@ -309,6 +312,7 @@ class AuthController extends GetxController {
         }
         setLoginStatus(true);
         FacebookEventsService.logLogin(method: "website");
+        FirebaseAnalyticsService.logLogin(method: "website");
         return true;
       }
       return false;
@@ -347,6 +351,7 @@ class AuthController extends GetxController {
         // ✅ User is fully registered and logged in now
         setLoginStatus(true);
         FacebookEventsService.logRegistration(method: "profile_completion");
+        FirebaseAnalyticsService.logRegistration(method: "profile_completion");
         return true;
       }
       return false;

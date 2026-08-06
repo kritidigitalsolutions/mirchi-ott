@@ -80,9 +80,20 @@ class DownloadsPage extends StatelessWidget {
               child: ListTile(
                 contentPadding: const EdgeInsets.all(10),
 
-                /// 🎬 OPEN DETAILS PAGE
+                /// 🎬 PLAY OFFLINE ON TAP
                 onTap: () {
-                  Get.toNamed(AppRoutes.dramaDetails, arguments: item);
+                  if (localPath != null && File(localPath).existsSync()) {
+                    Get.toNamed(AppRoutes.videoPlayer, arguments: {
+                      'url': localPath,
+                      'title': item.title,
+                    });
+                  } else {
+                    CustomSnackbar.show(
+                      title: "Error",
+                      message: "File not found. Please download again.",
+                      isError: true,
+                    );
+                  }
                 },
 
                 /// 🎞 POSTER

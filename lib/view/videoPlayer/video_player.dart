@@ -27,12 +27,18 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
   @override
   void initState() {
     super.initState();
-    // Show Meta Ad before playing video
-    AdService.showInterstitialAd(onComplete: () {
-      if (mounted) {
-        controller.initializeVideo(widget.url);
-      }
-    });
+    // Initialize video playback
+    if (widget.url.startsWith('http')) {
+      // Show Meta Ad before playing video only for online content
+      // AdService.showInterstitialAd(onComplete: () {
+        if (mounted) {
+          controller.initializeVideo(widget.url);
+        }
+      // });
+    } else {
+      // Local content (Downloads), play immediately without ad delay
+      controller.initializeVideo(widget.url);
+    }
   }
 
   @override
