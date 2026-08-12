@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "399081225701",
+    "project_id": "mirchi-ott",
+    "storage_bucket": "mirchi-ott.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:399081225701:android:9376a991f4b7765dde430c",
+        "android_client_info": {
+          "package_name": "com.mirchi_ott.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "399081225701-2ptv0ddb3e4a2tglbbb7h1sb0ligutto.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.mirchi_ott.app",
+            "certificate_hash": "d11285a512aa73926e1450017dfb5d6fdaa17601"
+          }
+        },
+        {
+          "client_id": "399081225701-nkia0qeia4bvttd38stj98headolhigv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.mirchi_ott.app",
+            "certificate_hash": "4343105a7e8f401b01c58f3500b632934d3812be"
+          }
+        },
+        {
+          "client_id": "399081225701-gir0j3n161vkhk0dlrlkf9qccgv7e0gj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAczpgbrw_KXK3_aoVBCrEInKyrN-A_I5s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "399081225701-gir0j3n161vkhk0dlrlkf9qccgv7e0gj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

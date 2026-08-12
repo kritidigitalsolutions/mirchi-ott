@@ -1,0 +1,18 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Mirchi OTT Web (Chrome, port 5000)",
+      "request": "launch",
+      "type": "dart",
+      "deviceId": "chrome",
+      "program": "lib/main.dart",
+      "args": [
+        "--web-hostname",
+        "localhost",
+        "--web-port",
+        "5000"
+      ]
+    }
+  ]
+}
