@@ -1,6 +1,6 @@
 class AppConstants {
-  // static const String serverUrl = 'http://192.168.1.33:5001';
-  static const String serverUrl = 'https://api.mirchiapp.in';
+  static const String serverUrl = 'http://192.168.1.14:5001';
+  // static const String serverUrl = 'https://api.mirchiapp.in';
   static const String webUrl = 'https://mirchiapp.in';
   static const String baseUrl = '$serverUrl/api';
 
@@ -9,6 +9,7 @@ class AppConstants {
   static const String verifyOtp = '$baseUrl/auth/verify-otp';
   static const String googleLogin = '$baseUrl/auth/google-login';
   static const String websiteLogin = '$baseUrl/auth/website-login';
+
   /// user proflie
   static const String getProfile = '$baseUrl/user/profile';
   static const String createProfile = '$baseUrl/user/complete-profile';
@@ -21,12 +22,15 @@ class AppConstants {
   static const String createTicket = '$baseUrl/support';
   static const String getTickets = '$baseUrl/support';
   static String replyTicket(String id) => '$baseUrl/support/reply/$id';
-  static String getConversation(String id) => '$baseUrl/support/conversation/$id';
+  static String getConversation(String id) =>
+      '$baseUrl/support/conversation/$id';
 
   /// notifications
   static const String getNotifications = '$baseUrl/notifications';
-  static String markNotificationRead(String id) => '$baseUrl/notifications/$id/read';
-  static const String markAllNotificationsRead = '$baseUrl/notifications/read-all';
+  static String markNotificationRead(String id) =>
+      '$baseUrl/notifications/$id/read';
+  static const String markAllNotificationsRead =
+      '$baseUrl/notifications/read-all';
   static String deleteNotification(String id) => '$baseUrl/notifications/$id';
 
   /// legal
@@ -38,11 +42,16 @@ class AppConstants {
   /// content
   static const String getAllContent = '$baseUrl/content';
   static const String getCategories = '$baseUrl/categories';
-  static String getEpisodes(String seriesId) => '$baseUrl/series/episodes/$seriesId';
+  static String getEpisodes(String seriesId) =>
+      '$baseUrl/series/episodes/$seriesId';
+  static const webSiteBanner = "$baseUrl/webpage/banners";
+
+  static const webSetion = "$baseUrl/webpage/sections";
 
   /// shorts
   static const String getShortDramas = '$baseUrl/shortdramas';
-  static String getShortEpisodes(String dramaId) => '$baseUrl/drama-episodes/$dramaId';
+  static String getShortEpisodes(String dramaId) =>
+      '$baseUrl/drama-episodes/$dramaId';
 
   /// payment
   static const String createOrder = '$baseUrl/payment/create-order';
@@ -59,6 +68,7 @@ class AppConstants {
 
   /// review
   static const String rateApp = '$baseUrl/rating/rate';
+
   /// plans
   static const String planList = '$baseUrl/plan';
   static const String buyPlan = '$baseUrl/subscription/subscribe';

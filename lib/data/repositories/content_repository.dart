@@ -39,7 +39,9 @@ class ContentRepository {
 
   Future<List<ContentModel>> getEpisodes(String seriesId) async {
     try {
-      final response = await apiProvider.getApi(AppConstants.getEpisodes(seriesId));
+      final response = await apiProvider.getApi(
+        AppConstants.getEpisodes(seriesId),
+      );
       if (response['success'] == true) {
         List<dynamic> data = response['episodes'] ?? [];
         return data.map((item) => ContentModel.fromJson(item)).toList();
@@ -47,6 +49,38 @@ class ContentRepository {
       return [];
     } catch (e) {
       print("Error fetching episodes: $e");
+      rethrow;
+    }
+  }
+
+  // Web site banner content
+
+  Future<List<ContentModel>> getAllWebSiteBannerContent() async {
+    try {
+      final response = await apiProvider.getApi(AppConstants.webSiteBanner);
+      if (response['success'] == true) {
+        // The API returns the list under the 'content' key
+        List<dynamic> data = response['heroBanners'] ?? [];
+        return data.map((item) => ContentModel.fromJson(item)).toList();
+      }
+      return [];
+    } catch (e) {
+      print("Error fetching content: $e");
+      rethrow;
+    }
+  }
+
+  Future<List<WebSectionModel>> getWebSections() async {
+    try {
+      final response = await apiProvider.getApi(AppConstants.webSetion);
+      if (response['success'] == true) {
+        // The API returns the list under the 'sections' key
+        List<dynamic> data = response['sections'] ?? [];
+        return data.map((item) => WebSectionModel.fromJson(item)).toList();
+      }
+      return [];
+    } catch (e) {
+      print("Error fetching web sections: $e");
       rethrow;
     }
   }

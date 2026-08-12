@@ -1,34 +1,24 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import '../../app/routes/app_routes.dart';
 import '../../app/theme/app_colors.dart';
 import '../../utils/app_images.dart';
 import '../../utils/responsive.dart';
 import '../../view_model/content_controller/content_controller.dart';
-import '../../widgets/custom_network_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../navbar/bottomNavbar.dart';
-import '../dramaDetails/dramaDetailsPage.dart';
 import 'auto_slider.dart';
 import 'coming_soon.dart';
 import '../../widgets/home_slider_section.dart';
-import '../search_pages/searchPage.dart';
 import 'top_10_list.dart';
-import '../auth/signInPage.dart';
-import '../premium/goPremium.dart';
+
 import '../profile/profilePage.dart';
 import '../../view_model/home_controller/home_controller.dart';
 import '../../view_model/auth_controller/auth_controller.dart';
 import '../../utils/notification_service.dart';
-import '../notifications/notification_page.dart';
 import '../popUp/confirmation_popup.dart';
 import 'package:flutter/services.dart';
-
-import '../profile/privacy_policy_page.dart';
-import '../profile/terms_condition_page.dart';
-import '../profile/refund_policy_page.dart';
-import '../profile/help_page.dart';
 
 class MainHomePage extends StatelessWidget {
   const MainHomePage({super.key});
@@ -67,8 +57,20 @@ class MainHomePage extends StatelessWidget {
       child: Scaffold(
         backgroundColor: AppColors.black,
         body: Responsive(
-          mobile: _buildMobileLayout(context, controller, authController, contentController, notificationService),
-          desktop: _buildDesktopLayout(context, controller, authController, contentController, notificationService),
+          mobile: _buildMobileLayout(
+            context,
+            controller,
+            authController,
+            contentController,
+            notificationService,
+          ),
+          desktop: _buildDesktopLayout(
+            context,
+            controller,
+            authController,
+            contentController,
+            notificationService,
+          ),
         ),
       ),
     );
@@ -151,14 +153,18 @@ class MainHomePage extends StatelessWidget {
       children: [
         /// HEADER AT TOP
         _buildDesktopHeader(notificationService, controller, authController),
-        
+
         /// CONTENT BELOW HEADER
         Expanded(
           child: Obx(
             () => IndexedStack(
               index: controller.selectedIndex.value,
               children: [
-                _buildUpcomingContent(notificationService, authController, isDesktop: true),
+                _buildUpcomingContent(
+                  notificationService,
+                  authController,
+                  isDesktop: true,
+                ),
                 _buildHomeContent(
                   context,
                   controller,
@@ -191,12 +197,18 @@ class MainHomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildDesktopHeader(NotificationService notificationService, HomeController controller, AuthController authController) {
+  Widget _buildDesktopHeader(
+    NotificationService notificationService,
+    HomeController controller,
+    AuthController authController,
+  ) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
       decoration: BoxDecoration(
         color: Colors.black, // Solid background
-        border: Border(bottom: BorderSide(color: Colors.white.withOpacity(0.1))),
+        border: Border(
+          bottom: BorderSide(color: Colors.white.withOpacity(0.1)),
+        ),
       ),
       child: Row(
         children: [
@@ -220,9 +232,17 @@ class MainHomePage extends StatelessWidget {
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.buttonColor,
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
-            child: const Text("Go Premium", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            child: const Text(
+              "Go Premium",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ],
       ),
@@ -255,7 +275,11 @@ class MainHomePage extends StatelessWidget {
         children: [
           IconButton(
             onPressed: () => Get.toNamed(AppRoutes.notifications),
-            icon: const Icon(Icons.notifications_outlined, color: Colors.white, size: 28),
+            icon: const Icon(
+              Icons.notifications_outlined,
+              color: Colors.white,
+              size: 28,
+            ),
           ),
           if (unreadCount > 0)
             Positioned(
@@ -263,11 +287,18 @@ class MainHomePage extends StatelessWidget {
               top: 8,
               child: Container(
                 padding: const EdgeInsets.all(4),
-                decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
+                decoration: const BoxDecoration(
+                  color: Colors.red,
+                  shape: BoxShape.circle,
+                ),
                 constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
                 child: Text(
                   unreadCount > 9 ? '9+' : '$unreadCount',
-                  style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -314,11 +345,21 @@ class MainHomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildUpcomingContent(NotificationService notificationService, AuthController authController, {bool isDesktop = false}) {
+  Widget _buildUpcomingContent(
+    NotificationService notificationService,
+    AuthController authController, {
+    bool isDesktop = false,
+  }) {
     return Column(
       children: [
         if (!isDesktop) _buildHeader(notificationService),
-        Expanded(child: ComingSoonSection(content: [], isSignedIn: authController.isLoggedIn.value, isFullPage: true)),
+        Expanded(
+          child: ComingSoonSection(
+            content: [],
+            isSignedIn: authController.isLoggedIn.value,
+            isFullPage: true,
+          ),
+        ),
       ],
     );
   }
@@ -355,67 +396,126 @@ class MainHomePage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 10),
-                    AutoSlider(
-                      content: contentController.allContent
-                          .where((c) => c.category.contains('trending') && c.isComingSoon == false)
-                          .toList(),
-                      isSignedIn: authController.isLoggedIn.value,
-                    ),
-                  
-                  SizedBox(height: isDesktop ? 30 : 0),
+                    isDesktop
+                        ? AutoSlider(
+                            content: contentController.allWebBannerContent,
 
-                  // Dynamic Categories
-                  ...contentController.categories.map((category) {
-                    final categoryContent = contentController.allContent
-                        .where((c) => c.category.contains(category.slug) && c.isComingSoon == false)
-                        .toList();
-                    
-                    if (categoryContent.isEmpty) return const SizedBox.shrink();
-
-                    // Special UI for Top 10 category
-                    if (category.slug.toLowerCase().contains('top10')) {
-                      return _buildAnimatedSection(
-                        isDesktop: isDesktop,
-                        delay: 200,
-                        child: Padding(
-                          padding: const EdgeInsets.only(top: 30),
-                          child: Top10List(
-                            title: category.name.toUpperCase(),
-                            content: categoryContent,
+                            isSignedIn: authController.isLoggedIn.value,
+                          )
+                        : AutoSlider(
+                            content: contentController.allContent
+                                .where(
+                                  (c) =>
+                                      c.category.contains('trending') &&
+                                      c.isComingSoon == false,
+                                )
+                                .toList(),
                             isSignedIn: authController.isLoggedIn.value,
                           ),
-                        ),
-                      );
-                    }
 
-                    return _buildAnimatedSection(
-                      isDesktop: isDesktop,
-                      delay: 200,
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 30),
-                        child: HomeSliderSection(
-                          title: category.name.toUpperCase(),
-                          content: categoryContent,
-                          isSignedIn: authController.isLoggedIn.value,
-                        ),
-                      ),
-                    );
-                  }).toList(),
+                    SizedBox(height: isDesktop ? 30 : 0),
 
-                  const SizedBox(height: 30),
-                  
-                  _buildFooter(),
-                  const SizedBox(height: 100),
-                ],
+                    if (kIsWeb) ...[
+                      ...contentController.webSections.map((section) {
+                        final sectionContent = section.items;
+
+                        if (sectionContent.isEmpty) {
+                          return const SizedBox.shrink();
+                        }
+
+                        // Special UI for Top 10 category
+                        if (section.categorySlug.toLowerCase().contains('top10')) {
+                          return _buildAnimatedSection(
+                            isDesktop: isDesktop,
+                            delay: 200,
+                            child: Padding(
+                              padding: const EdgeInsets.only(top: 30),
+                              child: Top10List(
+                                title: section.title.toUpperCase(),
+                                content: sectionContent,
+                                isSignedIn: authController.isLoggedIn.value,
+                              ),
+                            ),
+                          );
+                        }
+
+                        return _buildAnimatedSection(
+                          isDesktop: isDesktop,
+                          delay: 200,
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 30),
+                            child: HomeSliderSection(
+                              title: section.title.toUpperCase(),
+                              content: sectionContent,
+                              isSignedIn: authController.isLoggedIn.value,
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ] else ...[
+                      // Dynamic Categories
+                      ...contentController.categories.map((category) {
+                        final categoryContent = contentController.allContent
+                            .where(
+                              (c) =>
+                                  c.category.contains(category.slug) &&
+                                  c.isComingSoon == false,
+                            )
+                            .toList();
+
+                        if (categoryContent.isEmpty)
+                          return const SizedBox.shrink();
+
+                        // Special UI for Top 10 category
+                        if (category.slug.toLowerCase().contains('top10')) {
+                          return _buildAnimatedSection(
+                            isDesktop: isDesktop,
+                            delay: 200,
+                            child: Padding(
+                              padding: const EdgeInsets.only(top: 30),
+                              child: Top10List(
+                                title: category.name.toUpperCase(),
+                                content: categoryContent,
+                                isSignedIn: authController.isLoggedIn.value,
+                              ),
+                            ),
+                          );
+                        }
+
+                        return _buildAnimatedSection(
+                          isDesktop: isDesktop,
+                          delay: 200,
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 30),
+                            child: HomeSliderSection(
+                              title: category.name.toUpperCase(),
+                              content: categoryContent,
+                              isSignedIn: authController.isLoggedIn.value,
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ],
+
+                    const SizedBox(height: 30),
+
+                    _buildFooter(),
+                    const SizedBox(height: 100),
+                  ],
+                ),
               ),
-            ));
+            );
           }),
         ),
       ],
     );
   }
 
-  Widget _buildAnimatedSection({required bool isDesktop, required int delay, required Widget child}) {
+  Widget _buildAnimatedSection({
+    required bool isDesktop,
+    required int delay,
+    required Widget child,
+  }) {
     if (!isDesktop) return child;
     return TweenAnimationBuilder(
       tween: Tween<double>(begin: 0, end: 1),
@@ -443,13 +543,32 @@ class MainHomePage extends StatelessWidget {
         children: [
           Image.asset(AppImages.logo1, height: 80),
           const SizedBox(height: 20),
-          const Text("MIRCHI OTT", style: TextStyle(color: AppColors.white, fontSize: 26, fontWeight: FontWeight.bold, letterSpacing: 2.0)),
+          const Text(
+            "MIRCHI OTT",
+            style: TextStyle(
+              color: AppColors.white,
+              fontSize: 26,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 2.0,
+            ),
+          ),
           const SizedBox(height: 30),
-          const Text("The ultimate destination for premium regional content. Watch the latest web series, movies, and originals anytime, anywhere.", textAlign: TextAlign.center, style: TextStyle(color: Colors.white70, fontSize: 16, height: 1.5)),
+          const Text(
+            "The ultimate destination for premium regional content. Watch the latest web series, movies, and originals anytime, anywhere.",
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.white70, fontSize: 16, height: 1.5),
+          ),
           const SizedBox(height: 20),
           InkWell(
             onTap: () => launchUrl(Uri.parse("mailto:support@mirchiapp.in")),
-            child: const Text("Email: support@mirchiapp.in", style: TextStyle(color: AppColors.primary, fontSize: 16, fontWeight: FontWeight.w600)),
+            child: const Text(
+              "Email: support@mirchiapp.in",
+              style: TextStyle(
+                color: AppColors.primary,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
           const SizedBox(height: 40),
           Wrap(
@@ -466,22 +585,49 @@ class MainHomePage extends StatelessWidget {
           const SizedBox(height: 50),
           const Divider(color: Colors.white12),
           const SizedBox(height: 30),
-          const Text("© 2024 Mirchi OTT All Rights Reserved", style: TextStyle(color: Colors.white70, fontSize: 13)),
+          const Text(
+            "© 2024 Mirchi OTT All Rights Reserved",
+            style: TextStyle(color: Colors.white70, fontSize: 13),
+          ),
           const SizedBox(height: 15),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text("POWERED BY", style: TextStyle(color: Colors.white70, fontSize: 11, letterSpacing: 1.5)),
+              const Text(
+                "POWERED BY",
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontSize: 11,
+                  letterSpacing: 1.5,
+                ),
+              ),
               const SizedBox(width: 8),
-              const Text("WHITE MULTIMEDIA", style: TextStyle(color: AppColors.primary, fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 2.0)),
+              const Text(
+                "WHITE MULTIMEDIA",
+                style: TextStyle(
+                  color: AppColors.primary,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 2.0,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 20),
           const Column(
             children: [
-              Text("Floor No 12, 1202, Residences Tanaji Nagar,", style: TextStyle(color: Colors.white70, fontSize: 14)),
-              Text("Tanaji Nagar Road No 1, Near Time of India off, W.E. Highway,", style: TextStyle(color: Colors.white70, fontSize: 14)),
-              Text("Malad East, Mumbai, Maharashtra - 400097", style: TextStyle(color: Colors.white70, fontSize: 14)),
+              Text(
+                "Floor No 12, 1202, Residences Tanaji Nagar,",
+                style: TextStyle(color: Colors.white70, fontSize: 14),
+              ),
+              Text(
+                "Tanaji Nagar Road No 1, Near Time of India off, W.E. Highway,",
+                style: TextStyle(color: Colors.white70, fontSize: 14),
+              ),
+              Text(
+                "Malad East, Mumbai, Maharashtra - 400097",
+                style: TextStyle(color: Colors.white70, fontSize: 14),
+              ),
             ],
           ),
         ],
@@ -494,7 +640,11 @@ class MainHomePage extends StatelessWidget {
       onTap: () => Get.toNamed(route),
       child: Text(
         title,
-        style: const TextStyle(color: AppColors.primary, fontSize: 16, fontWeight: FontWeight.w600),
+        style: const TextStyle(
+          color: AppColors.primary,
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }

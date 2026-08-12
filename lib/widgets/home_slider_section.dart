@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../app/routes/app_routes.dart';
-import '../utils/app_images.dart';
 import '../utils/responsive.dart';
 import '../data/models/response_model/content_response_model/content_model.dart';
-import '../view/auth/signInPage.dart';
-import '../view/dramaDetails/dramaDetailsPage.dart';
+
 import 'custom_network_image.dart';
-import 'catagory_widget.dart';
 
 class HomeSliderSection extends StatelessWidget {
   final String title;
@@ -34,10 +31,10 @@ class HomeSliderSection extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: InkWell(
             onTap: () {
-              Get.toNamed(AppRoutes.categoryGrid, arguments: {
-                'title': title,
-                'content': content,
-              });
+              Get.toNamed(
+                AppRoutes.categoryGrid,
+                arguments: {'title': title, 'content': content},
+              );
             },
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -51,7 +48,11 @@ class HomeSliderSection extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.white),
+                const Icon(
+                  Icons.arrow_forward_ios,
+                  size: 16,
+                  color: Colors.white,
+                ),
               ],
             ),
           ),
@@ -61,14 +62,20 @@ class HomeSliderSection extends StatelessWidget {
 
         /// 🔥 SLIDER IMAGES
         SizedBox(
-          height: isDesktop ? 340 : 220, // Increased height to allow for lift-up without clipping
+          height: isDesktop
+              ? 340
+              : 220, // Increased height to allow for lift-up without clipping
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),
             itemCount: content.length,
             itemBuilder: (context, index) {
               final item = content[index];
-              return _HoverCard(item: item, isSignedIn: isSignedIn, isDesktop: isDesktop);
+              return _HoverCard(
+                item: item,
+                isSignedIn: isSignedIn,
+                isDesktop: isDesktop,
+              );
             },
           ),
         ),
@@ -82,7 +89,11 @@ class _HoverCard extends StatefulWidget {
   final bool isSignedIn;
   final bool isDesktop;
 
-  const _HoverCard({required this.item, required this.isSignedIn, required this.isDesktop});
+  const _HoverCard({
+    required this.item,
+    required this.isSignedIn,
+    required this.isDesktop,
+  });
 
   @override
   State<_HoverCard> createState() => _HoverCardState();
@@ -99,10 +110,14 @@ class _HoverCardState extends State<_HoverCard> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 250),
         width: widget.isDesktop ? (isHovered ? 230 : 200) : 150,
-        margin: const EdgeInsets.only(right: 32), // More spacing to prevent overlap
-        transform: isHovered 
-          ? (Matrix4.identity()..translate(0, -15, 0)..scale(1.05)) 
-          : Matrix4.identity(),
+        margin: const EdgeInsets.only(
+          right: 32,
+        ), // More spacing to prevent overlap
+        transform: isHovered
+            ? (Matrix4.identity()
+                ..translate(0, -15, 0)
+                ..scale(1.05))
+            : Matrix4.identity(),
         child: InkWell(
           borderRadius: BorderRadius.circular(15),
           onTap: () {
@@ -111,30 +126,33 @@ class _HoverCardState extends State<_HoverCard> {
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(15),
-              boxShadow: isHovered ? [
-                BoxShadow(
-                  color: Colors.red.withOpacity(0.5),
-                  blurRadius: 25,
-                  spreadRadius: 3,
-                  offset: const Offset(0, 10),
-                )
-              ] : [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.3),
-                  blurRadius: 10,
-                  offset: const Offset(0, 5),
-                )
-              ],
+              boxShadow: isHovered
+                  ? [
+                      BoxShadow(
+                        color: Colors.red.withOpacity(0.5),
+                        blurRadius: 25,
+                        spreadRadius: 3,
+                        offset: const Offset(0, 10),
+                      ),
+                    ]
+                  : [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.3),
+                        blurRadius: 10,
+                        offset: const Offset(0, 5),
+                      ),
+                    ],
             ),
             child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  CustomNetworkImage(
-                    imageUrl: widget.item.poster,
-                    fit: BoxFit.fill,
-                    borderRadius: 15,
-                  ),
-                  if (widget.isDesktop) AnimatedOpacity(
+              fit: StackFit.expand,
+              children: [
+                CustomNetworkImage(
+                  imageUrl: widget.item.poster,
+                  fit: BoxFit.fill,
+                  borderRadius: 15,
+                ),
+                if (widget.isDesktop)
+                  AnimatedOpacity(
                     duration: const Duration(milliseconds: 200),
                     opacity: isHovered ? 1.0 : 0.0,
                     child: Container(
@@ -155,18 +173,29 @@ class _HoverCardState extends State<_HoverCard> {
                         children: [
                           Text(
                             widget.item.title,
-                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                           const SizedBox(height: 4),
                           Row(
                             children: [
-                              const Icon(Icons.star, color: Colors.amber, size: 14),
+                              const Icon(
+                                Icons.star,
+                                color: Colors.amber,
+                                size: 14,
+                              ),
                               const SizedBox(width: 4),
                               Text(
                                 widget.item.releaseYear.toString(),
-                                style: const TextStyle(color: Colors.white70, fontSize: 12),
+                                style: const TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 12,
+                                ),
                               ),
                             ],
                           ),
@@ -174,11 +203,11 @@ class _HoverCardState extends State<_HoverCard> {
                       ),
                     ),
                   ),
-                ],
-              ),
+              ],
             ),
           ),
         ),
+      ),
     );
   }
 }

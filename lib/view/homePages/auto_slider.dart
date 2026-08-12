@@ -1,15 +1,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:mirchi_ott/utils/app_images.dart';
 import 'package:mirchi_ott/utils/responsive.dart';
-import 'package:mirchi_ott/view_model/primium_controller/premium_controller.dart';
 import 'package:mirchi_ott/widgets/custom_network_image.dart';
 import '../../app/routes/app_routes.dart';
 import '../../data/models/response_model/content_response_model/content_model.dart';
-import '../auth/signInPage.dart';
-import '../dramaDetails/dramaDetailsPage.dart';
-import '../premium/goPremium.dart';
+
 import '../../app/theme/app_colors.dart';
 
 class AutoSlider extends StatefulWidget {
@@ -75,7 +71,9 @@ class _AutoSliderState extends State<AutoSlider> {
     if (widget.content.isEmpty) {
       return const SizedBox(
         height: 200,
-        child: Center(child: CircularProgressIndicator(color: AppColors.primary)),
+        child: Center(
+          child: CircularProgressIndicator(color: AppColors.primary),
+        ),
       );
     }
 
@@ -95,14 +93,15 @@ class _AutoSliderState extends State<AutoSlider> {
       child: Column(
         children: [
           SizedBox(
-            height: isDesktop ? MediaQuery.of(context).size.height * 0.8 : MediaQuery.of(context).size.height * 0.40,
+            height: isDesktop
+                ? MediaQuery.of(context).size.height * 0.8
+                : MediaQuery.of(context).size.height * 0.40,
             child: PageView.builder(
               controller: _pageController,
               itemCount: null,
               onPageChanged: (index) => setState(() => currentPage = index),
               itemBuilder: (context, index) {
                 final item = widget.content[index % widget.content.length];
-                bool isSelected = currentPage == index;
 
                 return Padding(
                   padding: EdgeInsets.symmetric(horizontal: isDesktop ? 0 : 8),
@@ -126,6 +125,7 @@ class _AutoSliderState extends State<AutoSlider> {
                               fit: isDesktop ? BoxFit.fill : BoxFit.fill,
                               borderRadius: isDesktop ? 0 : 15,
                             ),
+
                             /// TOP GRADIENT
                             Container(
                               decoration: BoxDecoration(
@@ -140,6 +140,7 @@ class _AutoSliderState extends State<AutoSlider> {
                                 ),
                               ),
                             ),
+
                             /// BOTTOM GRADIENT
                             Container(
                               decoration: BoxDecoration(

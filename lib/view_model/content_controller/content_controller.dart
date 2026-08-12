@@ -8,15 +8,19 @@ import '../../data/network/api_network_service.dart';
 
 class ContentController extends GetxController {
   final ContentRepository _repository = ContentRepository(NetworkApiService());
-  final InteractionRepository _interactionRepo = InteractionRepository(NetworkApiService());
+  final InteractionRepository _interactionRepo = InteractionRepository(
+    NetworkApiService(),
+  );
 
   var isLoading = true.obs;
   var allContent = <ContentModel>[].obs;
+  var allWebBannerContent = <ContentModel>[].obs;
   var trendingContent = <ContentModel>[].obs;
   var categories = <CategoryModel>[].obs;
   var seriesEpisodes = <ContentModel>[].obs;
   var isEpisodesLoading = false.obs;
-  
+  var webSections = <WebSectionModel>[].obs;
+
   // Cache for likes: ContentID -> LikeCount
   var contentLikes = <String, int>{}.obs;
 
@@ -29,32 +33,52 @@ class ContentController extends GetxController {
   Future<void> fetchContent() async {
     try {
       isLoading.value = true;
-      
+
       // Fetch categories first or in parallel
       final cats = await _repository.getCategories();
       cats.sort((a, b) => a.priority.compareTo(b.priority));
       categories.assignAll(cats);
 
+      //  bool isDesktop = Responsive.isDesktop(context);
+
       final content = await _repository.getAllContent();
-      
+
       // Filter: Hide content if isHide is true, and filter 18+ content on web
       final filteredContent = content.where((c) {
         if (c.isHide) return false;
         if (kIsWeb && (c.is18Plus)) return false;
         return true;
       }).toList();
-      
+
       // Sort content by priority (lower number = higher priority, e.g. 1 is top)
-      filteredContent.sort((a, b) => (a.priority ?? 999).compareTo(b.priority ?? 999));
-      
+      filteredContent.sort(
+        (a, b) => (a.priority ?? 999).compareTo(b.priority ?? 999),
+      );
+
       allContent.assignAll(filteredContent);
-      
+
       // Filter trending for slider
-      trendingContent.assignAll(filteredContent.where((c) => c.category.contains('trending') && c.isComingSoon == false).toList());
-      
+      trendingContent.assignAll(
+        filteredContent
+            .where(
+              (c) => c.category.contains('trending') && c.isComingSoon == false,
+            )
+            .toList(),
+      );
+
       // Fetch stats for each item to enable sorting by likes
+
+      // -----------------------------
+      // web banner content
+      //-------------------------------------------------
+
+      final webBannerContent = await _repository.getAllWebSiteBannerContent();
+      allWebBannerContent.assignAll(webBannerContent);
+
+      final sections = await _repository.getWebSections();
+      webSections.assignAll(sections);
+
       _fetchAllStats();
-      
     } catch (e) {
       print("Error in ContentController: $e");
     } finally {
