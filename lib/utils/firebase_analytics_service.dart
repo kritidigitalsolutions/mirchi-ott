@@ -4,7 +4,10 @@ import 'package:flutter/foundation.dart';
 class FirebaseAnalyticsService {
   static final FirebaseAnalytics _analytics = FirebaseAnalytics.instance;
 
-  static void logEvent({required String name, Map<String, Object>? parameters}) {
+  static void logEvent({
+    required String name,
+    Map<String, Object>? parameters,
+  }) {
     _analytics.logEvent(name: name, parameters: parameters);
     debugPrint("🔥 Firebase Event Logged: $name | Params: $parameters");
   }
@@ -27,12 +30,7 @@ class FirebaseAnalyticsService {
     _analytics.logPurchase(
       value: amount,
       currency: currency,
-      items: [
-        AnalyticsEventItem(
-          itemId: contentId,
-          itemName: "Premium Plan",
-        ),
-      ],
+      items: [AnalyticsEventItem(itemId: contentId, itemName: "Premium Plan")],
     );
     debugPrint("🔥 Firebase Event: Purchase | Amount: $amount $currency");
   }
@@ -47,10 +45,7 @@ class FirebaseAnalyticsService {
     required String type,
     required String title,
   }) {
-    _analytics.logSelectContent(
-      contentType: type,
-      itemId: id,
-    );
+    _analytics.logSelectContent(contentType: type, itemId: id);
     debugPrint("🔥 Firebase Event: ViewContent | $title ($id)");
   }
 
@@ -67,13 +62,10 @@ class FirebaseAnalyticsService {
     _analytics.logBeginCheckout(
       value: amount,
       currency: currency,
-      items: [
-        AnalyticsEventItem(
-          itemId: contentId,
-          itemName: "Premium Plan",
-        ),
-      ],
+      items: [AnalyticsEventItem(itemId: contentId, itemName: "Premium Plan")],
     );
-    debugPrint("🔥 Firebase Event: Initiate Checkout | Amount: $amount $currency");
+    debugPrint(
+      "🔥 Firebase Event: Initiate Checkout | Amount: $amount $currency",
+    );
   }
 }
