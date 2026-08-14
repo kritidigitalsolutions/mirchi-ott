@@ -10,6 +10,7 @@ import 'package:mirchi_ott/view/popUp/redeem_voucher_page.dart';
 import 'package:mirchi_ott/view/popUp/search_with_mic.dart';
 import 'package:mirchi_ott/view/premium/goPremium.dart';
 import 'package:mirchi_ott/view/premium/payment_screen.dart';
+import 'package:mirchi_ott/view/premium/payment_success_page.dart';
 import 'package:mirchi_ott/view/profile/create_profile_page.dart';
 import 'package:mirchi_ott/view/profile/create_ticket_page.dart';
 import 'package:mirchi_ott/view/profile/delete_account_page.dart';
@@ -48,6 +49,7 @@ class AppPages {
     GetPage(name: AppRoutes.help, page: () => const HelpSupportPage()),
     GetPage(name: AppRoutes.profile, page: () => ProfilePage(onLogout: () {})),
     GetPage(name: AppRoutes.goPremium, page: () => const GoPremiumPage()),
+    GetPage(name: AppRoutes.paymentSuccess, page: () => const PaymentSuccessPage()),
     // GetPage(name: AppRoutes.payment, page: () => const PaymentScreen()),
     GetPage(name: AppRoutes.search, page: () => const SearchPage()),
     GetPage(name: AppRoutes.notifications, page: () => const NotificationPage()),

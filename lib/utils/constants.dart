@@ -1,6 +1,6 @@
 class AppConstants {
-  static const String serverUrl = 'http://192.168.1.14:5001';
-  // static const String serverUrl = 'https://api.mirchiapp.in';
+  // static const String serverUrl = 'http://192.168.1.14:5001';
+  static const String serverUrl = 'https://api.mirchiapp.in';
   static const String webUrl = 'https://mirchiapp.in';
   static const String baseUrl = '$serverUrl/api';
 

@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../app/routes/app_routes.dart';
 import '../../app/theme/app_colors.dart';
 import '../../data/models/response_model/plan_response/plan_model.dart';
 import '../../data/network/base_api_service.dart';
@@ -38,6 +39,9 @@ class PremiumController extends GetxController with WidgetsBindingObserver {
   var subscriptionData = Rxn<Map<String, dynamic>>();
   var isLoadingStatus = false.obs;
 
+  // Track if user just came back from a payment gateway
+  bool _expectingPaymentSuccess = false;
+
   bool get hasActiveSubscription => 
       subscriptionData.value != null && subscriptionData.value!['status'] == 'active';
 
@@ -48,6 +52,9 @@ class PremiumController extends GetxController with WidgetsBindingObserver {
     _repository = PremiumRepository(Get.find<BaseApiService>());
 
     fetchPlans();
+
+    // Check if we were expecting a payment success from a previous session
+    _expectingPaymentSuccess = GetStorage().read('expecting_payment') ?? false;
 
     var demoSub = GetStorage().read('demo_subscription');
     if (demoSub != null) {
@@ -142,6 +149,18 @@ class PremiumController extends GetxController with WidgetsBindingObserver {
       final response = await _repository.getSubscriptionStatus();
       if (response != null && response['success'] == true) {
         subscriptionData.value = response['subscription'];
+        
+        // If we were expecting a success and now we have an active sub
+        if (_expectingPaymentSuccess && hasActiveSubscription) {
+          _expectingPaymentSuccess = false;
+          GetStorage().write('expecting_payment', false);
+          final planId = subscriptionData.value?['planId'] ?? 
+                         subscriptionData.value?['plan']?['_id'] ?? "";
+          
+          if (Get.currentRoute != AppRoutes.paymentSuccess) {
+            Get.offNamed(AppRoutes.paymentSuccess, arguments: planId);
+          }
+        }
       }
     } catch (e) {
       print("Error fetching subscription status: $e");
@@ -268,6 +287,9 @@ class PremiumController extends GetxController with WidgetsBindingObserver {
         if (paymentUrl != null) {
           debugPrint("🚀 Redirecting to SabPaisa: $paymentUrl");
           
+          _expectingPaymentSuccess = true;
+          GetStorage().write('expecting_payment', true);
+          
           final Uri uri = Uri.parse(paymentUrl);
           bool launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
           
@@ -302,6 +324,8 @@ class PremiumController extends GetxController with WidgetsBindingObserver {
   Future<void> startSabPaisaPayment(String planId) async {
     try {
       final token = AppSession.getToken() ?? "";
+      _expectingPaymentSuccess = true;
+      GetStorage().write('expecting_payment', true);
       
       // Using the real production web link
       String baseUrl = "https://mirchiapp.in";
@@ -319,7 +343,7 @@ class PremiumController extends GetxController with WidgetsBindingObserver {
       // Attempt to launch the URL
       final bool launched = await launchUrl(
         uri, 
-        mode: LaunchMode.platformDefault,
+        mode: LaunchMode.externalApplication,
       );
 
       if (!launched) {
@@ -348,24 +372,15 @@ class PremiumController extends GetxController with WidgetsBindingObserver {
       });
 
       if (verifyResponse != null && verifyResponse['success'] == true) {
-        CustomSnackbar.show(title: "Success", message: "Payment Verified Successfully!", isSuccess: true);
+        // CustomSnackbar.show(title: "Success", message: "Payment Verified Successfully!", isSuccess: true);
         
-        // Log Meta Purchase Event
-        final selectedPlan = plans.firstWhereOrNull((p) => p.id == planId);
-        if (selectedPlan != null) {
-          FacebookEventsService.logPurchase(
-            amount: discountedPrice.value > 0 ? discountedPrice.value : originalPrice.value,
-            currency: "INR",
-            contentId: planId,
-          );
-          FirebaseAnalyticsService.logPurchase(
-            amount: discountedPrice.value > 0 ? discountedPrice.value : originalPrice.value,
-            currency: "INR",
-            contentId: planId,
-          );
-        }
-
+        _expectingPaymentSuccess = false;
+        GetStorage().write('expecting_payment', false);
         fetchSubscriptionStatus();
+        
+        // Navigate to Success Page and trigger events there
+        Get.offNamed(AppRoutes.paymentSuccess, arguments: planId);
+
         try {
           if (Get.isRegistered<ContentController>()) {
             Get.find<ContentController>().fetchContent();
