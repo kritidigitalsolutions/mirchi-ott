@@ -24,6 +24,7 @@ import 'cast_crewPage.dart';
 import '../premium/goPremium.dart';
 import '../../utils/share_service.dart';
 import '../../utils/facebook_events_service.dart';
+import '../../utils/firebase_analytics_service.dart';
 import '../../view_model/drama_detail_controller/drama_details_controller.dart';
 import '../../utils/custom_snackbar.dart';
 
@@ -57,8 +58,13 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
       contentController.fetchEpisodes(widget.content.id);
     }
 
-    // Log Meta ViewContent Event
+    // Log Meta & Firebase ViewContent Event
     FacebookEventsService.logViewContent(
+      id: widget.content.id,
+      type: widget.content.contentType,
+      title: widget.content.title,
+    );
+    FirebaseAnalyticsService.logViewContent(
       id: widget.content.id,
       type: widget.content.contentType,
       title: widget.content.title,

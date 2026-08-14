@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../utils/facebook_events_service.dart';
+import '../../utils/firebase_analytics_service.dart';
 import '../../data/models/response_model/content_response_model/content_model.dart';
 import '../content_controller/content_controller.dart';
 
@@ -18,6 +19,7 @@ class AppSearchController extends GetxController {
     } else {
       // Log Search Event
       FacebookEventsService.logSearch(query: query);
+      FirebaseAnalyticsService.logSearch(query: query);
 
       // 1. Filter contents by title
       List<ContentModel> filtered = _contentController.allContent.where((item) {

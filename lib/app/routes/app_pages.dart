@@ -48,7 +48,7 @@ class AppPages {
     GetPage(name: AppRoutes.help, page: () => const HelpSupportPage()),
     GetPage(name: AppRoutes.profile, page: () => ProfilePage(onLogout: () {})),
     GetPage(name: AppRoutes.goPremium, page: () => const GoPremiumPage()),
-    GetPage(name: AppRoutes.payment, page: () => const PaymentScreen()),
+    // GetPage(name: AppRoutes.payment, page: () => const PaymentScreen()),
     GetPage(name: AppRoutes.search, page: () => const SearchPage()),
     GetPage(name: AppRoutes.notifications, page: () => const NotificationPage()),
     GetPage(name: AppRoutes.voiceSearch, page: () => const VoiceListeningPage()),

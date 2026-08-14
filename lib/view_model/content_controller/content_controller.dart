@@ -73,9 +73,19 @@ class ContentController extends GetxController {
       //-------------------------------------------------
 
       final webBannerContent = await _repository.getAllWebSiteBannerContent();
+      // Sort web banners by priority
+      webBannerContent.sort(
+        (a, b) => (a.priority ?? 999).compareTo(b.priority ?? 999),
+      );
       allWebBannerContent.assignAll(webBannerContent);
 
       final sections = await _repository.getWebSections();
+      // Sort items within each section by priority
+      for (var section in sections) {
+        section.items.sort(
+          (a, b) => (a.priority ?? 999).compareTo(b.priority ?? 999),
+        );
+      }
       webSections.assignAll(sections);
 
       _fetchAllStats();
