@@ -17,6 +17,7 @@ import '../profile/profilePage.dart';
 import '../../view_model/home_controller/home_controller.dart';
 import '../../view_model/auth_controller/auth_controller.dart';
 import '../../utils/notification_service.dart';
+import '../../view_model/primium_controller/premium_controller.dart';
 import '../popUp/confirmation_popup.dart';
 import 'package:flutter/services.dart';
 
@@ -28,6 +29,9 @@ class MainHomePage extends StatelessWidget {
     final ContentController contentController = Get.find<ContentController>();
     final HomeController controller = Get.find<HomeController>();
     final AuthController authController = Get.find<AuthController>();
+    final PremiumController premiumController = Get.isRegistered<PremiumController>()
+        ? Get.find<PremiumController>()
+        : Get.put(PremiumController());
     final notificationService = NotificationService.to;
 
     return PopScope(
@@ -227,23 +231,26 @@ class MainHomePage extends StatelessWidget {
           ),
           _buildNotificationIcon(notificationService),
           const SizedBox(width: 20),
-          ElevatedButton(
-            onPressed: () => Get.toNamed(AppRoutes.goPremium),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.buttonColor,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+          Obx(() {
+            final bool isPremium = Get.find<PremiumController>().hasActiveSubscription;
+            return ElevatedButton(
+              onPressed: () => Get.toNamed(AppRoutes.goPremium),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: isPremium ? Colors.green : AppColors.buttonColor,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
-            ),
-            child: const Text(
-              "Go Premium",
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
+              child: Text(
+                isPremium ? "Subscribed" : "Subscribe",
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-          ),
+            );
+          }),
         ],
       ),
     );
@@ -323,21 +330,24 @@ class MainHomePage extends StatelessWidget {
               ),
               _buildNotificationIcon(notificationService),
               const SizedBox(width: 4),
-              SizedBox(
-                width: 100,
-                height: 28,
-                child: ElevatedButton(
-                  onPressed: () => Get.toNamed(AppRoutes.goPremium),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.buttonColor,
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
+              Obx(() {
+                final bool isPremium = Get.find<PremiumController>().hasActiveSubscription;
+                return SizedBox(
+                  width: 100,
+                  height: 28,
+                  child: ElevatedButton(
+                    onPressed: () => Get.toNamed(AppRoutes.goPremium),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: isPremium ? Colors.green : AppColors.buttonColor,
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                    ),
+                    child: Text(
+                      isPremium ? "Subscribed" : "Subscribe",
+                      style: const TextStyle(color: Colors.white, fontSize: 12),
+                    ),
                   ),
-                  child: const Text(
-                    "Go Premium",
-                    style: TextStyle(color: Colors.white, fontSize: 10),
-                  ),
-                ),
-              ),
+                );
+              }),
             ],
           ),
         ],

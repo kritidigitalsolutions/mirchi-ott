@@ -27,6 +27,13 @@ subprojects {
 }
 subprojects {
     project.evaluationDependsOn(":app")
+    project.configurations.all {
+        resolutionStrategy.eachDependency {
+            if (requested.group == "androidx.media3") {
+                useVersion("1.11.0")
+            }
+        }
+    }
 }
 
 tasks.register<Delete>("clean") {
