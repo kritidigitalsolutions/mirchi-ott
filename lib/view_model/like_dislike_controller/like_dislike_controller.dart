@@ -5,6 +5,7 @@ import '../../data/repositories/interaction_repository.dart';
 import '../../utils/custom_snackbar.dart';
 import '../auth_controller/auth_controller.dart';
 import '../../view/auth/signInPage.dart';
+import '../content_controller/content_controller.dart';
 
 class InteractionController extends GetxController {
   final InteractionRepository _repo = InteractionRepository(Get.find<BaseApiService>());
@@ -18,22 +19,59 @@ class InteractionController extends GetxController {
   bool isDisliked(String contentId) => dislikedMap[contentId] ?? false;
   bool isLoading(String contentId) => isLoadingMap[contentId] ?? false;
 
+  @override
+  void onInit() {
+    super.onInit();
+    final authController = Get.find<AuthController>();
+    ever(authController.isLoggedIn, (bool loggedIn) {
+      if (!loggedIn) {
+        likedMap.clear();
+        dislikedMap.clear();
+        isLoadingMap.clear();
+      }
+    });
+  }
+
   /// 🔄 Fetch Status for specific content
   Future<void> fetchStatus(String contentId) async {
     if (contentId.isEmpty) return;
     
     final authController = Get.find<AuthController>();
-    if (!authController.isLoggedIn.value) return;
-
+    
+    // We fetch stats regardless, but user specific likes only if logged in
     try {
       final response = await _repo.getInteractionStats(contentId);
       if (response != null) {
-        likedMap[contentId] = response['userLiked'] ?? false;
-        dislikedMap[contentId] = response['userDisliked'] ?? false;
+        // Robust parsing for liked/disliked status
+        if (authController.isLoggedIn.value) {
+          likedMap[contentId] = _parseBool(response['userLiked']) ?? 
+                                _parseBool(response['isLiked']) ?? 
+                                _parseBool(response['liked']) ?? false;
+                                
+          dislikedMap[contentId] = _parseBool(response['userDisliked']) ?? 
+                                   _parseBool(response['isDisliked']) ?? 
+                                   _parseBool(response['disliked']) ?? false;
+        }
+
+        // ✅ Update global like count cache for search/UI
+        if (Get.isRegistered<ContentController>()) {
+          Get.find<ContentController>().contentLikes[contentId] = response['likes'] ?? 0;
+        }
       }
     } catch (e) {
       print("❌ Error fetching interaction status for $contentId: $e");
     }
+  }
+
+  bool? _parseBool(dynamic value) {
+    if (value == null) return null;
+    if (value is bool) return value;
+    if (value is int) return value == 1;
+    if (value is String) {
+      final v = value.toLowerCase();
+      return v == 'true' || v == '1' || v == 'yes';
+    }
+    return null;
   }
 
   /// 👍 Toggle LIKE

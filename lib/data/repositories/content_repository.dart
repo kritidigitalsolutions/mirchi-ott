@@ -37,6 +37,32 @@ class ContentRepository {
     }
   }
 
+  Future<List<ContentModel>> getContentByCategory(String categoryId) async {
+    try {
+      final response = await apiProvider.getApi(AppConstants.getCategoryContent(categoryId));
+      if (response['success'] == true) {
+        final categorySlug = response['category']?['slug'];
+        List<dynamic> data = response['data'] ?? [];
+        
+        return data.map((item) {
+          final Map<String, dynamic> itemMap = Map<String, dynamic>.from(item);
+          if (categorySlug != null) {
+            final List<String> categories = List<String>.from(itemMap['category'] ?? []);
+            if (!categories.contains(categorySlug)) {
+              categories.add(categorySlug);
+            }
+            itemMap['category'] = categories;
+          }
+          return ContentModel.fromJson(itemMap);
+        }).toList();
+      }
+      return [];
+    } catch (e) {
+      print("Error fetching category content: $e");
+      rethrow;
+    }
+  }
+
   Future<List<ContentModel>> getEpisodes(String seriesId) async {
     try {
       final response = await apiProvider.getApi(

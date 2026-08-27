@@ -22,8 +22,13 @@ class ContentModel {
   final bool isTrending;
   final String? releaseDate;
   final int? priority;
+  final int? position;
   final bool is18Plus;
   final bool isHide;
+  final bool isPublished;
+  final bool allAges;
+  final int likes;
+  final int dislikes;
 
   // Series/Episode specific fields
   final int? totalSeasons;
@@ -54,8 +59,13 @@ class ContentModel {
     this.isTrending = false,
     this.is18Plus = false,
     this.isHide = false,
+    this.isPublished = true,
+    this.allAges = false,
+    this.likes = 0,
+    this.dislikes = 0,
     this.releaseDate,
     this.priority,
+    this.position,
     this.totalSeasons,
     this.totalEpisodes,
     this.seriesId,
@@ -73,7 +83,7 @@ class ContentModel {
     }
 
     // Determine content type from various possible keys
-    String type = json['type'] ?? json['contentType'] ?? '';
+    String type = (json['type'] ?? json['contentType'] ?? '').toString().toLowerCase();
     if (type.isEmpty && json['itemModel'] != null) {
       type = json['itemModel'].toString().toLowerCase();
     }
@@ -105,13 +115,58 @@ class ContentModel {
       isTrending: json['isTrending'] ?? false,
       is18Plus: json['is18+'] ?? json['is18'] ?? json['is18plus'] ?? false,
       isHide: json['isHide'] ?? false,
+      isPublished: json['isPublished'] ?? true,
+      allAges: json['allAges'] ?? false,
+      likes: json['likes'] ?? 0,
+      dislikes: json['dislikes'] ?? 0,
       releaseDate: json['releaseDate'],
       priority: json['priority'],
+      position: json['position'],
       totalSeasons: json['totalSeasons'] ?? (json['seasons'] as List?)?.length,
       totalEpisodes: json['totalEpisodes'] ?? (json['seasons'] as List?)?.fold<int>(0, (sum, season) => sum + ((season['episodes'] as List?)?.length ?? 0)),
       seriesId: json['seriesId'],
       seasonNumber: json['seasonNumber'],
       episodeNumber: json['episodeNumber'],
+    );
+  }
+
+  ContentModel copyWith({
+    List<String>? category,
+  }) {
+    return ContentModel(
+      id: id,
+      title: title,
+      description: description,
+      genre: genre,
+      releaseYear: releaseYear,
+      duration: duration,
+      language: language,
+      poster: poster,
+      banner: banner,
+      videoUrl: videoUrl,
+      trailerUrl: trailerUrl,
+      isPremium: isPremium,
+      rating: rating,
+      cast: cast,
+      category: category ?? this.category,
+      slug: slug,
+      contentType: contentType,
+      isComingSoon: isComingSoon,
+      isTrending: isTrending,
+      is18Plus: is18Plus,
+      isHide: isHide,
+      isPublished: isPublished,
+      allAges: allAges,
+      likes: likes,
+      dislikes: dislikes,
+      releaseDate: releaseDate,
+      priority: priority,
+      position: position,
+      totalSeasons: totalSeasons,
+      totalEpisodes: totalEpisodes,
+      seriesId: seriesId,
+      seasonNumber: seasonNumber,
+      episodeNumber: episodeNumber,
     );
   }
 
@@ -138,8 +193,13 @@ class ContentModel {
       'isTrending': isTrending,
       'is18+': is18Plus,
       'isHide': isHide,
+      'isPublished': isPublished,
+      'allAges': allAges,
+      'likes': likes,
+      'dislikes': dislikes,
       'releaseDate': releaseDate,
       'priority': priority,
+      'position': position,
       'totalSeasons': totalSeasons,
       'totalEpisodes': totalEpisodes,
       'seriesId': seriesId,
@@ -196,7 +256,7 @@ class WebSectionModel {
       }
       return ContentModel.fromJson(itemJson);
     }).where((c) {
-      if (c.isHide) return false;
+      if (c.isHide || !c.isPublished) return false;
       return true;
     }).toList();
 

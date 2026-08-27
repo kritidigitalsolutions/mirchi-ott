@@ -1,6 +1,6 @@
 class AppConstants {
-  static const String serverUrl = 'http://192.168.1.9:5001';
-  // static const String serverUrl = 'https://api.mirchiapp.in';
+  // static const String serverUrl = 'http://192.168.1.9:5001';
+  static const String serverUrl = 'https://api.mirchiapp.in';
   static const String webUrl = 'https://mirchiapp.in';
   static const String baseUrl = '$serverUrl/api';
 
@@ -42,6 +42,7 @@ class AppConstants {
   /// content
   static const String getAllContent = '$baseUrl/content';
   static const String getCategories = '$baseUrl/categories';
+  static String getCategoryContent(String id) => '$baseUrl/categories/$id';
   static String getEpisodes(String seriesId) =>
       '$baseUrl/series/episodes/$seriesId';
   static const webSiteBanner = "$baseUrl/webpage/banners";

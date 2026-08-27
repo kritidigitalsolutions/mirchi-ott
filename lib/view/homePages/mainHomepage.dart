@@ -409,17 +409,10 @@ class MainHomePage extends StatelessWidget {
                     isDesktop
                         ? AutoSlider(
                             content: contentController.allWebBannerContent,
-
                             isSignedIn: authController.isLoggedIn.value,
                           )
                         : AutoSlider(
-                            content: contentController.allContent
-                                .where(
-                                  (c) =>
-                                      c.category.contains('trending') &&
-                                      c.isComingSoon == false,
-                                )
-                                .toList(),
+                            content: contentController.homeBannerContent,
                             isSignedIn: authController.isLoggedIn.value,
                           ),
 
@@ -465,18 +458,15 @@ class MainHomePage extends StatelessWidget {
                     ] else ...[
                       // Dynamic Categories
                       ...contentController.categories.map((category) {
-                        final categoryContent = contentController.allContent
-                            .where(
-                              (c) =>
-                                  c.category.contains(category.slug) &&
-                                  c.isComingSoon == false,
-                            )
-                            .toList();
+                        // Skip home-banners as it is shown in the slider
+                        if (category.slug == 'home-banners') return const SizedBox.shrink();
+
+                        final categoryContent = contentController.categoryContents[category.id] ?? [];
 
                         if (categoryContent.isEmpty)
                           return const SizedBox.shrink();
 
-                        // Special UI for Top 10 category
+                        // Special UI for Top 10 category - keep as single row
                         if (category.slug.toLowerCase().contains('top10')) {
                           return _buildAnimatedSection(
                             isDesktop: isDesktop,
@@ -492,17 +482,49 @@ class MainHomePage extends StatelessWidget {
                           );
                         }
 
-                        return _buildAnimatedSection(
-                          isDesktop: isDesktop,
-                          delay: 200,
-                          child: Padding(
-                            padding: const EdgeInsets.only(top: 30),
-                            child: HomeSliderSection(
-                              title: category.name.toUpperCase(),
-                              content: categoryContent,
-                              isSignedIn: authController.isLoggedIn.value,
+                        // Split all other categories into Series and Movies
+                        final seriesItems = categoryContent.where((item) => item.contentType == 'series').toList();
+                        final movieItems = categoryContent.where((item) => item.contentType == 'movie').toList();
+
+                        List<Widget> sections = [];
+                        
+                        if (seriesItems.isNotEmpty) {
+                          sections.add(
+                            _buildAnimatedSection(
+                              isDesktop: isDesktop,
+                              delay: 200,
+                              child: Padding(
+                                padding: const EdgeInsets.only(top: 30),
+                                child: HomeSliderSection(
+                                  title: "${category.name.toUpperCase()}",
+                                  content: seriesItems,
+                                  isSignedIn: authController.isLoggedIn.value,
+                                ),
+                              ),
                             ),
-                          ),
+                          );
+                        }
+
+                        if (movieItems.isNotEmpty) {
+                          sections.add(
+                            _buildAnimatedSection(
+                              isDesktop: isDesktop,
+                              delay: 200,
+                              child: Padding(
+                                padding: const EdgeInsets.only(top: 30),
+                                child: HomeSliderSection(
+                                  title: "${category.name.toUpperCase()}",
+                                  content: movieItems,
+                                  isSignedIn: authController.isLoggedIn.value,
+                                ),
+                              ),
+                            ),
+                          );
+                        }
+
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: sections,
                         );
                       }).toList(),
                     ],

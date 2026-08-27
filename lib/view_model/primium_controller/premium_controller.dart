@@ -61,17 +61,18 @@ class PremiumController extends GetxController with WidgetsBindingObserver {
       subscriptionData.value = Map<String, dynamic>.from(demoSub);
     }
 
-    ever(isUserLoggedIn, (bool loggedIn) {
-      if (loggedIn) {
-        fetchSubscriptionStatus();
-      } else {
-        subscriptionData.value = null;
-      }
-    });
+    // Removed: Automatic subscription check on startup/login to optimize API calls
+    // ever(isUserLoggedIn, (bool loggedIn) {
+    //   if (loggedIn) {
+    //     fetchSubscriptionStatus();
+    //   } else {
+    //     subscriptionData.value = null;
+    //   }
+    // });
 
-    if (isUserLoggedIn.value) {
-      fetchSubscriptionStatus();
-    }
+    // if (isUserLoggedIn.value) {
+    //   fetchSubscriptionStatus();
+    // }
   }
 
   @override

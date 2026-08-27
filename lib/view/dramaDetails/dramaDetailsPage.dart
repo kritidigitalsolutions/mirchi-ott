@@ -51,6 +51,12 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
   void initState() {
     super.initState();
     interactionController.fetchStatus(widget.content.id);
+    
+    // ✅ Optimization: Fetch subscription status only when viewing content
+    if (authController.isLoggedIn.value) {
+      premiumController.fetchSubscriptionStatus();
+    }
+
     if (authController.isLoggedIn.value && watchlistController.watchlist.isEmpty) {
       watchlistController.getWatchlist();
     }
@@ -77,11 +83,21 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
   @override
   Widget build(BuildContext context) {
     bool isDesktop = Responsive.isDesktop(context);
-    final List<ContentModel> relatedContent = contentController.allContent.where((item) {
+    
+    // Filter related content: Same type AND matching categories
+    List<ContentModel> relatedContent = contentController.allContent.where((item) {
       return item.id != widget.content.id &&
              item.contentType == widget.content.contentType &&
              item.category.any((cat) => widget.content.category.contains(cat));
     }).toList();
+
+    // Fallback: If no category matches, just show items of the same content type
+    if (relatedContent.isEmpty) {
+      relatedContent = contentController.allContent.where((item) {
+        return item.id != widget.content.id &&
+               item.contentType == widget.content.contentType;
+      }).toList();
+    }
 
     return Scaffold(
       backgroundColor: Colors.black,
