@@ -13,7 +13,7 @@ abstract class AppRoutes {
   static const accountSetting = '/account-setting';
   static const deleteAccount = '/delete-account';
   static const otpPage = '/otp-page';
-  static const signIn = '/whitemultimedia/signin';
+  static const signIn = '/humanmultimediallp/signin';
   static const createProfile = '/create-profile';
   static const manageProfile= '/manage-profile';
   static const manageDevice= '/manage-device';

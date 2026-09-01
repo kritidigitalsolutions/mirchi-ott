@@ -635,7 +635,7 @@ class MainHomePage extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               const Text(
-                "WHITE MULTIMEDIA",
+                "HUMAN MULTIMEDIA LLP",
                 style: TextStyle(
                   color: AppColors.primary,
                   fontSize: 14,
