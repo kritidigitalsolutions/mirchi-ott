@@ -1,6 +1,8 @@
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:mirchi_ott/utils/app_images.dart';
 import 'package:mirchi_ott/utils/google_sign_in_web_button.dart';
@@ -141,8 +143,62 @@ class _SignInPageState extends State<SignInPage> {
                           ),
                           const SizedBox(height: 25),
 
-                          /// LOGIN WITH GOOGLE
-                          _buildGoogleSignInButton(),
+                          /// LOGIN WITH SOCIAL
+                          if (!kIsWeb)
+                            Obx(() => Column(
+                                  children: [
+                                    if (Platform.isIOS) ...[
+                                      _socialLoginButton(
+                                        icon: FontAwesomeIcons.apple,
+                                        label: authController.isLoading.value
+                                            ? "Signing in..."
+                                            : "Sign in with Apple",
+                                        color: Colors.white,
+                                        textColor: Colors.black,
+                                        iconColor: Colors.black,
+                                        height: 44,
+                                        fontSize: 19,
+                                        iconSize: 19,
+                                        onTap: authController.isLoading.value
+                                            ? () {}
+                                            : () =>
+                                                authController.loginWithApple(),
+                                      ),
+                                      const SizedBox(height: 16),
+                                      _socialLoginButton(
+                                        icon: FontAwesomeIcons.google,
+                                        label: authController.isLoading.value
+                                            ? "Signing in..."
+                                            : "Sign in with Google",
+                                        color: Colors.white,
+                                        textColor: Colors.black87,
+                                        iconColor: Colors.red,
+                                        height: 44,
+                                        fontSize: 19,
+                                        iconSize: 19,
+                                        onTap: authController.isLoading.value
+                                            ? () {}
+                                            : () => authController
+                                                .signInWithGoogle(),
+                                      ),
+                                    ] else if (Platform.isAndroid)
+                                      _socialLoginButton(
+                                        icon: FontAwesomeIcons.google,
+                                        label: authController.isLoading.value
+                                            ? "Signing in..."
+                                            : "Sign in with Google",
+                                        color: Colors.white,
+                                        textColor: Colors.black87,
+                                        iconColor: Colors.red,
+                                        onTap: authController.isLoading.value
+                                            ? () {}
+                                            : () => authController
+                                                .signInWithGoogle(),
+                                      ),
+                                  ],
+                                ))
+                          else
+                            _buildGoogleSignInButton(),
 
                           const SizedBox(height: 15),
                           // TextButton(
@@ -255,6 +311,47 @@ class _SignInPageState extends State<SignInPage> {
                     ],
                   ),
           )),
+    );
+  }
+
+  Widget _socialLoginButton({
+    required dynamic icon,
+    required String label,
+    required Color color,
+    required Color textColor,
+    required Color iconColor,
+    double height = 44,
+    double fontSize = 19,
+    double iconSize = 19,
+    required VoidCallback onTap,
+  }) {
+    return SizedBox(
+      width: double.infinity,
+      height: height,
+      child: ElevatedButton(
+        onPressed: onTap,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: color,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            FaIcon(icon, color: iconColor, size: iconSize),
+            const SizedBox(width: 12),
+            Text(
+              label,
+              style: TextStyle(
+                color: textColor,
+                fontSize: fontSize,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

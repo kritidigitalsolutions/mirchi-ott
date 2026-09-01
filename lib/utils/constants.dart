@@ -8,6 +8,8 @@ class AppConstants {
   static const String sendOtp = '$baseUrl/auth/send-otp';
   static const String verifyOtp = '$baseUrl/auth/verify-otp';
   static const String googleLogin = '$baseUrl/auth/google-login';
+  static const String appleLogin = '$baseUrl/auth/apple-login';
+  static const String socialLogin = '$baseUrl/auth/social-login';
   static const String websiteLogin = '$baseUrl/auth/website-login';
 
   /// user proflie

@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+import '../../app/routes/app_routes.dart';
 import '../../data/repositories/auth_repository.dart';
 import '../../data/network/api_network_service.dart';
 import '../../data/network/base_api_service.dart';
@@ -28,7 +30,9 @@ class AuthController extends GetxController {
 
   var isLoading = false.obs;
   var isGoogleLoading = false.obs;
+  var isAppleLoading = false.obs;
   var isLoggedIn = false.obs;
+  final nameController = TextEditingController();
   var googleLoginResponse = Rxn<VerifyOtpResponse>();
   final storage = GetStorage();
   var userData = Rxn<Map<String, dynamic>>();
@@ -292,9 +296,88 @@ class AuthController extends GetxController {
     }
   }
 
+  Future<void> loginWithApple() async {
+    isLoading.value = true;
+    try {
+      final credential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+      );
+
+      final response = await repository.appleLogin({
+        "idToken": credential.identityToken,
+        "provider": "apple",
+        "email": credential.email,
+        "fullName": credential.givenName != null
+            ? "${credential.givenName} ${credential.familyName}"
+            : null,
+      });
+
+      final data = VerifyOtpResponse.fromJson(response);
+      if (data.success == true) {
+        if (data.token != null && data.token!.isNotEmpty) {
+          await AppSession.setToken(data.token!);
+          _updateGlobalToken(data.token!);
+        }
+
+        if (data.user != null) {
+          userData.value = data.user;
+          await storage.write('user_data', data.user);
+        }
+
+        if (data.user?['fullName'] != null &&
+            data.user!['fullName']!.isNotEmpty) {
+          nameController.text = data.user!['fullName']!;
+        } else if (credential.givenName != null) {
+          nameController.text =
+              "${credential.givenName} ${credential.familyName}";
+        }
+
+        _syncNotificationsAfterLogin();
+        await _syncNumericPhoneIfNeeded(data.user);
+
+        FacebookEventsService.logLogin(method: "apple");
+        FirebaseAnalyticsService.logLogin(method: "apple");
+
+        if (data.isNewUser) {
+          if (nameController.text.trim().length < 3) {
+            Get.offAllNamed(AppRoutes.createProfile,
+                arguments: data.user?['email'] ?? "");
+          } else {
+            setLoginStatus(true);
+            Get.offAllNamed(AppRoutes.navbar);
+          }
+        } else {
+          setLoginStatus(true);
+          Get.offAllNamed(AppRoutes.navbar);
+        }
+      } else {
+        CustomSnackbar.show(
+          title: "Error",
+          message: data.message ?? "Apple login failed",
+          isError: true,
+        );
+      }
+    } catch (e) {
+      debugPrint("Apple Login Error: $e");
+      if (!e.toString().contains("canceled")) {
+        CustomSnackbar.show(
+          title: "Error",
+          message: "Apple login failed. Please try again.",
+          isError: true,
+        );
+      }
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   @override
   void onClose() {
     _googleSignInSubscription?.cancel();
+    nameController.dispose();
     super.onClose();
   }
 

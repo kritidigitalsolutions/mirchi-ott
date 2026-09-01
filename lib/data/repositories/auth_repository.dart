@@ -46,6 +46,15 @@ class AuthRepository {
     }
   }
 
+  Future<dynamic> appleLogin(Map<String, dynamic> data) async {
+    try {
+      final response = await apiProvider.postApi(AppConstants.socialLogin, data);
+      return response;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<VerifyOtpResponse?> websiteLogin() async {
     try {
       final response = await apiProvider.postApi(AppConstants.websiteLogin, {});
