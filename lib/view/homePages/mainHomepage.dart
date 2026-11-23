@@ -234,7 +234,7 @@ class MainHomePage extends StatelessWidget {
           Obx(() {
             final bool isPremium = Get.find<PremiumController>().hasActiveSubscription;
             return ElevatedButton(
-              onPressed: () => Get.toNamed(AppRoutes.goPremium),
+              onPressed: () => Get.find<PremiumController>().navigateToPremiumOrManageAccount(Get.context!),
               style: ElevatedButton.styleFrom(
                 backgroundColor: isPremium ? Colors.green : AppColors.buttonColor,
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
@@ -243,7 +243,9 @@ class MainHomePage extends StatelessWidget {
                 ),
               ),
               child: Text(
-                isPremium ? "Subscribed" : "Subscribe",
+                defaultTargetPlatform == TargetPlatform.iOS
+                    ? (isPremium ? "Account" : "Manage")
+                    : (isPremium ? "Subscribed" : "Subscribe"),
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -336,13 +338,15 @@ class MainHomePage extends StatelessWidget {
                   width: 100,
                   height: 28,
                   child: ElevatedButton(
-                    onPressed: () => Get.toNamed(AppRoutes.goPremium),
+                    onPressed: () => Get.find<PremiumController>().navigateToPremiumOrManageAccount(Get.context!),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: isPremium ? Colors.green : AppColors.buttonColor,
                       padding: const EdgeInsets.symmetric(horizontal: 8),
                     ),
                     child: Text(
-                      isPremium ? "Subscribed" : "Subscribe",
+                      defaultTargetPlatform == TargetPlatform.iOS
+                          ? (isPremium ? "Account" : "Manage")
+                          : (isPremium ? "Subscribed" : "Subscribe"),
                       style: const TextStyle(color: Colors.white, fontSize: 12),
                     ),
                   ),

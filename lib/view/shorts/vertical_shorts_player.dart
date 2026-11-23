@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:video_player/video_player.dart';
@@ -166,13 +167,15 @@ class _ShortVideoItemState extends State<ShortVideoItem> {
             bottom: 100,
             child: Column(
               children: [
-                _buildOption(Icons.favorite_border, "Like", () {}),
+                _buildOption(Icons.favorite_border, "Like", (_) {}),
                 const SizedBox(height: 20),
-                _buildOption(Icons.share, "Share", () {
-                  Share.share(widget.episode.videoUrl);
+                _buildOption(Icons.share, "Share", (btnContext) {
+                  final RenderBox? box = btnContext.findRenderObject() as RenderBox?;
+                  final Rect? rect = box != null ? box.localToGlobal(Offset.zero) & box.size : null;
+                  Share.share(widget.episode.videoUrl, sharePositionOrigin: rect);
                 }),
                 const SizedBox(height: 20),
-                _buildOption(Icons.playlist_play, "Episodes", widget.onEpisodesClick),
+                _buildOption(Icons.playlist_play, "Episodes", (btnContext) => widget.onEpisodesClick()),
               ],
             ),
           ),
@@ -234,8 +237,13 @@ class _ShortVideoItemState extends State<ShortVideoItem> {
           const Icon(Icons.lock, color: Colors.white, size: 80),
           const SizedBox(height: 20),
           Text(
-            loggedIn ? "Subscribe to watch all episodes" : "Sign in to watch",
+            loggedIn
+                ? (defaultTargetPlatform == TargetPlatform.iOS
+                    ? "Manage your account to watch all episodes"
+                    : "Subscribe to watch all episodes")
+                : "Sign in to watch",
             style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center,
           ),
           const SizedBox(height: 30),
           ElevatedButton(
@@ -246,13 +254,19 @@ class _ShortVideoItemState extends State<ShortVideoItem> {
             ),
             onPressed: () {
               if (loggedIn) {
-                Get.toNamed(AppRoutes.goPremium);
+                if (Get.isRegistered<PremiumController>()) {
+                  Get.find<PremiumController>().navigateToPremiumOrManageAccount(context);
+                } else {
+                  Get.put(PremiumController()).navigateToPremiumOrManageAccount(context);
+                }
               } else {
                 Get.toNamed(AppRoutes.signIn);
               }
             },
             child: Text(
-              loggedIn ? "GO PREMIUM" : "SIGN IN",
+              loggedIn
+                  ? (defaultTargetPlatform == TargetPlatform.iOS ? "MANAGE ACCOUNT" : "GO PREMIUM")
+                  : "SIGN IN",
               style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
             ),
           ),
@@ -261,16 +275,20 @@ class _ShortVideoItemState extends State<ShortVideoItem> {
     );
   }
 
-  Widget _buildOption(IconData icon, String label, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        children: [
-          Icon(icon, color: Colors.white, size: 35),
-          const SizedBox(height: 4),
-          Text(label, style: const TextStyle(color: Colors.white, fontSize: 12)),
-        ],
-      ),
+  Widget _buildOption(IconData icon, String label, void Function(BuildContext) onTap) {
+    return Builder(
+      builder: (context) {
+        return GestureDetector(
+          onTap: () => onTap(context),
+          child: Column(
+            children: [
+              Icon(icon, color: Colors.white, size: 35),
+              const SizedBox(height: 4),
+              Text(label, style: const TextStyle(color: Colors.white, fontSize: 12)),
+            ],
+          ),
+        );
+      }
     );
   }
 }

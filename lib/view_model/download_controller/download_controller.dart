@@ -42,6 +42,9 @@ class DownloadController extends GetxController {
     localPaths.value = Map<String, String>.from(
       storage.read('paths') ?? {},
     );
+    
+    debugPrint("📥 Loaded ${downloadedContent.length} downloads");
+    debugPrint("📍 Loaded ${localPaths.length} local paths");
   }
 
   Future<void> downloadVideo(ContentModel content) async {
@@ -121,7 +124,7 @@ class DownloadController extends GetxController {
       },
     );
 
-    localPaths[content.id] = filePath;
+    localPaths[content.id] = "$fileName.mp4";
   }
 
   Future<void> _downloadHls(ContentModel content) async {
@@ -225,20 +228,22 @@ class DownloadController extends GetxController {
     File localM3u8File = File("${downloadDir.path}/playlist.m3u8");
     await localM3u8File.writeAsString(localM3u8Content);
 
-    localPaths[content.id] = localM3u8File.path;
+    localPaths[content.id] = "downloads/$folderName/playlist.m3u8";
   }
 
-  void removeDownload(String contentId) {
+  Future<void> removeDownload(String contentId) async {
     // delete file also
     if (localPaths.containsKey(contentId)) {
-      String path = localPaths[contentId]!;
-      File file = File(path);
-      if (file.existsSync()) {
-        if (path.endsWith('.m3u8')) {
-          // It's an HLS folder
-          file.parent.deleteSync(recursive: true);
-        } else {
-          file.deleteSync();
+      String? path = await getLocalPath(contentId);
+      if (path != null) {
+        File file = File(path);
+        if (file.existsSync()) {
+          if (path.endsWith('.m3u8')) {
+            // It's an HLS folder
+            file.parent.deleteSync(recursive: true);
+          } else {
+            file.deleteSync();
+          }
         }
       }
       localPaths.remove(contentId);
@@ -255,10 +260,30 @@ class DownloadController extends GetxController {
 
   void _saveToStorage() {
     storage.write('downloads', downloadedContent.map((e) => e.toJson()).toList());
-    storage.write('paths', localPaths);
+    // Convert RxMap to a plain Map for storage
+    storage.write('paths', Map<String, String>.from(localPaths));
   }
 
   bool isDownloaded(String id) => localPaths.containsKey(id);
 
-  String? getLocalPath(String id) => localPaths[id];
+  Future<String?> getLocalPath(String id) async {
+    if (!localPaths.containsKey(id)) {
+      debugPrint("🔍 getLocalPath: ID $id not found in localPaths");
+      return null;
+    }
+    
+    final relativePath = localPaths[id]!;
+    debugPrint("🔍 getLocalPath: Relative path for $id is $relativePath");
+
+    // Handle legacy absolute paths
+    if (relativePath.startsWith('/') || relativePath.contains(':/')) {
+       debugPrint("⚠️ Detected legacy absolute path: $relativePath");
+       return relativePath;
+    }
+
+    final Directory dir = await getApplicationDocumentsDirectory();
+    final fullPath = "${dir.path}/$relativePath";
+    debugPrint("✅ getLocalPath: Resolved full path: $fullPath");
+    return fullPath;
+  }
 }

@@ -48,7 +48,7 @@ class AuthRepository {
 
   Future<dynamic> appleLogin(Map<String, dynamic> data) async {
     try {
-      final response = await apiProvider.postApi(AppConstants.socialLogin, data);
+      final response = await apiProvider.postApi(AppConstants.appleLogin, data);
       return response;
     } catch (e) {
       rethrow;
@@ -92,11 +92,13 @@ class AuthRepository {
     }
   }
 
-  Future<dynamic> updateProfile({required String phone}) async {
+  Future<dynamic> updateProfile({String? phone, String? name}) async {
     try {
-      final response = await apiProvider.pacthApi(AppConstants.updateProfile, {
-        'phone': phone,
-      });
+      final Map<String, dynamic> body = {
+        if (phone != null && phone.isNotEmpty) 'phone': phone,
+        if (name != null && name.isNotEmpty) 'name': name,
+      };
+      final response = await apiProvider.pacthApi(AppConstants.updateProfile, body);
       return response;
     } catch (e) {
       rethrow;

@@ -86,15 +86,17 @@ Future<void> main() async {
         ),
       );
     } else {
+      print("📱 Firebase Mobile: Attempting initialization...");
       await Firebase.initializeApp();
     }
     print("✅ Firebase Initialized");
     
     // 🔥 Firebase Analytics: Log App Open
     FirebaseAnalyticsService.logAppOpen();
-  } catch (e) {
+  } catch (e, stackTrace) {
     print("⚠️ Firebase Initialization Failed: $e");
-    print("💡 Tip: For Web, make sure you have configured Firebase correctly (flutterfire configure)");
+    print("📍 Stack Trace: $stackTrace");
+    print("💡 Tip for iOS: Ensure GoogleService-Info.plist is added to the Runner target in Xcode.");
   }
 
   /// 🌙 Background Listener (Mobile only typically, for web it uses service workers)

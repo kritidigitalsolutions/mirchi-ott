@@ -34,7 +34,7 @@ class _AutoSliderState extends State<AutoSlider> {
     int startingPage = widget.content.isNotEmpty ? 1000 - (1000 % widget.content.length) : 0;
     
     _pageController = PageController(
-      viewportFraction: Responsive.isDesktop(Get.context!) ? 0.92 : 0.85,
+      viewportFraction: Responsive.isDesktop(Get.context!) ? 0.88 : 0.76,
       initialPage: startingPage,
     );
     currentPage = startingPage;
@@ -98,7 +98,7 @@ class _AutoSliderState extends State<AutoSlider> {
           SizedBox(
             height: isDesktop
                 ? MediaQuery.of(context).size.height * 0.8
-                : MediaQuery.of(context).size.height * 0.40,
+                : MediaQuery.of(context).size.height * 0.45,
             child: PageView.builder(
               controller: _pageController,
               itemCount: null,

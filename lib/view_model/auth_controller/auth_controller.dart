@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import '../../app/routes/app_routes.dart';
 import '../../data/repositories/auth_repository.dart';
 import '../../data/network/api_network_service.dart';
@@ -20,6 +21,8 @@ import '../../utils/firebase_analytics_service.dart';
 class AuthController extends GetxController {
   static const String _googleWebClientId =
       '399081225701-gir0j3n161vkhk0dlrlkf9qccgv7e0gj.apps.googleusercontent.com';
+  static const String _googleIosClientId =
+      '399081225701-ureoit7vu43tftg05rkdo64m76v3ahda.apps.googleusercontent.com';
 
   late final GoogleSignIn _googleSignIn;
   StreamSubscription<GoogleSignInAccount?>? _googleSignInSubscription;
@@ -49,7 +52,18 @@ class AuthController extends GetxController {
     isLoggedIn.value = AppSession.getLogin();
     var saved = storage.read('user_data');
     if (saved != null) {
-      userData.value = Map<String, dynamic>.from(saved);
+      Map<String, dynamic> userMap = Map<String, dynamic>.from(saved);
+      String? currentName = userMap['name'] ?? userMap['fullName'];
+      String userEmail = userMap['email']?.toString() ?? "";
+      if (_isGenericName(currentName) && userEmail.isNotEmpty) {
+        String cleanName = _formatNameFromEmail(userEmail);
+        if (cleanName.isNotEmpty) {
+          userMap['name'] = cleanName;
+          userMap['fullName'] = cleanName;
+          storage.write('user_data', userMap);
+        }
+      }
+      userData.value = userMap;
     }
 
     // Set initial token from session if available
@@ -69,8 +83,8 @@ class AuthController extends GetxController {
 
   void _configureGoogleSignIn() {
     _googleSignIn = GoogleSignIn(
-      clientId: kIsWeb ? _googleWebClientId : null,
-      serverClientId: kIsWeb ? null : _googleWebClientId,
+      clientId: kIsWeb ? _googleWebClientId : (GetPlatform.isIOS ? _googleIosClientId : null),
+      serverClientId: _googleWebClientId,
     );
 
     if (kIsWeb) {
@@ -298,6 +312,7 @@ class AuthController extends GetxController {
 
   Future<void> loginWithApple() async {
     isLoading.value = true;
+    isAppleLoading.value = true;
     try {
       final credential = await SignInWithApple.getAppleIDCredential(
         scopes: [
@@ -306,14 +321,31 @@ class AuthController extends GetxController {
         ],
       );
 
-      final response = await repository.appleLogin({
-        "idToken": credential.identityToken,
-        "provider": "apple",
-        "email": credential.email,
-        "fullName": credential.givenName != null
-            ? "${credential.givenName} ${credential.familyName}"
-            : null,
-      });
+      String? name;
+      if ((credential.givenName != null && credential.givenName!.trim().isNotEmpty) ||
+          (credential.familyName != null && credential.familyName!.trim().isNotEmpty)) {
+        name = "${credential.givenName ?? ''} ${credential.familyName ?? ''}".trim();
+      }
+
+      String? fcmToken;
+      try {
+        if (!kIsWeb) {
+          fcmToken = await FirebaseMessaging.instance.getToken();
+        }
+      } catch (e) {
+        debugPrint("⚠️ Failed to fetch FCM token for Apple login: $e");
+      }
+
+      final Map<String, dynamic> appleData = {
+        "identityToken": credential.identityToken,
+        if (name != null && name.isNotEmpty) "name": name,
+        if (name != null && name.isNotEmpty) "fullName": name,
+        if (credential.email != null && credential.email!.isNotEmpty) "email": credential.email,
+        if (fcmToken != null && fcmToken.isNotEmpty) "fcmToken": fcmToken,
+      };
+
+      debugPrint("🚀 Sending Apple login payload: $appleData");
+      final response = await repository.appleLogin(appleData);
 
       final data = VerifyOtpResponse.fromJson(response);
       if (data.success == true) {
@@ -322,33 +354,56 @@ class AuthController extends GetxController {
           _updateGlobalToken(data.token!);
         }
 
-        if (data.user != null) {
-          userData.value = data.user;
-          await storage.write('user_data', data.user);
+        Map<String, dynamic> userMap = Map<String, dynamic>.from(data.user ?? {});
+        
+        String userEmail = userMap['email'] ?? credential.email ?? "";
+        String? existingName = userMap['name'] ?? userMap['fullName'];
+        
+        bool isGenericName = existingName == null ||
+            existingName.toString().trim().isEmpty ||
+            existingName.toString().trim().toLowerCase() == "user" ||
+            existingName.toString().trim().toLowerCase() == "user name" ||
+            existingName.toString().trim().toLowerCase() == "null" ||
+            existingName.toString().trim().toLowerCase() == "n/a" ||
+            existingName.toString().trim().toLowerCase() == "guest";
+
+        String finalName = "";
+        if (!isGenericName) {
+          finalName = existingName.toString().trim();
+        } else if (name != null && name.trim().isNotEmpty) {
+          finalName = name.trim();
+        } else if (userEmail.isNotEmpty) {
+          finalName = _formatNameFromEmail(userEmail);
         }
 
-        if (data.user?['fullName'] != null &&
-            data.user!['fullName']!.isNotEmpty) {
-          nameController.text = data.user!['fullName']!;
-        } else if (credential.givenName != null) {
-          nameController.text =
-              "${credential.givenName} ${credential.familyName}";
+        if (finalName.isNotEmpty) {
+          userMap['name'] = finalName;
+          userMap['fullName'] = finalName;
+          nameController.text = finalName;
+
+          // 🔥 Persist full name to backend DB if backend returned generic name "User" or if new user
+          if (data.isNewUser || isGenericName) {
+            try {
+              debugPrint("🚀 Automatically persisting full name '$finalName' to backend database...");
+              await repository.updateProfile(name: finalName);
+            } catch (e) {
+              debugPrint("⚠️ Profile update to backend note: $e");
+            }
+          }
         }
+
+        userData.value = userMap;
+        await storage.write('user_data', userMap);
 
         _syncNotificationsAfterLogin();
-        await _syncNumericPhoneIfNeeded(data.user);
+        await _syncNumericPhoneIfNeeded(userMap);
 
         FacebookEventsService.logLogin(method: "apple");
         FirebaseAnalyticsService.logLogin(method: "apple");
 
-        if (data.isNewUser) {
-          if (nameController.text.trim().length < 3) {
-            Get.offAllNamed(AppRoutes.createProfile,
-                arguments: data.user?['email'] ?? "");
-          } else {
-            setLoginStatus(true);
-            Get.offAllNamed(AppRoutes.navbar);
-          }
+        if (data.isNewUser || isGenericName) {
+          debugPrint("👤 Directing user to Create Profile screen to enter/confirm name...");
+          Get.offAllNamed(AppRoutes.createProfile, arguments: userEmail);
         } else {
           setLoginStatus(true);
           Get.offAllNamed(AppRoutes.navbar);
@@ -371,6 +426,7 @@ class AuthController extends GetxController {
       }
     } finally {
       isLoading.value = false;
+      isAppleLoading.value = false;
     }
   }
 
@@ -440,8 +496,9 @@ class AuthController extends GetxController {
       return false;
     } catch (e) {
       if (e.toString().contains("Profile already completed")) {
-        // If profile exists, at least update the phone number if provided
-        await updatePhoneNumber(phone);
+        // If profile exists, update name and phone
+        await repository.updateProfile(phone: phone, name: name);
+        await getProfile();
         setLoginStatus(true);
         return true;
       }
@@ -471,8 +528,24 @@ class AuthController extends GetxController {
     try {
       final response = await repository.getProfile();
       if (response != null && response['user'] != null) {
-        userData.value = Map<String, dynamic>.from(response['user']);
-        await storage.write('user_data', userData.value);
+        Map<String, dynamic> userMap = Map<String, dynamic>.from(response['user']);
+        
+        String? currentName = userMap['name'] ?? userMap['fullName'];
+        String userEmail = userMap['email']?.toString() ?? "";
+        
+        if (_isGenericName(currentName) && userEmail.isNotEmpty) {
+          String cleanName = _formatNameFromEmail(userEmail);
+          if (cleanName.isNotEmpty) {
+            userMap['name'] = cleanName;
+            userMap['fullName'] = cleanName;
+          }
+        } else if ((userMap['name'] == null || userMap['name'].toString().trim().isEmpty) &&
+            userMap['fullName'] != null && userMap['fullName'].toString().trim().isNotEmpty) {
+          userMap['name'] = userMap['fullName'];
+        }
+        
+        userData.value = userMap;
+        await storage.write('user_data', userMap);
       }
     } catch (e) {
       print("❌ Error fetching profile: $e");
@@ -497,6 +570,23 @@ class AuthController extends GetxController {
     if (Get.isRegistered<NotificationService>()) {
       NotificationService.to.clearNotifications();
     }
+  }
+
+  bool _isGenericName(String? name) {
+    if (name == null) return true;
+    String s = name.trim().toLowerCase();
+    return s.isEmpty || s == "user" || s == "user name" || s == "null" || s == "n/a" || s == "guest";
+  }
+
+  String _formatNameFromEmail(String email) {
+    if (!email.contains('@')) return '';
+    String local = email.split('@')[0];
+    local = local.replaceAll(RegExp(r'\d+$'), '');
+    local = local.replaceAll(RegExp(r'[\._\-\d]+'), ' ').trim();
+    if (local.isEmpty) return '';
+    return local.split(' ').where((s) => s.isNotEmpty).map((word) {
+      return word[0].toUpperCase() + word.substring(1).toLowerCase();
+    }).join(' ');
   }
 
   Future<void> _syncNumericPhoneIfNeeded(Map<String, dynamic>? user) async {

@@ -73,18 +73,19 @@ class DownloadsPage extends StatelessWidget {
 
             return Container(
               margin: const EdgeInsets.only(bottom: 12),
-              decoration: BoxDecoration(
+              child: Material(
                 color: Colors.grey[900],
                 borderRadius: BorderRadius.circular(12),
-              ),
-              child: ListTile(
+                clipBehavior: Clip.antiAlias,
+                child: ListTile(
                 contentPadding: const EdgeInsets.all(10),
 
                 /// 🎬 PLAY OFFLINE ON TAP
-                onTap: () {
-                  if (localPath != null && File(localPath).existsSync()) {
+                onTap: () async {
+                  final resolvedPath = await downloadController.getLocalPath(item.id);
+                  if (resolvedPath != null && File(resolvedPath).existsSync()) {
                     Get.toNamed(AppRoutes.videoPlayer, arguments: {
-                      'url': localPath,
+                      'url': resolvedPath,
                       'title': item.title,
                     });
                   } else {
@@ -134,10 +135,11 @@ class DownloadsPage extends StatelessWidget {
                         color: Colors.green,
                         size: 28,
                       ),
-                      onPressed: () {
-                        if (localPath != null && File(localPath).existsSync()) {
+                      onPressed: () async {
+                        final resolvedPath = await downloadController.getLocalPath(item.id);
+                        if (resolvedPath != null && File(resolvedPath).existsSync()) {
                           Get.toNamed(AppRoutes.videoPlayer, arguments: {
-                            'url': localPath,
+                            'url': resolvedPath,
                             'title': item.title,
                           });
                         } else {
@@ -183,7 +185,7 @@ class DownloadsPage extends StatelessWidget {
                   ],
                 ),
               ),
-            );
+            ));
           },
         );
       }),

@@ -99,21 +99,29 @@ class _GoPremiumPageState extends State<GoPremiumPage> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isIOS = defaultTargetPlatform == TargetPlatform.iOS;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: Responsive.backButton(context, onPressed: () => Get.back()),
-        title: const Text(
-          "Premium Plans",
-          style: TextStyle(color: AppColors.white, fontWeight: FontWeight.bold),
+        title: Text(
+          isIOS ? "Account & Premium" : "Premium Plans",
+          style: const TextStyle(color: AppColors.white, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
       ),
       body: Obx(() {
         if (controller.isLoading.value) {
           return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+        }
+
+        if (isIOS) {
+          return SingleChildScrollView(
+            child: _buildIOSManageAccountView(),
+          );
         }
 
         return Column(
@@ -194,6 +202,56 @@ class _GoPremiumPageState extends State<GoPremiumPage> {
           ],
         );
       }),
+    );
+  }
+
+  Widget _buildIOSManageAccountView() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+      child: Column(
+        children: [
+          const Icon(Icons.stars, color: Colors.amber, size: 60),
+          const SizedBox(height: 15),
+          const Text(
+            "Account Details",
+            style: TextStyle(
+              color: AppColors.white,
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 10),
+          const Text(
+            "Your account status and options are managed through our website. Tap below to access your account on mirchiapp.in.",
+            textAlign: TextAlign.center,
+            style: TextStyle(color: AppColors.grey, fontSize: 14, height: 1.4),
+          ),
+          const SizedBox(height: 30),
+          _buildFeaturesList(),
+          const SizedBox(height: 40),
+          SizedBox(
+            width: double.infinity,
+            height: 50,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.buttonColor,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+              onPressed: () {
+                if (!controller.isUserLoggedIn.value) {
+                  Get.toNamed(AppRoutes.signIn);
+                } else {
+                  controller.redirectToIOSWebAccount();
+                }
+              },
+              child: Text(
+                controller.isUserLoggedIn.value ? "MANAGE YOUR ACCOUNT" : "SIGN IN TO MANAGE ACCOUNT",
+                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 

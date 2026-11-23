@@ -22,8 +22,16 @@ import '../data/models/response_model/content_response_model/content_model.dart'
 class NotificationService extends GetxController {
   static NotificationService get to => Get.find();
 
-  // Lazy initialization for Firebase components to avoid crashes on non-configured platforms
-  FirebaseMessaging get _firebaseMessaging => FirebaseMessaging.instance;
+  // Safe getter for Firebase Messaging
+  FirebaseMessaging get _firebaseMessaging {
+    try {
+      return FirebaseMessaging.instance;
+    } catch (e) {
+      print("⚠️ Firebase Messaging instance error: $e");
+      // Fallback: Try to initialize if possible, but instance is sync
+      rethrow;
+    }
+  }
   final FlutterLocalNotificationsPlugin _localNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
@@ -69,8 +77,25 @@ class NotificationService extends GetxController {
     /// 🔔 Initialize Local Notifications
     const AndroidInitializationSettings androidSettings =
         AndroidInitializationSettings('@mipmap/ic_launcher');
+    
+    const DarwinInitializationSettings iosSettings = DarwinInitializationSettings(
+      requestAlertPermission: true,
+      requestBadgePermission: true,
+      requestSoundPermission: true,
+    );
+
     const InitializationSettings initSettings =
-        InitializationSettings(android: androidSettings);
+        InitializationSettings(
+      android: androidSettings,
+      iOS: iosSettings,
+    );
+
+    /// 🔥 Set foreground notification options for iOS
+    await _firebaseMessaging.setForegroundNotificationPresentationOptions(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
 
     await _localNotificationsPlugin.initialize(
       initSettings,
@@ -155,6 +180,12 @@ class NotificationService extends GetxController {
   Future<void> uploadToken() async {
     if (GetPlatform.isWeb) return;
     try {
+      // 🛡️ Robust check: Ensure Firebase is initialized before proceeding
+      if (Firebase.apps.isEmpty) {
+        print("🔍 Firebase not initialized, attempting to initialize in uploadToken...");
+        await Firebase.initializeApp();
+      }
+
       final authController = Get.find<AuthController>();
       if (!authController.isLoggedIn.value) {
         print("⏭️ FCM Token upload skipped: User not logged in");

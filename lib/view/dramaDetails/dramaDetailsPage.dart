@@ -50,19 +50,23 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
   @override
   void initState() {
     super.initState();
-    interactionController.fetchStatus(widget.content.id);
-    
-    // ✅ Optimization: Fetch subscription status only when viewing content
-    if (authController.isLoggedIn.value) {
-      premiumController.fetchSubscriptionStatus();
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        interactionController.fetchStatus(widget.content.id);
+        
+        // ✅ Optimization: Fetch subscription status only when viewing content
+        if (authController.isLoggedIn.value) {
+          premiumController.fetchSubscriptionStatus();
+        }
 
-    if (authController.isLoggedIn.value && watchlistController.watchlist.isEmpty) {
-      watchlistController.getWatchlist();
-    }
-    if (widget.content.contentType == 'series') {
-      contentController.fetchEpisodes(widget.content.id);
-    }
+        if (authController.isLoggedIn.value && watchlistController.watchlist.isEmpty) {
+          watchlistController.getWatchlist();
+        }
+        if (widget.content.contentType == 'series') {
+          contentController.fetchEpisodes(widget.content.id);
+        }
+      }
+    });
 
     // Log Meta & Firebase ViewContent Event
     FacebookEventsService.logViewContent(
@@ -383,7 +387,7 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
             title: "Error", message: "Video URL not found", isError: true);
       }
     } else {
-      Get.toNamed(AppRoutes.goPremium);
+      premiumController.navigateToPremiumOrManageAccount(context);
     }
   }
 
@@ -425,7 +429,7 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
           _circleActionBtn(
             icon: watchlistController.isInWatchlist(contentId) ? Icons.check : Icons.add,
             label: "Watchlist",
-            onTap: () {
+            onTap: (_) {
               if (!userLoggedIn) {
                 Get.toNamed(AppRoutes.signIn);
               } else {
@@ -437,7 +441,7 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
           _circleActionBtn(
             icon: interactionController.isLiked(contentId) ? Icons.thumb_up : Icons.thumb_up_outlined,
             label: "Like",
-            onTap: () {
+            onTap: (_) {
               if (!userLoggedIn) {
                 Get.toNamed(AppRoutes.signIn);
               } else {
@@ -449,11 +453,17 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
           _circleActionBtn(
             icon: Icons.share_outlined,
             label: "Share",
-            onTap: () {
+            onTap: (btnContext) {
               if (!userLoggedIn) {
                 Get.toNamed(AppRoutes.signIn);
               } else {
-                ShareService.shareContent(title: widget.content.title, imageUrl: widget.content.poster);
+                final RenderBox? box = btnContext.findRenderObject() as RenderBox?;
+                final Rect? rect = box != null ? box.localToGlobal(Offset.zero) & box.size : null;
+                ShareService.shareContent(
+                  title: widget.content.title, 
+                  imageUrl: widget.content.poster,
+                  sharePositionOrigin: rect,
+                );
               }
             },
           ),
@@ -462,9 +472,9 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
     });
   }
 
-  Widget _circleActionBtn({required IconData icon, required String label, required VoidCallback onTap}) {
+  Widget _circleActionBtn({required IconData icon, required String label, required void Function(BuildContext) onTap}) {
     return InkWell(
-      onTap: onTap,
+      onTap: () => onTap(context),
       child: Column(
         children: [
           Container(
@@ -852,6 +862,10 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
   }
 
   void _showSubscriptionDialog(BuildContext context) {
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      premiumController.navigateToPremiumOrManageAccount(context);
+      return;
+    }
     bool isDesktop = Responsive.isDesktop(context);
     Get.dialog(
       Dialog(
@@ -892,7 +906,7 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
                         ),
                         onPressed: () {
                           Get.back();
-                          Get.toNamed(AppRoutes.goPremium);
+                          premiumController.navigateToPremiumOrManageAccount(context);
                         },
                         child: const Text("EXPLORE PLANS", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                       ),

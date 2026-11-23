@@ -71,21 +71,31 @@ class VideoController extends GetxController {
   /// 🛠 Internal setup for Controller
   Future<void> _setupController(String url) async {
     try {
+      debugPrint("🎬 Initializing video with URL: $url");
       final oldController = videoPlayerController;
       
       if (!kIsWeb && !url.startsWith('http')) {
+        debugPrint("📂 Local file detected");
         // It's a local file path
         final file = File(url);
+        if (!file.existsSync()) {
+          debugPrint("❌ File does not exist: $url");
+          throw Exception("Offline file not found at: $url");
+        }
+        
+        debugPrint("📄 File size: ${file.lengthSync()} bytes");
+
         if (url.toLowerCase().contains('.m3u8')) {
-          // For local HLS, use networkUrl with file scheme and HLS hint
-          videoPlayerController = VideoPlayerController.networkUrl(
-            Uri.file(file.path),
-            formatHint: VideoFormat.hls,
-          );
+          debugPrint("📺 Local HLS detected");
+          
+          // Try standard file controller first as it sometimes handles the resolution better
+          videoPlayerController = VideoPlayerController.file(file);
         } else {
+          debugPrint("🎞 Local MP4 detected");
           videoPlayerController = VideoPlayerController.file(file);
         }
       } else {
+        debugPrint("🌐 Remote URL detected");
         VideoFormat? format;
         if (url.toLowerCase().contains(".m3u8")) {
           format = VideoFormat.hls;
@@ -125,9 +135,26 @@ class VideoController extends GetxController {
       _startHideTimer();
     } catch (e) {
       debugPrint("Video Player Error: $e");
-      // If Auto fails, maybe one of the quality links works? 
-      // Or show an error to user.
-      isInitialized.value = true; // Stop showing loader to allow error state or retry
+      
+      // Import the snackbar if not already present, or use standard Get.snackbar
+      // Since this is a view model, we can use a custom snackbar if available.
+      // We already know CustomSnackbar exists in the project.
+      
+      // Fallback message
+      String message = "Failed to load video";
+      if (e.toString().contains("file not found")) {
+        message = "Offline file not found. Please download again.";
+      }
+
+      Get.snackbar(
+        "Playback Error",
+        message,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: const Color(0xFFD32F2F),
+        colorText: const Color(0xFFFFFFFF),
+      );
+
+      isInitialized.value = true; // Stop showing loader
     }
   }
 

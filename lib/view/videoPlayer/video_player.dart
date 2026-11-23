@@ -145,11 +145,17 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.share, color: Colors.white),
-                    onPressed: () {
-                      Share.share(widget.url);
-                    },
+                  Builder(
+                    builder: (btnContext) {
+                      return IconButton(
+                        icon: const Icon(Icons.share, color: Colors.white),
+                        onPressed: () {
+                          final RenderBox? box = btnContext.findRenderObject() as RenderBox?;
+                          final Rect? rect = box != null ? box.localToGlobal(Offset.zero) & box.size : null;
+                          Share.share(widget.url, sharePositionOrigin: rect);
+                        },
+                      );
+                    }
                   ),
                 ],
               ),

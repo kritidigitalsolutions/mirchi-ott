@@ -1,10 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mirchi_ott/utils/responsive.dart';
-import '../../app/routes/app_routes.dart';
 import '../../app/theme/app_colors.dart';
 import '../../view_model/primium_controller/premium_controller.dart';
-import '../premium/goPremium.dart';
 
 class PurchasedPlansPage extends StatelessWidget {
   const PurchasedPlansPage({super.key});
@@ -30,7 +29,7 @@ class PurchasedPlansPage extends StatelessWidget {
         final bool hasActiveSub = sub != null && sub['status'] == 'active';
 
         if (!hasActiveSub) {
-          return _buildNoPlanView();
+          return _buildNoPlanView(context);
         }
 
         return SingleChildScrollView(
@@ -62,10 +61,10 @@ class PurchasedPlansPage extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 15),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
-                  onPressed: () => Get.toNamed(AppRoutes.goPremium),
-                  child: const Text(
-                    "UPGRADE OR RENEW PLAN",
-                    style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
+                  onPressed: () => controller.navigateToPremiumOrManageAccount(context),
+                  child: Text(
+                    defaultTargetPlatform == TargetPlatform.iOS ? "MANAGE ACCOUNT" : "UPGRADE OR RENEW PLAN",
+                    style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
@@ -169,7 +168,8 @@ class PurchasedPlansPage extends StatelessWidget {
     );
   }
 
-  Widget _buildNoPlanView() {
+  Widget _buildNoPlanView(BuildContext context) {
+    final controller = Get.find<PremiumController>();
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(30),
@@ -183,10 +183,12 @@ class PurchasedPlansPage extends StatelessWidget {
               style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
-            const Text(
-              "You haven't purchased any plan yet. Subscribe now to enjoy premium content.",
+            Text(
+              defaultTargetPlatform == TargetPlatform.iOS
+                  ? "Manage your account status and options on our website."
+                  : "You haven't purchased any plan yet. Subscribe now to enjoy premium content.",
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey, fontSize: 14),
+              style: const TextStyle(color: Colors.grey, fontSize: 14),
             ),
             const SizedBox(height: 30),
             SizedBox(
@@ -197,8 +199,11 @@ class PurchasedPlansPage extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(vertical: 15),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-                onPressed: () => Get.toNamed(AppRoutes.goPremium),
-                child: const Text("VIEW PLANS", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                onPressed: () => controller.navigateToPremiumOrManageAccount(context),
+                child: Text(
+                  defaultTargetPlatform == TargetPlatform.iOS ? "MANAGE ACCOUNT" : "VIEW PLANS",
+                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                ),
               ),
             ),
           ],

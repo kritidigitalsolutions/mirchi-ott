@@ -28,7 +28,7 @@
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>fb1944672236921270</string>
-				<string>YOUR_REVERSED_CLIENT_ID</string>
+				<string>com.googleusercontent.apps.399081225701-ureoit7vu43tftg05rkdo64m76v3ahda</string>
 			</array>
 		</dict>
 	</array>
@@ -40,6 +40,10 @@
 	<string>f4910f08ad31813c174099b8588dae9e</string>
 	<key>FacebookDisplayName</key>
 	<string>Mirchi OTT</string>
+	<key>FirebaseAppDelegateProxyEnabled</key>
+	<true/>
+	<key>GIDClientID</key>
+	<string>399081225701-ureoit7vu43tftg05rkdo64m76v3ahda.apps.googleusercontent.com</string>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>fbapi</string>
@@ -84,6 +88,11 @@
 	</dict>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+		<string>remote-notification</string>
+	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

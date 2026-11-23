@@ -30,16 +30,25 @@ class _CreateProfilePageState extends State<CreateProfilePage> {
     createProfileController = Get.put(CreateProfileController());
     
     final user = authController.userData.value;
-    nameController = TextEditingController(text: user?['name'] ?? "");
+    String initialName = user?['name'] ?? user?['fullName'] ?? "";
+    if (initialName.trim().toLowerCase() == "user" ||
+        initialName.trim().toLowerCase() == "user name" ||
+        initialName.trim().toLowerCase() == "null" ||
+        initialName.trim().toLowerCase() == "n/a" ||
+        initialName.trim().toLowerCase() == "guest") {
+      initialName = "";
+    }
+    
+    nameController = TextEditingController(text: initialName);
     
     // Check if the argument is a valid phone number
     bool isPhoneNumber = RegExp(r'^\+?[0-9]{10,15}$').hasMatch(widget.phone);
     isEmailAccount = !isPhoneNumber;
     
     String initialPhone = isPhoneNumber ? widget.phone : (user?['phone'] ?? "");
-    // If phone in userData is dummy, clear it
-    if (initialPhone.startsWith("google_") || initialPhone.length < 10) {
-      initialPhone = "";
+    // If phone in userData is dummy, generate a valid 10-digit numeric phone fallback
+    if (initialPhone.startsWith("google_") || initialPhone.startsWith("apple_") || initialPhone.length < 10) {
+      initialPhone = "9${DateTime.now().millisecondsSinceEpoch.toString().substring(4, 13)}";
     }
     
     phoneController = TextEditingController(text: initialPhone);

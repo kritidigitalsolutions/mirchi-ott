@@ -154,9 +154,6 @@ class NetworkApiService extends BaseApiService {
       final response = await _dio.post(
         url,
         data: formData,
-        options: Options(
-          headers: {"Content-Type": "multipart/form-data"},
-        ),
       );
       return returnResponse(response);
     } on DioException catch (e) {

@@ -28,7 +28,7 @@ class ProfilePage extends StatelessWidget {
     bool isDesktop = Responsive.isDesktop(context);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (authController.userData.value == null) {
+      if (authController.isLoggedIn.value) {
         authController.getProfile();
       }
       if (authController.isLoggedIn.value && premiumController.subscriptionData.value == null) {
@@ -142,7 +142,7 @@ class ProfilePage extends StatelessWidget {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        user?['name'] ?? "User Name",
+                                        _getUserDisplayName(user),
                                         style: const TextStyle(color: AppColors.white, fontSize: 16, fontWeight: FontWeight.bold),
                                       ),
                                       const SizedBox(height: 4),
@@ -180,7 +180,7 @@ class ProfilePage extends StatelessWidget {
                               if (hasActiveSub) {
                                 Get.toNamed(AppRoutes.purchasedPlans);
                               } else {
-                                Get.toNamed(AppRoutes.goPremium);
+                                premiumController.navigateToPremiumOrManageAccount(context);
                               }
                             },
                             child: Padding(
@@ -190,13 +190,15 @@ class ProfilePage extends StatelessWidget {
                                   Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      const Text(
-                                        "My Plan",
-                                        style: TextStyle(color: AppColors.grey, fontSize: 12, fontWeight: FontWeight.w500),
+                                      Text(
+                                        defaultTargetPlatform == TargetPlatform.iOS ? "My Account" : "My Plan",
+                                        style: const TextStyle(color: AppColors.grey, fontSize: 12, fontWeight: FontWeight.w500),
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
-                                        hasActiveSub ? (sub['plan']?['name'] ?? "Active Plan") : "No Active Plans",
+                                        hasActiveSub
+                                            ? (sub['plan']?['name'] ?? "Active Account")
+                                            : (defaultTargetPlatform == TargetPlatform.iOS ? "Manage Account" : "No Active Plans"),
                                         style: const TextStyle(color: AppColors.white, fontSize: 16, fontWeight: FontWeight.bold),
                                       ),
                                     ],
@@ -209,7 +211,10 @@ class ProfilePage extends StatelessWidget {
                                         color: AppColors.buttonColor,
                                         borderRadius: BorderRadius.circular(8),
                                       ),
-                                      child: const Text("SUBSCRIBE", style: TextStyle(color: AppColors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                                      child: Text(
+                                        defaultTargetPlatform == TargetPlatform.iOS ? "MANAGE" : "SUBSCRIBE",
+                                        style: const TextStyle(color: AppColors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                                      ),
                                     )
                                   else
                                     const Icon(Icons.verified, color: Colors.green, size: 24),
@@ -280,5 +285,32 @@ class ProfilePage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _getUserDisplayName(Map<String, dynamic>? user) {
+    if (user == null) return "User Name";
+    String? name = user['name'] ?? user['fullName'];
+    if (name != null &&
+        name.toString().trim().isNotEmpty &&
+        !_isGenericName(name.toString())) {
+      return name.toString().trim();
+    }
+    String email = user['email']?.toString() ?? "";
+    if (email.contains('@')) {
+      String local = email.split('@')[0];
+      local = local.replaceAll(RegExp(r'\d+$'), '');
+      local = local.replaceAll(RegExp(r'[\._\-\d]+'), ' ').trim();
+      if (local.isNotEmpty) {
+        return local.split(' ').where((s) => s.isNotEmpty).map((w) {
+          return w[0].toUpperCase() + w.substring(1).toLowerCase();
+        }).join(' ');
+      }
+    }
+    return "User Name";
+  }
+
+  bool _isGenericName(String name) {
+    String s = name.trim().toLowerCase();
+    return s.isEmpty || s == "user" || s == "user name" || s == "null" || s == "n/a" || s == "guest";
   }
 }

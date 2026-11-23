@@ -219,8 +219,9 @@ class PremiumController extends GetxController with WidgetsBindingObserver {
       return;
     }
     
-    // Redirect immediately to payment without confirmation popup
-    if (kIsWeb) {
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      redirectToIOSWebAccount();
+    } else if (kIsWeb) {
       initiateSabPaisaWebPayment(planId);
     } else {
       startSabPaisaPayment(planId);
@@ -446,6 +447,101 @@ class PremiumController extends GetxController with WidgetsBindingObserver {
       return DateFormat('dd MMM yyyy').format(date);
     } catch (e) {
       return "N/A";
+    }
+  }
+
+  /// Navigates to GoPremium page on Android/Web, or shows Manage Account dialog on iOS
+  void navigateToPremiumOrManageAccount(BuildContext context) {
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      if (!isUserLoggedIn.value) {
+        Get.toNamed(AppRoutes.signIn);
+      } else {
+        showIOSManageAccountDialog(context);
+      }
+    } else {
+      Get.toNamed(AppRoutes.goPremium);
+    }
+  }
+
+  /// Displays an Apple-compliant Manage Account dialog for iOS
+  void showIOSManageAccountDialog(BuildContext context) {
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        backgroundColor: Colors.grey[900],
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.manage_accounts_rounded, color: AppColors.primary, size: 56),
+              const SizedBox(height: 16),
+              const Text(
+                "Manage Account",
+                style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+              const Text(
+                "To manage your account settings and access options, please visit our website. Tapping below will redirect you to your account on mirchiapp.in with your current login.",
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.white70, fontSize: 14, height: 1.4),
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.buttonColor,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                  onPressed: () {
+                    Get.back();
+                    redirectToIOSWebAccount();
+                  },
+                  child: const Text(
+                    "MANAGE YOUR ACCOUNT",
+                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextButton(
+                onPressed: () => Get.back(),
+                child: const Text("CANCEL", style: TextStyle(color: Colors.white54)),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Redirects iOS user to web account with auto-login token
+  Future<void> redirectToIOSWebAccount() async {
+    try {
+      final token = AppSession.getToken() ?? "";
+      const String baseUrl = "https://mirchiapp.in";
+      final Uri uri = Uri.parse("$baseUrl/go-premium").replace(queryParameters: {
+        'token': token,
+        'source': 'ios_app',
+      });
+
+      _expectingPaymentSuccess = true;
+      GetStorage().write('expecting_payment', true);
+
+      debugPrint("🚀 iOS Redirecting to Web Account: $uri");
+      final bool launched = await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
+
+      if (!launched) {
+        CustomSnackbar.show(title: "Error", message: "Could not open website", isError: true);
+      }
+    } catch (e) {
+      debugPrint("❌ iOS Redirection Error: $e");
+      CustomSnackbar.show(title: "Error", message: "Something went wrong opening the website", isError: true);
     }
   }
 }
