@@ -1,6 +1,6 @@
 class AppConstants {
-  // static const String serverUrl = 'http://192.168.1.4:5001';
-  static const String serverUrl = 'https://api.mirchiapp.in';
+  static const String serverUrl = 'http://192.168.1.9:5001';
+  // static const String serverUrl = 'https://api.mirchiapp.in';
   static const String webUrl = 'https://mirchiapp.in';
   static const String baseUrl = '$serverUrl/api';
 
@@ -81,6 +81,13 @@ class AppConstants {
 
   /// voucher
   static const String redeemVoucher = '$baseUrl/voucher/redeem';
+
+  /// watch tracking
+  static const String watchStart = '$baseUrl/watch/start';
+  static const String watchProgress = '$baseUrl/watch/progress';
+  static const String watchShare = '$baseUrl/watch/share';
+  static String watchContinue({int limit = 20}) =>
+      '$baseUrl/watch/continue?limit=$limit';
 
   /// Meta Ads
   static const String metaAppId = '1944672236921270';

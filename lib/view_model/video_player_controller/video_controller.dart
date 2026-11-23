@@ -5,9 +5,14 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:video_player/video_player.dart';
 import 'package:http/http.dart' as http;
+import '../analytics_controller/analytics_controller.dart';
 
 class VideoController extends GetxController {
   VideoPlayerController? videoPlayerController;
+
+  // Watch tracking IDs
+  String? currentEpisodeId;
+  String? currentSeriesId;
 
   var isInitialized = false.obs;
   var isPlaying = false.obs;
@@ -25,7 +30,6 @@ class VideoController extends GetxController {
   // --- Quality Features ---
   var availableQualities = <String, String>{}.obs;
   var selectedQuality = "Auto".obs;
-  String? _mainUrl;
 
   /// 🔥 HEADERS to bypass 403 Forbidden
   /// Using a Mobile User-Agent often works better for Android apps
@@ -46,9 +50,15 @@ class VideoController extends GetxController {
   }
 
   /// 🔥 INIT
-  Future<void> initializeVideo(String url, {Map<String, String>? qualities}) async {
+  Future<void> initializeVideo(
+    String url, {
+    Map<String, String>? qualities,
+    String? episodeId,
+    String? seriesId,
+  }) async {
     isInitialized.value = false;
-    _mainUrl = url;
+    currentEpisodeId = episodeId;
+    currentSeriesId = seriesId;
     selectedQuality.value = "Auto";
     availableQualities.clear();
     
@@ -133,6 +143,16 @@ class VideoController extends GetxController {
 
       videoPlayerController!.addListener(_videoListener);
       _startHideTimer();
+
+      // 🎬 Start Watch Tracking if episodeId is provided
+      if (currentEpisodeId != null && currentEpisodeId!.isNotEmpty) {
+        if (Get.isRegistered<AnalyticsController>()) {
+          AnalyticsController.to.startWatching(
+            episodeId: currentEpisodeId!,
+            durationSec: totalDuration.value.inSeconds,
+          );
+        }
+      }
     } catch (e) {
       debugPrint("Video Player Error: $e");
       
@@ -265,6 +285,19 @@ class VideoController extends GetxController {
     if (value.duration != Duration.zero) {
       totalDuration.value = value.duration;
     }
+
+    // 💓 Update watch tracking progress
+    if (Get.isRegistered<AnalyticsController>()) {
+      AnalyticsController.to.updatePosition(value.position.inSeconds);
+
+      // Detect episode end
+      if (value.duration > Duration.zero &&
+          value.position >= value.duration) {
+        AnalyticsController.to.onEpisodeEnd(
+          positionSec: value.duration.inSeconds,
+        );
+      }
+    }
     
     // Handle playback error during stream
     if (value.hasError) {
@@ -309,7 +342,18 @@ class VideoController extends GetxController {
   void togglePlay() {
     final c = videoPlayerController;
     if (c == null) return;
-    c.value.isPlaying ? c.pause() : {c.play(), _startHideTimer()};
+    if (c.value.isPlaying) {
+      c.pause();
+      if (Get.isRegistered<AnalyticsController>()) {
+        AnalyticsController.to.onPause(positionSec: c.value.position.inSeconds);
+      }
+    } else {
+      c.play();
+      _startHideTimer();
+      if (Get.isRegistered<AnalyticsController>()) {
+        AnalyticsController.to.onPlay();
+      }
+    }
   }
 
   void toggleControls() {
@@ -327,8 +371,12 @@ class VideoController extends GetxController {
     if (c == null) return;
     final duration = c.value.duration;
     if (duration.inSeconds == 0) return;
-    c.seekTo(Duration(seconds: (duration.inSeconds * value).toInt()));
+    final targetSec = (duration.inSeconds * value).toInt();
+    c.seekTo(Duration(seconds: targetSec));
     _startHideTimer();
+    if (Get.isRegistered<AnalyticsController>()) {
+      AnalyticsController.to.onSeek(targetSec);
+    }
   }
 
   void setPlaybackSpeed(double speed) {
@@ -344,6 +392,11 @@ class VideoController extends GetxController {
   @override
   void onClose() {
     _hideTimer?.cancel();
+    if (Get.isRegistered<AnalyticsController>()) {
+      AnalyticsController.to.stopWatching(
+        positionSec: videoPlayerController?.value.position.inSeconds,
+      );
+    }
     videoPlayerController?.removeListener(_videoListener);
     videoPlayerController?.dispose();
     if (!kIsWeb) {

@@ -1,19 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:mirchi_ott/utils/ad_service.dart';
 import 'package:mirchi_ott/utils/responsive.dart';
 import 'package:video_player/video_player.dart';
 import 'package:share_plus/share_plus.dart';
+import '../../view_model/analytics_controller/analytics_controller.dart';
 import '../../view_model/video_player_controller/video_controller.dart';
 
 class AdvancedVideoPlayer extends StatefulWidget {
   final String url;
   final String title;
+  final String? episodeId;
+  final String? seriesId;
 
   const AdvancedVideoPlayer({
     super.key,
     required this.url,
     required this.title,
+    this.episodeId,
+    this.seriesId,
   });
 
   @override
@@ -29,15 +33,20 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
     super.initState();
     // Initialize video playback
     if (widget.url.startsWith('http')) {
-      // Show Meta Ad before playing video only for online content
-      // AdService.showInterstitialAd(onComplete: () {
-        if (mounted) {
-          controller.initializeVideo(widget.url);
-        }
-      // });
+      if (mounted) {
+        controller.initializeVideo(
+          widget.url,
+          episodeId: widget.episodeId,
+          seriesId: widget.seriesId,
+        );
+      }
     } else {
       // Local content (Downloads), play immediately without ad delay
-      controller.initializeVideo(widget.url);
+      controller.initializeVideo(
+        widget.url,
+        episodeId: widget.episodeId,
+        seriesId: widget.seriesId,
+      );
     }
   }
 
@@ -50,6 +59,11 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
         if (controller.isFullscreen.value) {
           controller.toggleFullscreen();
         } else {
+          if (Get.isRegistered<AnalyticsController>()) {
+            AnalyticsController.to.stopWatching(
+              positionSec: controller.videoPlayerController?.value.position.inSeconds,
+            );
+          }
           Get.back();
         }
       },
@@ -153,6 +167,12 @@ class _AdvancedVideoPlayerState extends State<AdvancedVideoPlayer> {
                           final RenderBox? box = btnContext.findRenderObject() as RenderBox?;
                           final Rect? rect = box != null ? box.localToGlobal(Offset.zero) & box.size : null;
                           Share.share(widget.url, sharePositionOrigin: rect);
+                          if (widget.seriesId != null && Get.isRegistered<AnalyticsController>()) {
+                            AnalyticsController.to.trackShare(
+                              seriesId: widget.seriesId!,
+                              episodeId: widget.episodeId,
+                            );
+                          }
                         },
                       );
                     }

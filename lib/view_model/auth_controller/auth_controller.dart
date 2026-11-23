@@ -17,6 +17,7 @@ import '../../utils/notification_service.dart';
 import '../../utils/custom_snackbar.dart';
 import '../../utils/facebook_events_service.dart';
 import '../../utils/firebase_analytics_service.dart';
+import '../primium_controller/premium_controller.dart';
 
 class AuthController extends GetxController {
   static const String _googleWebClientId =
@@ -569,6 +570,12 @@ class AuthController extends GetxController {
     // Clear notifications locally on logout
     if (Get.isRegistered<NotificationService>()) {
       NotificationService.to.clearNotifications();
+    }
+
+    // Clear subscription data and demo storage on logout
+    await storage.remove('demo_subscription');
+    if (Get.isRegistered<PremiumController>()) {
+      Get.find<PremiumController>().clearSubscription();
     }
   }
 

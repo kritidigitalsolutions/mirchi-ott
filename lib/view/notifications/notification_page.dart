@@ -6,12 +6,30 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../utils/notification_service.dart';
 import '../../app/theme/app_colors.dart';
 
-class NotificationPage extends StatelessWidget {
+class NotificationPage extends StatefulWidget {
   const NotificationPage({super.key});
 
   @override
+  State<NotificationPage> createState() => _NotificationPageState();
+}
+
+class _NotificationPageState extends State<NotificationPage> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (Get.isRegistered<NotificationService>()) {
+        Get.find<NotificationService>().fetchNotifications();
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final notificationService = NotificationService.to;
+    final NotificationService notificationService =
+        Get.isRegistered<NotificationService>()
+            ? Get.find<NotificationService>()
+            : Get.put(NotificationService(), permanent: true);
 
     return Scaffold(
       backgroundColor: AppColors.black,
@@ -45,7 +63,13 @@ class NotificationPage extends StatelessWidget {
           }
 
           if (notificationService.notifications.isEmpty) {
-            return _buildEmptyState();
+            return SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: SizedBox(
+                height: MediaQuery.of(context).size.height * 0.7,
+                child: _buildEmptyState(),
+              ),
+            );
           }
 
           return ListView.builder(
@@ -53,7 +77,8 @@ class NotificationPage extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 10),
             itemBuilder: (context, index) {
               final notification = notificationService.notifications[index];
-              return _buildNotificationItem(context, notification, index, notificationService);
+              return _buildNotificationItem(
+                  context, notification, index, notificationService);
             },
           );
         }),
@@ -81,9 +106,14 @@ class NotificationPage extends StatelessWidget {
     );
   }
 
-  Widget _buildNotificationItem(BuildContext context, Map<String, dynamic> notification,
-      int index, NotificationService service) {
-    final DateTime time = DateTime.parse(notification['time']);
+  Widget _buildNotificationItem(BuildContext context,
+      Map<String, dynamic> notification, int index, NotificationService service) {
+    DateTime time;
+    try {
+      time = DateTime.parse(notification['time']?.toString() ?? '');
+    } catch (_) {
+      time = DateTime.now();
+    }
     final String formattedTime = DateFormat('dd MMM, hh:mm a').format(time);
     final bool isRead = notification['isRead'] ?? false;
     final String? imageUrl = notification['image'];

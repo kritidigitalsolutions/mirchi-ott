@@ -14,6 +14,7 @@ import 'package:mirchi_ott/view_model/like_dislike_controller/like_dislike_contr
 import 'package:mirchi_ott/view_model/watchlist_controller/watchlist_controller.dart';
 
 import 'app/routes/app_routes.dart';
+import 'app/theme/app_colors.dart';
 import 'data/network/api_network_service.dart';
 import 'data/network/base_api_service.dart';
 import 'utils/ad_service.dart';
@@ -21,6 +22,7 @@ import 'utils/app_session.dart';
 import 'utils/facebook_events_service.dart';
 import 'utils/firebase_analytics_service.dart';
 import 'utils/notification_service.dart';
+import 'view_model/analytics_controller/analytics_controller.dart';
 import 'view_model/auth_controller/auth_controller.dart';
 import 'view_model/home_controller/home_controller.dart';
 
@@ -138,6 +140,7 @@ Future<void> main() async {
   Get.put(ContentController(), permanent: true);
   Get.put(InteractionController(), permanent: true);
   Get.put(WatchlistController(), permanent: true);
+  Get.put(AnalyticsController(), permanent: true);
 
   print("✅ All Controllers Initialized");
 
@@ -161,6 +164,15 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       title: 'Mirchi OTT',
       debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        fontFamily: 'Raleway',
+        scaffoldBackgroundColor: AppColors.scaffoldBackground,
+        brightness: Brightness.dark,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: AppColors.primary,
+          brightness: Brightness.dark,
+        ),
+      ),
       initialRoute: AppRoutes.splash,
       getPages: AppPages.pages,
     );

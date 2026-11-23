@@ -43,7 +43,14 @@ class PremiumController extends GetxController with WidgetsBindingObserver {
   bool _expectingPaymentSuccess = false;
 
   bool get hasActiveSubscription => 
-      subscriptionData.value != null && subscriptionData.value!['status'] == 'active';
+      isUserLoggedIn.value &&
+      subscriptionData.value != null && 
+      subscriptionData.value!['status'] == 'active';
+
+  void clearSubscription() {
+    subscriptionData.value = null;
+    GetStorage().remove('demo_subscription');
+  }
 
   @override
   void onInit() {
@@ -56,19 +63,22 @@ class PremiumController extends GetxController with WidgetsBindingObserver {
     // Check if we were expecting a payment success from a previous session
     _expectingPaymentSuccess = GetStorage().read('expecting_payment') ?? false;
 
-    var demoSub = GetStorage().read('demo_subscription');
-    if (demoSub != null) {
-      subscriptionData.value = Map<String, dynamic>.from(demoSub);
+    if (isUserLoggedIn.value) {
+      var demoSub = GetStorage().read('demo_subscription');
+      if (demoSub != null) {
+        subscriptionData.value = Map<String, dynamic>.from(demoSub);
+      }
+    } else {
+      subscriptionData.value = null;
     }
 
-    // Removed: Automatic subscription check on startup/login to optimize API calls
-    // ever(isUserLoggedIn, (bool loggedIn) {
-    //   if (loggedIn) {
-    //     fetchSubscriptionStatus();
-    //   } else {
-    //     subscriptionData.value = null;
-    //   }
-    // });
+    ever(isUserLoggedIn, (bool loggedIn) {
+      if (loggedIn) {
+        fetchSubscriptionStatus();
+      } else {
+        clearSubscription();
+      }
+    });
 
     // if (isUserLoggedIn.value) {
     //   fetchSubscriptionStatus();
@@ -399,18 +409,6 @@ class PremiumController extends GetxController with WidgetsBindingObserver {
     } finally {
       isLoading.value = false;
     }
-  }
-
-  void _setDemoActiveSubscription(String planId) {
-    subscriptionData.value = {
-      'status': 'active',
-      'planId': planId,
-      'plan': plans.firstWhere((p) => p.id == planId).toJson(),
-      'endDate': DateTime.now().add(const Duration(days: 30)).toIso8601String(),
-      'expiryDate': DateTime.now().add(const Duration(days: 30)).toString(), // Keep for fallback
-    };
-    GetStorage().write('demo_subscription', subscriptionData.value);
-    CustomSnackbar.show(title: "Success", message: "Plan purchased successfully (Demo Mode)", isSuccess: true);
   }
 
   Future<void> redeemVoucher(String code) async {

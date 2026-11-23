@@ -100,6 +100,8 @@ class AppPages {
       page: () => AdvancedVideoPlayer(
         url: (Get.arguments as Map?)?['url'] ?? '',
         title: (Get.arguments as Map?)?['title'] ?? '',
+        episodeId: (Get.arguments as Map?)?['episodeId'],
+        seriesId: (Get.arguments as Map?)?['seriesId'],
       ),
     ),
   ];

@@ -20,7 +20,7 @@ import '../app/routes/app_routes.dart';
 import '../data/models/response_model/content_response_model/content_model.dart';
 
 class NotificationService extends GetxController {
-  static NotificationService get to => Get.find();
+  static NotificationService get to => Get.find<NotificationService>();
 
   // Safe getter for Firebase Messaging
   FirebaseMessaging get _firebaseMessaging {

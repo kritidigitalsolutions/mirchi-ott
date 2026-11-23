@@ -1,15 +1,26 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
+import '../view_model/analytics_controller/analytics_controller.dart';
 
 class ShareService {
   static Future<void> shareContent({
     required String title,
     required String imageUrl,
     Rect? sharePositionOrigin,
+    String? seriesId,
+    String? episodeId,
   }) async {
+    // 📊 Track share analytics if seriesId is provided
+    if (seriesId != null && Get.isRegistered<AnalyticsController>()) {
+      AnalyticsController.to.trackShare(
+        seriesId: seriesId,
+        episodeId: episodeId,
+      );
+    }
     try {
       // 1. Download the image
       final response = await http.get(Uri.parse(imageUrl));

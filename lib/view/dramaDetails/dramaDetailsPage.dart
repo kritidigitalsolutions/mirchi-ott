@@ -9,6 +9,7 @@ import 'package:mirchi_ott/view_model/auth_controller/auth_controller.dart';
 import 'package:mirchi_ott/view_model/download_controller/download_controller.dart';
 import 'package:mirchi_ott/view_model/primium_controller/premium_controller.dart';
 import 'package:mirchi_ott/widgets/custom_network_image.dart';
+import '../../view_model/analytics_controller/analytics_controller.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../app/routes/app_routes.dart';
@@ -380,8 +381,12 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
               await Get.dialog<bool>(const AgeRestrictionPopup());
           if (isOver18 != true) return;
         }
-        Get.toNamed(AppRoutes.videoPlayer,
-            arguments: {'url': item.videoUrl!, 'title': item.title});
+        Get.toNamed(AppRoutes.videoPlayer, arguments: {
+          'url': item.videoUrl!,
+          'title': item.title,
+          'episodeId': item.id,
+          'seriesId': widget.content.id,
+        });
       } else {
         CustomSnackbar.show(
             title: "Error", message: "Video URL not found", isError: true);
@@ -405,7 +410,9 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
         }
         Get.toNamed(AppRoutes.videoPlayer, arguments: {
           'url': widget.content.trailerUrl!,
-          'title': '${widget.content.title} - Trailer'
+          'title': '${widget.content.title} - Trailer',
+          'episodeId': widget.content.id,
+          'seriesId': widget.content.id,
         });
       },
       icon: const Icon(Icons.play_circle_outline, size: 18, color: Colors.white),
@@ -464,6 +471,11 @@ class _DramaDetailsPageState extends State<DramaDetailsPage> {
                   imageUrl: widget.content.poster,
                   sharePositionOrigin: rect,
                 );
+                if (Get.isRegistered<AnalyticsController>()) {
+                  AnalyticsController.to.trackShare(
+                    seriesId: widget.content.id,
+                  );
+                }
               }
             },
           ),
