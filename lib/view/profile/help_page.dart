@@ -27,16 +27,21 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
   }
 
   void _makePhoneCall(String phoneNumber) async {
-    final Uri launchUri = Uri(
-      scheme: 'tel',
-      path: phoneNumber,
-    );
+    final Uri launchUri = Uri(scheme: 'tel', path: phoneNumber);
     try {
       if (!await launchUrl(launchUri)) {
-        Get.snackbar("Error", "Could not launch dialer", colorText: Colors.white);
+        Get.snackbar(
+          "Error",
+          "Could not launch dialer",
+          colorText: Colors.white,
+        );
       }
     } catch (e) {
-      Get.snackbar("Error", "Something went wrong: $e", colorText: Colors.white);
+      Get.snackbar(
+        "Error",
+        "Something went wrong: $e",
+        colorText: Colors.white,
+      );
     }
   }
 
@@ -102,36 +107,58 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
                       children: [
                         const Text(
                           "Contact Us Directly",
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
                         ),
                         const SizedBox(height: 12),
                         InkWell(
                           onTap: () async {
-                            final Uri emailUri = Uri.parse("mailto:support@mirchiapp.in");
+                            final Uri emailUri = Uri.parse(
+                              "mailto:support@mirchiapp.in",
+                            );
                             if (!await launchUrl(emailUri)) {
-                              Get.snackbar("Error", "Could not launch email app", colorText: Colors.white);
+                              Get.snackbar(
+                                "Error",
+                                "Could not launch email app",
+                                colorText: Colors.white,
+                              );
                             }
                           },
                           child: const Text(
                             "Mail - support@mirchiapp.in ",
-                            style: TextStyle(color: AppColors.primary, fontSize: 14, fontWeight: FontWeight.w600),
+                            style: TextStyle(
+                              color: AppColors.primary,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
                         const SizedBox(height: 8),
                         const Text(
                           "Call - +91 8369720507",
-                          style: TextStyle(color: Colors.green, fontSize: 14, fontWeight: FontWeight.w600),
+                          style: TextStyle(
+                            color: Colors.green,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                         const SizedBox(height: 12),
                         const Divider(color: Colors.white10),
                         const SizedBox(height: 12),
                         const Text(
                           "Address",
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
                         ),
                         const SizedBox(height: 8),
                         const Text(
-                          "Floor No 12, 1202, Residences Tanaji Nagar, Tanaji Nagar Road No 1, Near Time of India off, W.E. Highway, Malad East, Mumbai, Maharashtra - 400097",
+                          "PLOT B-D-82 RSC 25,B-23, MANGAL CO-OP HSC, VARSOVA, ANDHERI WEST, MUMBAI SUBURBAN, MUMBAI, MAHARASTRA -400058",
                           textAlign: TextAlign.center,
                           style: TextStyle(color: Colors.white60, fontSize: 12),
                         ),
@@ -154,10 +181,17 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
                       child: Text(
                         "Recent Support Tickets",
-                        style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                     ListView.builder(
@@ -175,7 +209,12 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
               return const SizedBox.shrink();
             }),
 
-            const Divider(color: Colors.white12, thickness: 1, indent: 16, endIndent: 16),
+            const Divider(
+              color: Colors.white12,
+              thickness: 1,
+              indent: 16,
+              endIndent: 16,
+            ),
 
             /// 🔹 FAQ Section
             const Padding(
@@ -184,7 +223,11 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
                 alignment: Alignment.centerLeft,
                 child: Text(
                   "Frequently Asked Questions",
-                  style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
@@ -194,7 +237,10 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
               }
               if (privacyController.helpData.isEmpty) {
                 return const Center(
-                  child: Text("No FAQ Found", style: TextStyle(color: Colors.white54)),
+                  child: Text(
+                    "No FAQ Found",
+                    style: TextStyle(color: Colors.white54),
+                  ),
                 );
               }
               return ListView.builder(
@@ -213,7 +259,10 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
                     child: ExpansionTile(
                       title: Text(
                         help['question'] ?? "",
-                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                       iconColor: AppColors.buttonColor,
                       collapsedIconColor: Colors.white54,
@@ -222,7 +271,10 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
                           padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                           child: Text(
                             help['answer'] ?? "",
-                            style: const TextStyle(color: Colors.white70, height: 1.4),
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              height: 1.4,
+                            ),
                           ),
                         ),
                       ],
@@ -238,7 +290,12 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
     );
   }
 
-  Widget _buildActionCard({required IconData icon, required String label, required VoidCallback onTap, required Color color}) {
+  Widget _buildActionCard({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+    required Color color,
+  }) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(15),
@@ -256,7 +313,11 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
             Text(
               label,
               textAlign: TextAlign.center,
-              style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 13),
+              style: TextStyle(
+                color: color,
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
+              ),
             ),
           ],
         ),
@@ -266,13 +327,15 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
 
   Widget _buildTicketItem(dynamic ticket) {
     String status = ticket['status'] ?? 'OPEN';
-    Color statusColor = status == 'OPEN' ? Colors.green : (status == 'PENDING' ? Colors.orange : Colors.grey);
-    
+    Color statusColor = status == 'OPEN'
+        ? Colors.green
+        : (status == 'PENDING' ? Colors.orange : Colors.grey);
+
     String formattedDate = "";
     try {
-       DateTime date = DateTime.parse(ticket['createdAt']);
-       formattedDate = DateFormat('dd MMM yyyy').format(date);
-    } catch(e) {}
+      DateTime date = DateTime.parse(ticket['createdAt']);
+      formattedDate = DateFormat('dd MMM yyyy').format(date);
+    } catch (e) {}
 
     return InkWell(
       onTap: () => Get.toNamed(AppRoutes.ticketChat, arguments: ticket),
@@ -291,28 +354,46 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: statusColor.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
                     status,
-                    style: TextStyle(color: statusColor, fontSize: 10, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      color: statusColor,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
-                Text(formattedDate, style: const TextStyle(color: Colors.white38, fontSize: 11)),
+                Text(
+                  formattedDate,
+                  style: const TextStyle(color: Colors.white38, fontSize: 11),
+                ),
               ],
             ),
             const SizedBox(height: 8),
             Text(
               ticket['subject'] ?? "",
-              style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const SizedBox(height: 4),
             Text(
               ticket['category'] ?? "",
-              style: const TextStyle(color: AppColors.primary, fontSize: 12, fontWeight: FontWeight.w500),
+              style: const TextStyle(
+                color: AppColors.primary,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
             ),
             const SizedBox(height: 8),
             Text(

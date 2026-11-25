@@ -26,17 +26,17 @@ class HomeSliderSection extends StatelessWidget {
     double screenWidth = MediaQuery.of(context).size.width;
 
     double mobileCardWidth = screenWidth > 600
-        ? (screenWidth - 36) / 6.5
-        : (screenWidth - 28) / 4.25;
+        ? (screenWidth - 36) / 5.5
+        : (screenWidth - 36) / 3;
     double posterHeight = mobileCardWidth / 0.70;
-    double sliderHeight = isDesktop ? 340 : (posterHeight + 30);
+    double sliderHeight = isDesktop ? 340 : (posterHeight + 23);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         /// 🔥 TITLE ROW WITH ACCENT BAR & VIEW ALL
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: isDesktop ? 16 : 14),
+          padding: EdgeInsets.symmetric(horizontal: isDesktop ? 16 : 8),
           child: Row(
             children: [
               Container(
@@ -99,14 +99,14 @@ class HomeSliderSection extends StatelessWidget {
           ),
         ),
 
-        const SizedBox(height: 12),
+        const SizedBox(height: 10),
 
         /// 🔥 SLIDER IMAGES
         SizedBox(
           height: sliderHeight,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            padding: EdgeInsets.symmetric(horizontal: isDesktop ? 16 : 14),
+            padding: EdgeInsets.symmetric(horizontal: isDesktop ? 16 : 8),
             itemCount: content.length,
             itemBuilder: (context, index) {
               final item = content[index];
@@ -158,7 +158,7 @@ class _HoverCardState extends State<_HoverCard> {
   Widget _buildMobileCard(BuildContext context) {
     return Container(
       width: widget.cardWidth,
-      margin: const EdgeInsets.only(right: 8),
+      margin: const EdgeInsets.only(right: 10),
       child: InkWell(
         borderRadius: BorderRadius.circular(10),
         onTap: () {
@@ -175,7 +175,7 @@ class _HoverCardState extends State<_HoverCard> {
                 borderRadius: BorderRadius.circular(10),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.35),
+                    color: Colors.black.withValues(alpha: 0.35),
                     blurRadius: 6,
                     offset: const Offset(0, 3),
                   ),
@@ -187,7 +187,7 @@ class _HoverCardState extends State<_HoverCard> {
                 borderRadius: 10,
               ),
             ),
-            const SizedBox(height: 5),
+            const SizedBox(height: 6),
             SizedBox(
               width: widget.cardWidth,
               child: Text(
@@ -197,7 +197,7 @@ class _HoverCardState extends State<_HoverCard> {
                 textAlign: TextAlign.start,
                 style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 11,
+                  fontSize: 12,
                   fontWeight: FontWeight.w600,
                 ),
               ),

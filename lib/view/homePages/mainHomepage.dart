@@ -29,9 +29,9 @@ class MainHomePage extends StatelessWidget {
     final ContentController contentController = Get.find<ContentController>();
     final HomeController controller = Get.find<HomeController>();
     final AuthController authController = Get.find<AuthController>();
-    final PremiumController premiumController = Get.isRegistered<PremiumController>()
-        ? Get.find<PremiumController>()
-        : Get.put(PremiumController());
+    if (!Get.isRegistered<PremiumController>()) {
+      Get.put(PremiumController());
+    }
     final notificationService = NotificationService.to;
 
     return PopScope(
@@ -232,12 +232,19 @@ class MainHomePage extends StatelessWidget {
           _buildNotificationIcon(notificationService),
           const SizedBox(width: 20),
           Obx(() {
-            final bool isPremium = Get.find<PremiumController>().hasActiveSubscription;
+            final bool isPremium =
+                Get.find<PremiumController>().hasActiveSubscription;
             return ElevatedButton(
-              onPressed: () => Get.find<PremiumController>().navigateToPremiumOrManageAccount(Get.context!),
+              onPressed: () => Get.find<PremiumController>()
+                  .navigateToPremiumOrManageAccount(Get.context!),
               style: ElevatedButton.styleFrom(
-                backgroundColor: isPremium ? Colors.green : AppColors.buttonColor,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                backgroundColor: isPremium
+                    ? Colors.green
+                    : AppColors.buttonColor,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 15,
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -307,7 +314,10 @@ class MainHomePage extends StatelessWidget {
                         color: Colors.red,
                         shape: BoxShape.circle,
                       ),
-                      constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                      constraints: const BoxConstraints(
+                        minWidth: 16,
+                        minHeight: 16,
+                      ),
                       child: Text(
                         unreadCount > 9 ? '9+' : '$unreadCount',
                         style: const TextStyle(
@@ -336,21 +346,21 @@ class MainHomePage extends StatelessWidget {
           Image.asset(AppImages.logo1, height: 50),
           Row(
             children: [
-              IconButton(
-                onPressed: () => Get.toNamed(AppRoutes.search),
-                icon: const Icon(Icons.search, color: Colors.white, size: 28),
-              ),
               _buildNotificationIcon(notificationService),
-              const SizedBox(width: 4),
+              const SizedBox(width: 8),
               Obx(() {
-                final bool isPremium = Get.find<PremiumController>().hasActiveSubscription;
+                final bool isPremium =
+                    Get.find<PremiumController>().hasActiveSubscription;
                 return SizedBox(
                   width: 100,
                   height: 28,
                   child: ElevatedButton(
-                    onPressed: () => Get.find<PremiumController>().navigateToPremiumOrManageAccount(Get.context!),
+                    onPressed: () => Get.find<PremiumController>()
+                        .navigateToPremiumOrManageAccount(Get.context!),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: isPremium ? Colors.green : AppColors.buttonColor,
+                      backgroundColor: isPremium
+                          ? Colors.green
+                          : AppColors.buttonColor,
                       padding: const EdgeInsets.symmetric(horizontal: 8),
                     ),
                     child: Text(
@@ -441,12 +451,14 @@ class MainHomePage extends StatelessWidget {
                         }
 
                         // Special UI for Top 10 category
-                        if (section.categorySlug.toLowerCase().contains('top10')) {
+                        if (section.categorySlug.toLowerCase().contains(
+                          'top10',
+                        )) {
                           return _buildAnimatedSection(
                             isDesktop: isDesktop,
                             delay: 200,
                             child: Padding(
-                              padding: const EdgeInsets.only(top: 30),
+                              padding: EdgeInsets.only(top: isDesktop ? 30 : 14),
                               child: Top10List(
                                 title: section.title.toUpperCase(),
                                 content: sectionContent,
@@ -460,7 +472,7 @@ class MainHomePage extends StatelessWidget {
                           isDesktop: isDesktop,
                           delay: 200,
                           child: Padding(
-                            padding: const EdgeInsets.only(top: 30),
+                            padding: EdgeInsets.only(top: isDesktop ? 30 : 14),
                             child: HomeSliderSection(
                               title: section.title.toUpperCase(),
                               content: sectionContent,
@@ -473,9 +485,12 @@ class MainHomePage extends StatelessWidget {
                       // Dynamic Categories
                       ...contentController.categories.map((category) {
                         // Skip home-banners as it is shown in the slider
-                        if (category.slug == 'home-banners') return const SizedBox.shrink();
+                        if (category.slug == 'home-banners')
+                          return const SizedBox.shrink();
 
-                        final categoryContent = contentController.categoryContents[category.id] ?? [];
+                        final categoryContent =
+                            contentController.categoryContents[category.id] ??
+                            [];
 
                         if (categoryContent.isEmpty)
                           return const SizedBox.shrink();
@@ -486,7 +501,7 @@ class MainHomePage extends StatelessWidget {
                             isDesktop: isDesktop,
                             delay: 200,
                             child: Padding(
-                              padding: const EdgeInsets.only(top: 30),
+                              padding: EdgeInsets.only(top: isDesktop ? 30 : 14),
                               child: Top10List(
                                 title: category.name.toUpperCase(),
                                 content: categoryContent,
@@ -497,18 +512,22 @@ class MainHomePage extends StatelessWidget {
                         }
 
                         // Split all other categories into Series and Movies
-                        final seriesItems = categoryContent.where((item) => item.contentType == 'series').toList();
-                        final movieItems = categoryContent.where((item) => item.contentType == 'movie').toList();
+                        final seriesItems = categoryContent
+                            .where((item) => item.contentType == 'series')
+                            .toList();
+                        final movieItems = categoryContent
+                            .where((item) => item.contentType == 'movie')
+                            .toList();
 
                         List<Widget> sections = [];
-                        
+
                         if (seriesItems.isNotEmpty) {
                           sections.add(
                             _buildAnimatedSection(
                               isDesktop: isDesktop,
                               delay: 200,
                               child: Padding(
-                                padding: const EdgeInsets.only(top: 30),
+                                padding: EdgeInsets.only(top: isDesktop ? 30 : 14),
                                 child: HomeSliderSection(
                                   title: "${category.name.toUpperCase()}",
                                   content: seriesItems,
@@ -525,7 +544,7 @@ class MainHomePage extends StatelessWidget {
                               isDesktop: isDesktop,
                               delay: 200,
                               child: Padding(
-                                padding: const EdgeInsets.only(top: 30),
+                                padding: EdgeInsets.only(top: isDesktop ? 30 : 14),
                                 child: HomeSliderSection(
                                   title: "${category.name.toUpperCase()}",
                                   content: movieItems,
@@ -663,15 +682,15 @@ class MainHomePage extends StatelessWidget {
           const Column(
             children: [
               Text(
-                "Floor No 12, 1202, Residences Tanaji Nagar,",
+                "PLOT B-D-82 RSC 25,B-23, MANGAL CO-OP",
                 style: TextStyle(color: Colors.white70, fontSize: 14),
               ),
               Text(
-                "Tanaji Nagar Road No 1, Near Time of India off, W.E. Highway,",
+                "HSC,VARSOVA, ANDHERI WEST, MUMBAI",
                 style: TextStyle(color: Colors.white70, fontSize: 14),
               ),
               Text(
-                "Malad East, Mumbai, Maharashtra - 400097",
+                "SUBURBAN, MUMBAI, MAHARASHTRA 400058",
                 style: TextStyle(color: Colors.white70, fontSize: 14),
               ),
             ],
